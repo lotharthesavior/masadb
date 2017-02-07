@@ -11,7 +11,9 @@ require __DIR__ . '/vendor/autoload.php';
 
 // require_once('Git.php');
 
-$repo = \Coyl\Git\Git::open('.');  // -or- Git::create('/path/to/repo')
+$repo = \Coyl\Git\Git::open('.');  
+// $repo = \Coyl\Git\Git::open('.');  
+// -or- Git::create('/path/to/repo')
 
 echo "<pre>";var_dump($repo);exit;
 
