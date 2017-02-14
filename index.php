@@ -5,25 +5,29 @@
  * @todo 2. create navigation itself though the repository
  */
 
+// use Psr\Http\Message\ResponseInterface;
+// use Psr\Http\Message\ServerRequestInterface;
+
 require __DIR__ . '/vendor/autoload.php';
 
-// use \Git\Coyl\Git;
+$templates = new League\Plates\Engine('themes/masa1');
 
-// require_once('Git.php');
+$container = new League\Container\Container;
 
-$repo = \Coyl\Git\Git::open('.');  
-// $repo = \Coyl\Git\Git::open('.');  
-// -or- Git::create('/path/to/repo')
+$container->share('response', Zend\Diactoros\Response::class);
+$container->share('request', function () {
+    return Zend\Diactoros\ServerRequestFactory::fromGlobals(
+        $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
+    );
+});
 
-echo "<pre>";var_dump($repo);exit;
+$container->share('emitter', Zend\Diactoros\Response\SapiEmitter::class);
 
-// code example for the usage of the Git class
-// $repo->add('.');
-// $repo->commit('Some commit message');
-// $repo->push('origin', 'master');
+include "route.php";
 
-// list all files in the root directory
-// git ls-tree HEAD
+$response = $route->dispatch($container->get('request'), $container->get('response'));
 
-// list all files in all directories
-// git ls-tree --full-tree -r HEAD
+$origin = "*";
+header("Access-Control-Allow-Origin: " . $origin);
+
+$container->get('emitter')->emit($response);
