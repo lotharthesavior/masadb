@@ -16,20 +16,7 @@ class RepositoriesController
 	public function __construct(){}
 
 	/**
-	 * 
-	 */
-	public function list(ServerRequestInterface $request, ResponseInterface $response){
-
-		$notes_model = new Notes();
-
-		$result = $notes_model->findAll();
-
-		return $result;
-
-	}
-
-	/**
-	 * 
+	 * Get All Repositories
 	 */
 	public function getRepositories(ServerRequestInterface $request, ResponseInterface $response){
 
@@ -40,6 +27,25 @@ class RepositoriesController
 		$response->getBody()->write( json_encode($result) );
 
     	return $response;
+
+	}
+
+	/**
+	 * Get Repository
+	 * 
+	 * Necessary Data from the Repository:
+	 * 
+	 * 1. Address
+	 * 2. ls-tree recursive
+	 * 3. list of branches
+	 * 4. readme file content
+	 * 
+	 * Ex.: http://lotharthesavior.dns1.us/resources/repositories/savioresende/
+	 * 
+	 */
+	public function getRepository(ServerRequestInterface $request, ResponseInterface $response){
+
+		
 
 	}
 
