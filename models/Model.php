@@ -66,6 +66,21 @@ abstract class Model
 
 		$cli_result = $this->repo->run($command);
 
+		$result_array_parsed = $this->parseLsTree( $cli_result, true );
+
+		return $result_array_parsed;
+	}
+
+	/**
+	 * Turn the git ls-tree command into Array with
+	 * discriminated metadata
+	 * 
+	 * @param String $cli_result
+	 * @param Bool $is_db
+	 * @return Array
+	 */
+	private function parseLsTree( $cli_result, $is_db = false ){
+
 		$result_array = $this->splitByLine($cli_result);
 		
 		$result_array_parsed = array();
@@ -77,17 +92,45 @@ abstract class Model
 			$result = array_filter($result);
 
 			$new_object = new \stdClass;
-			$new_object->id = preg_replace("/[^\d]/", "", $result[3]);
-			$new_object->permissions = $result[0];
-			$new_object->type = $result[1];
-			$new_object->revision_hash = $result[2];
-			$new_object->address = $result[3];
+
+			if( $is_db )
+				$new_object->id = preg_replace("/[^\d]/", "", $result[3]);
+
+			$new_object->permissions 	= $result[0];
+			$new_object->type 			= $result[1];
+			$new_object->revision_hash 	= $result[2];
+			$new_object->address 		= $result[3];
 
 			array_push($result_array_parsed, $new_object);
 
 		}
 
 		return $result_array_parsed;
+
+	}
+
+	/**
+	 * 
+	 */
+	public function lsTreeHead(){
+
+		$result = $this->repo->run('ls-tree HEAD');
+
+		$result_array_parsed = $this->parseLsTree( $result );
+
+		return $result_array_parsed;
+
+	}
+
+	/**
+	 * 
+	 */
+	public function showFile( $file, $branch = "master" ){
+
+		$result = $this->repo->show( $branch . ':' . $file );
+
+		return $result;
+
 	}
 
 	/**

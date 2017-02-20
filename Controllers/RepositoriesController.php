@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use \Models\Repositories;
+use \Models\Generic;
 
 class RepositoriesController
 {
@@ -43,9 +44,44 @@ class RepositoriesController
 	 * Ex.: http://lotharthesavior.dns1.us/resources/repositories/savioresende/
 	 * 
 	 */
-	public function getRepository(ServerRequestInterface $request, ResponseInterface $response){
+	public function getRepository(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
-		
+		$repositories_model = new Repositories();
+
+		$repository = $repositories_model->find( $args['id'] );
+
+		$generic_model = new Generic();
+
+		$generic_model->setRepo( $repository->address );
+
+		$result = $generic_model->lsTreeHead();
+
+		$response->getBody()->write( json_encode($result) );
+
+    	return $response;
+
+	}
+
+	/**
+	 * 
+	 */
+	public function getAsset(ServerRequestInterface $request, ResponseInterface $response, array $args){
+
+		$repositories_model = new Repositories();
+
+		$repository = $repositories_model->find( $args['id'] );
+
+		$generic_model = new Generic();
+
+		$generic_model->setRepo( $repository->address );
+
+		$assets_list = $generic_model->lsTreeHead();
+
+		$asset = $assets_list[ $args['asset'] ]->address;
+
+		$result = $generic_model->showFile( $asset );
+
+		return $result;
 
 	}
 
