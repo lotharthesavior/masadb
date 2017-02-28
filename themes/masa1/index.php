@@ -5,9 +5,7 @@
 </head>
 <body>
 
-<?php
-echo "<pre>";var_dump($repository_data);exit;
-?>
+masa git repository
 
 </body>
 </html>

@@ -8,13 +8,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use \Models\Repositories;
 use \Models\Generic;
 
-class RepositoriesController
+class RepositoriesController extends MasaController
 {
-
-	/**
-	 * 
-	 */
-	public function __construct(){}
 
 	/**
 	 * Get All Repositories

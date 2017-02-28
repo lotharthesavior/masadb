@@ -1,2 +1,4 @@
 vendor
 data
+private.key
+public.key

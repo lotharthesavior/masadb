@@ -13,7 +13,9 @@ class HomeController
 	/**
 	 * 
 	 */
-	public function __construct(){}
+	public function __construct(){
+		
+	}
 
 	/**
 	 * 
@@ -22,12 +24,7 @@ class HomeController
 
 		global $templates;
 
-	    $notes_model = new Notes();
-
-		// $result = $notes_model->findAll();
-		// $result = $notes_model->find(1);
-
-		return $templates->render('index', ['repository_data' => $result]);
+	    return $templates->render('index');
 
 	}
 
