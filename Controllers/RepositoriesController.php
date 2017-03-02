@@ -8,8 +8,13 @@ use Psr\Http\Message\ServerRequestInterface;
 use \Models\Repositories;
 use \Models\Generic;
 
-class RepositoriesController extends MasaController
+class RepositoriesController implements MasaGitPersistence
 {
+
+	/**
+	 * 
+	 */
+	public function __construct(){}
 
 	/**
 	 * Get All Repositories

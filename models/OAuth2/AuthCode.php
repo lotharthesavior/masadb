@@ -5,9 +5,11 @@ namespace Models\OAuth2;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-use League\OAuth2\Server\Entities;
+use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
 
-use League\OAuth2\Server\Entities\Traits;
+use League\OAuth2\Server\Entities\Traits\EntityTrait;
+use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
+use League\OAuth2\Server\Entities\Traits\AuthCodeTrait;
 
 class AuthCode implements AuthCodeEntityInterface
 {

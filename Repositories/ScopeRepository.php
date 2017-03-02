@@ -56,7 +56,7 @@ class ScopeRepository implements ScopeRepositoryInterface
 
         $scope_model = new Scope;
 
-        // return $scope_model;
+        return [$scope_model];
 
     }
 

@@ -5,9 +5,9 @@ namespace Models\OAuth2;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-use League\OAuth2\Server\Entities;
+use League\OAuth2\Server\Entities\ScopeEntityInterface;
 
-use League\OAuth2\Server\Entities\Traits;
+// use League\OAuth2\Server\Entities\Traits;
 
 class Scope implements ScopeEntityInterface
 {
@@ -26,6 +26,16 @@ class Scope implements ScopeEntityInterface
      */
     public function getIdentifier(){
 
+    }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        
     }
 
 }

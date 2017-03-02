@@ -23,9 +23,13 @@ $container->share('request', function () {
 
 $container->share('emitter', Zend\Diactoros\Response\SapiEmitter::class);
 
-include "oauth2_initialization.php";
 
-include "route.php";
+// Routes ------------------------------------------------------------------------------
+
+include "routes.php";
+
+// -------------------------------------------------------------------------------------
+
 
 $response = $route->dispatch($container->get('request'), $container->get('response'));
 

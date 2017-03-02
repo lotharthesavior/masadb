@@ -4,7 +4,7 @@ namespace Models;
 
 use \Git\Coyl\Git;
 
-class Generic extends Model
+class Generic extends GitModel
 {
 	protected $repo;
 

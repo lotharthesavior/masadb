@@ -8,8 +8,18 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Plugin\ListPaths;
 
-abstract class Model
+abstract class GitModel
 {
+
+	// ------------------------------------------------------------------------
+	// PUBLIC
+	// ------------------------------------------------------------------------
+
+	public function __construct(){
+
+		$this->repo = \Coyl\Git\Git::open('data');
+
+	}
 
 	/**
 	 * 
@@ -44,9 +54,33 @@ abstract class Model
 	}
 
 	/**
-	 * 
+	 * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]
 	 */
-	public function save(){
+	public function save( Array $client_data ){
+
+		$client_data = (object) $client_data;
+
+		$adapter = new Local('data/' . $this->database);
+
+		$filesystem = new Filesystem($adapter);
+
+		$content = json_encode($client_data->content, JSON_PRETTY_PRINT);
+
+		if( is_null($client_data->id) ){
+
+			$filesystem->write( $this->nextId() . '.json', $content);
+
+		}else{
+
+			$filesystem->update( $client_data->id . '.json', $content);
+
+		}
+
+		$result = $this->saveVersion();
+
+		echo $content;
+
+		exit;
 
 	}
 
@@ -56,6 +90,34 @@ abstract class Model
 	public function delete(){
 
 	}
+
+	/**
+	 * 
+	 */
+	public function lsTreeHead(){
+
+		$result = $this->repo->run('ls-tree HEAD');
+
+		$result_array_parsed = $this->parseLsTree( $result );
+
+		return $result_array_parsed;
+
+	}
+
+	/**
+	 * 
+	 */
+	public function showFile( $file, $branch = "master" ){
+
+		$result = $this->repo->show( $branch . ':' . $file );
+
+		return $result;
+
+	}
+
+	// ------------------------------------------------------------------------
+	// PROTECTED
+	// ------------------------------------------------------------------------
 
 	/**
 	 * 
@@ -70,6 +132,32 @@ abstract class Model
 
 		return $result_array_parsed;
 	}
+
+	/**
+	 * 
+	 */
+	protected function splitByLine( $string ){
+
+		$array = preg_split ('/$\R?^/m', $string);
+
+		return $array;
+
+	}
+
+	/**
+	 * 
+	 */
+	protected function nextId(){
+
+		$ls_tree_result = $this->lsTree();
+
+		return count($ls_tree_result) + 1;
+
+	}
+
+	// ------------------------------------------------------------------------
+	// PRIVATE
+	// ------------------------------------------------------------------------
 
 	/**
 	 * Turn the git ls-tree command into Array with
@@ -106,41 +194,6 @@ abstract class Model
 		}
 
 		return $result_array_parsed;
-
-	}
-
-	/**
-	 * 
-	 */
-	public function lsTreeHead(){
-
-		$result = $this->repo->run('ls-tree HEAD');
-
-		$result_array_parsed = $this->parseLsTree( $result );
-
-		return $result_array_parsed;
-
-	}
-
-	/**
-	 * 
-	 */
-	public function showFile( $file, $branch = "master" ){
-
-		$result = $this->repo->show( $branch . ':' . $file );
-
-		return $result;
-
-	}
-
-	/**
-	 * 
-	 */
-	protected function splitByLine( $string ){
-
-		$array = preg_split ('/$\R?^/m', $string);
-
-		return $array;
 
 	}
 

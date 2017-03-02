@@ -4,16 +4,17 @@ namespace Models;
 
 use \Git\Coyl\Git;
 
-class Notes extends Model
+use League\Flysystem\Filesystem;
+
+use League\Flysystem\Adapter\Local;
+
+class Notes extends GitModel
 {
+
+	use Traits\GitWorkflow;
+
 	protected $repo;
 
 	protected $database = 'notes';
-
-	public function __construct(){
-
-		$this->repo = \Coyl\Git\Git::open('data');
-
-	}
 
 }

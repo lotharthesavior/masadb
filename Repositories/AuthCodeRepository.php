@@ -36,24 +36,23 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
      * Persists a new auth code to permanent storage.
      *
      * @param AuthCodeEntityInterface $authCodeEntity
-     * @todo persist mentioned data
      */
     public function persistNewAuthCode(AuthCodeEntityInterface $authCodeEntity){
 
         // string this is randomly generated unique identifier (of 80+ characters in length) for the auth code.
-        // $authCodeEntity->getIdentifier();
+        $authCodeEntity->getIdentifier();
 
         // \DateTime the expiry date and time of the auth code.
-        // $authCodeEntity->getExpiryDateTime();
+        $authCodeEntity->getExpiryDateTime();
 
         // string|null the user identifier represented by the auth code.
-        // $authCodeEntity->getUserIdentifier();
+        $authCodeEntity->getUserIdentifier();
 
         // ScopeEntityInterface[] an array of scope entities
-        // $authCodeEntity->getScopes();
+        $authCodeEntity->getScopes();
 
         // string the identifier of the client who requested the auth code.
-        // $authCodeEntity->getClient()->getIdentifier();
+        $authCodeEntity->getClient()->getIdentifier();
 
     }
 
