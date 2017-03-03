@@ -8,8 +8,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use \Models\Repositories;
 use \Models\Generic;
 
-class RepositoriesController implements MasaGitPersistence
+class RepositoriesController
 {
+
+	use \Controllers\traits\commonController;
 
 	/**
 	 * 

@@ -48,20 +48,29 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity){
 
-        // string this is randomly generated unique identifier (of 80+ characters in length) for the access token.
-        // $accessTokenEntity->getIdentifier();
+        $access_token_model = new AccessToken;
 
-        // \DateTime the expiry date and time of the access token.
-        // $accessTokenEntity->getExpiryDateTime();
+        $access_token_model->save([
+            'id' => null,
+            'content' => [
 
-        // string|null the user identifier represented by the access token.
-        // $accessTokenEntity->getUserIdentifier();
+                // string this is randomly generated unique identifier (of 80+ characters in length) for the access token.
+                'identifier' => $accessTokenEntity->getIdentifier(),
 
-        // ScopeEntityInterface[] an array of scope entities
-        // $accessTokenEntity->getScopes();
+                // \DateTime the expiry date and time of the access token.
+                'expiry_date' => $accessTokenEntity->getExpiryDateTime(),
 
-        // string
-        // $accessTokenEntity->getClient()->getIdentifier();
+                // string|null the user identifier represented by the access token.
+                'user_identifier' => $accessTokenEntity->getUserIdentifier(),
+
+                // ScopeEntityInterface[] an array of scope entities
+                'scopes' => $accessTokenEntity->getScopes(),
+
+                // string the identifier of the client who requested the access token
+                'client_identifier' => $accessTokenEntity->getClient()->getIdentifier()
+
+            ]
+        ]);
 
     }
 

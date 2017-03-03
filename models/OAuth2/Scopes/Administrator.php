@@ -1,6 +1,6 @@
 <?php
 
-namespace Models\OAuth2;
+namespace Models\OAuth2\Scopes;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -9,10 +9,12 @@ use League\OAuth2\Server\Entities\ScopeEntityInterface;
 
 // use League\OAuth2\Server\Entities\Traits;
 
-class Scope implements ScopeEntityInterface
+class Administrator implements ScopeEntityInterface
 {
-	
-	/**
+    
+    protected $identifier = 'administrator';
+
+    /**
 	 * 
 	 */
 	public function __construct(){
@@ -26,6 +28,8 @@ class Scope implements ScopeEntityInterface
      */
     public function getIdentifier(){
 
+        return $this->identifier;
+
     }
 
     /**
@@ -35,7 +39,7 @@ class Scope implements ScopeEntityInterface
      */
     public function jsonSerialize()
     {
-        
+        return $this->identifier;
     }
 
 }

@@ -10,7 +10,7 @@ use \Models\Generic;
 
 use League\OAuth2\Server\AuthorizationServer;
 
-class OAuthController extends MasaController
+class OAuthController
 {
 
 	/**

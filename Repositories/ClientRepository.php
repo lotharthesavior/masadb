@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 
-use Models\OAuth2\Client;
+use Models\OAuth2\Clients;
 
 class ClientRepository implements ClientRepositoryInterface
 {
@@ -31,10 +31,12 @@ class ClientRepository implements ClientRepositoryInterface
      * @return ClientEntityInterface
      */
     public function getClientEntity($clientIdentifier, $grantType, $clientSecret = null, $mustValidateSecret = true){
-        
-    	$client_model = new Client;
 
-        return $client_model;
+        $client_model = new Clients;
+
+        $client_loaded = $client_model->find( $clientIdentifier );
+
+        return $client_loaded;
 
     }
 

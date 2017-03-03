@@ -1,12 +1,8 @@
-<?php
+<?php 
 
 namespace Controllers;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-
-use \Models\Repositories;
-use \Models\Generic;
+use \Repositories\AccessTokenRepository;
 
 abstract class MasaController
 {
@@ -14,43 +10,22 @@ abstract class MasaController
 	/**
 	 * 
 	 */
-	public function __construct(){}
+	protected function oauthBefore(){
 
-	/**
-	 * 
-	 */
-	public function getAll(ServerRequestInterface $request, ResponseInterface $response){
+		// Init our repositories
+		$accessTokenRepository = new AccessTokenRepository(); // instance of AccessTokenRepositoryInterface
 
-		
+		// Path to authorization server's public key
+		$publicKey = '/home/vagrant/Code/gitdev/public.key';
+		        
+		// Setup the authorization server
+		$server = new \League\OAuth2\Server\ResourceServer(
+		    $accessTokenRepository,
+		    $publicKey
+		);
 
-	}
-
-	/**
-	 * 
-	 */
-	public function getOne(ServerRequestInterface $request, ResponseInterface $response){
-		
-	}
-
-	/**
-	 * 
-	 */
-	public function create(ServerRequestInterface $request, ResponseInterface $response){
+		new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server);
 
 	}
-
-	/**
-	 * 
-	 */
-	public function update(ServerRequestInterface $request, ResponseInterface $response){
-
-	}
-
-	/**
-	 * 
-	 */
-	public function delete(ServerRequestInterface $request, ResponseInterface $response){
-
-	}
-
+	
 }

@@ -26,16 +26,29 @@ abstract class GitModel
 	 */
 	public function find( $id ){
 
-		$result = file_get_contents( "data/" . $this->database . "/" . $id . ".json" );
+		$address = "data/" . $this->database . "/" . $id . ".json";
 
-		return json_decode($result);
+		if( !file_exists($address) ){
+
+
+			throw new \Exception("Inexistent Record.");
+
+		}
+
+		$result = file_get_contents( $address );
+
+		$result_parsed = json_decode( $result, true );
+
+		$this->loadObject( $result_parsed );
+
+		return $this;
 
 	}
 
 	/**
-	 * 
+	 * @todo find a solution for search
 	 */
-	public function findAll(){
+	public function findAll( Array $search = [] ){
 
 		$result = $this->lsTree();
 
@@ -78,16 +91,24 @@ abstract class GitModel
 
 		$result = $this->saveVersion();
 
-		echo $content;
-
-		exit;
+		return $content;
 
 	}
 
 	/**
-	 * 
+	 * @param Int $id
 	 */
-	public function delete(){
+	public function delete( $id ){
+
+		$adapter = new Local('data/' . $this->database);
+
+		$filesystem = new Filesystem($adapter);
+
+		$filesystem->delete( $id . '.json');
+
+		$result = $this->saveVersion();
+
+		return $result;
 
 	}
 
@@ -173,6 +194,8 @@ abstract class GitModel
 		
 		$result_array_parsed = array();
 
+		$result_array = array_filter($result_array);
+
 		foreach ($result_array as $key => $value) {
 			
 			$result = preg_split('/\s+/', $value);
@@ -194,6 +217,19 @@ abstract class GitModel
 		}
 
 		return $result_array_parsed;
+
+	}
+
+	/**
+	 * 
+	 */
+	private function loadObject( Array $data_loaded ){
+
+		foreach ($data_loaded as $key => $record) {
+			
+			$this->{$key} = $record;
+
+		}
 
 	}
 

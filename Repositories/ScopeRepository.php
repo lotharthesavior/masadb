@@ -9,7 +9,9 @@ use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 
-use \Models\OAuth2\Scope;
+// scopes
+use \Models\OAuth2\Scopes\Administrator;
+use \Models\OAuth2\Scopes\Basic;
 
 class ScopeRepository implements ScopeRepositoryInterface
 {
@@ -30,7 +32,9 @@ class ScopeRepository implements ScopeRepositoryInterface
      */
     public function getScopeEntityByIdentifier($identifier){
 
-        $scope_model = new Scope;
+        $class = '\\Models\\OAuth2\\Scopes\\' . ucfirst($identifier);
+
+        $scope_model = new $class;
 
         return $scope_model;
 
@@ -54,9 +58,9 @@ class ScopeRepository implements ScopeRepositoryInterface
         $userIdentifier = null
     ){
 
-        $scope_model = new Scope;
+        // $scope_model = new Scope;
 
-        return [$scope_model];
+        return $scopes;
 
     }
 

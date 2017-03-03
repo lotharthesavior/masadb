@@ -1,38 +1,66 @@
 <?php
 
-$route = new League\Route\RouteCollection($container);
-
-$route->map('GET', '/', '\Controllers\HomeController::home');
+$app->get('/', 'HomeController:home');
 
 
 // NOTES ------------------------------------------------------------------------------------------
 
-$route->map('GET', '/notes', '\Controllers\NotesController::getNotes');
+$app->get('/notes', 'NotesController:getNotes');
 
-$route->map('GET', '/notes/{id}', '\Controllers\NotesController::getNote');
+$app->get('/notes/{id}', 'NotesController:getNote');
 
-$route->map('POST', '/notes', '\Controllers\NotesController::saveNote');
+$app->post('/notes', 'NotesController:saveNote');
 
-$route->map('PUT', '/notes/{id}', '\Controllers\NotesController::saveNote');
+$app->put('/notes/{id}', 'NotesController:saveNote');
 
-$route->map('DELETE', '/notes/{id}', '\Controllers\NotesController::delete');
+$app->delete('/notes/{id}', 'NotesController:delete');
 
 // / NOTES ----------------------------------------------------------------------------------------
 
 
+// USERS ------------------------------------------------------------------------------------------
+
+$app->get('/users', 'UsersController:getUsers');
+
+$app->get('/users/{id}', 'UsersController:getUser');
+
+$app->post('/users', 'UsersController:saveUser');
+
+$app->put('/users/{id}', 'UsersController:saveUser');
+
+$app->delete('/users/{id}', 'UsersController:delete');
+
+// / USERS ----------------------------------------------------------------------------------------
+
+
+// CLIENTS ------------------------------------------------------------------------------------------
+
+$app->get('/clients', 'ClientsController:getClients');
+
+$app->get('/clients/{id}', 'ClientsController:getClient');
+
+$app->post('/clients', 'ClientsController:saveClient');
+
+$app->put('/clients/{id}', 'ClientsController:saveClient');
+
+$app->delete('/clients/{id}', 'ClientsController:delete');
+
+// / CLIENTS ----------------------------------------------------------------------------------------
+
+
 // REPOSITORIES ------------------------------------------------------------------------------------------
 
-$route->map('GET', '/repositories', '\Controllers\RepositoriesController::getRepositories');
+$app->get('/listRepositories', 'RepositoriesController:getRepositories');
 
-$route->map('GET', '/repositories/{id}', '\Controllers\RepositoriesController::getRepository');
+$app->get('/repositories/{id}', 'RepositoriesController:getRepository');
 
-$route->map('GET', '/repositories/{id}/{asset}', '\Controllers\RepositoriesController::getAsset');
+$app->get('/repositories/{id}/{asset}', 'RepositoriesController:getAsset');
 
 // / REPOSITORIES ----------------------------------------------------------------------------------------
 
 
 // OAUTH2 ------------------------------------------------------------------------------------------
 
-$route->map('POST', '/access_token', '\Controllers\OAuthController::accessToken');
+$app->post('/access_token', 'OAuthController:accessToken');
 
 // / OAUTH2 ----------------------------------------------------------------------------------------
