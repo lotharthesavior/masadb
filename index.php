@@ -28,6 +28,30 @@ $app = new \Slim\App($c);
 $container = $app->getContainer();
 
 
+// OAuth2 initialization ---------------------------------------------------------------
+
+// Init our repositories
+$accessTokenRepository = new \Repositories\AccessTokenRepository(); // instance of AccessTokenRepositoryInterface
+
+// Path to authorization server's public key
+$publicKey = '/home/vagrant/Code/gitdev/public.key';
+        
+// Setup the authorization server
+$server = new \League\OAuth2\Server\ResourceServer(
+    $accessTokenRepository,
+    $publicKey
+);
+
+// OAuth2 initialization ---------------------------------------------------------------
+
+
+// Middlewares -------------------------------------------------------------------------
+
+// $app->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+// Middlewares -------------------------------------------------------------------------
+
+
 // Controllers -------------------------------------------------------------------------
 
 $container['NotesController'] = function($c) {

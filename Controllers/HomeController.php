@@ -22,9 +22,9 @@ class HomeController
 	 */
 	public function home(ServerRequestInterface $request, ResponseInterface $response){
 
-		global $templates;
+		$response->getBody()->write( "masa git repository" );
 
-	    return $templates->render('index');
+    	return $response;
 
 	}
 

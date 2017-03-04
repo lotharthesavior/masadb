@@ -30,7 +30,6 @@ abstract class GitModel
 
 		if( !file_exists($address) ){
 
-
 			throw new \Exception("Inexistent Record.");
 
 		}
@@ -47,8 +46,9 @@ abstract class GitModel
 
 	/**
 	 * @todo find a solution for search
+	 * @return Array
 	 */
-	public function findAll( Array $search = [] ){
+	public function findAll(){
 
 		$result = $this->lsTree();
 
@@ -225,9 +225,11 @@ abstract class GitModel
 	 */
 	private function loadObject( Array $data_loaded ){
 
+		$this->file_content = new \stdClass;
+
 		foreach ($data_loaded as $key => $record) {
 			
-			$this->{$key} = $record;
+			$this->file_content->{$key} = $record;
 
 		}
 

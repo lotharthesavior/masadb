@@ -7,6 +7,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use \Models\Repositories;
 use \Models\Generic;
+use \Models\OAuth2\Clients;
+use \Models\Users;
 
 use League\OAuth2\Server\AuthorizationServer;
 
@@ -64,6 +66,55 @@ class OAuthController
 	        
 	    }
 
+	}
+
+	/**
+	  * Expected Body Format:
+	  *     {
+	  *         "email": string
+	  *         "password": string
+	  *     }
+	  * 
+	  * @todo improve this method
+	  */
+	public function generateClientKey(ServerRequestInterface $request, ResponseInterface $response){
+
+		$secret_key = uniqid();
+
+		$client = $request->getParam('client');
+		$email = $request->getParam('email');
+		$password = $request->getParam('password');
+
+		// find client 
+
+		$clients_model = new Clients;
+		$client_result = $clients_model->find( $client );
+
+		// find user
+
+		$users_model = new Users;
+		$users_result = $users_model->find( $client_result->file_content->user_id );
+		
+		// validate user credential
+
+		if(
+			$users_result->file_content->email != $email
+			|| $users_result->file_content->password != $password
+		){
+			return false;
+		}
+
+		// update client with secret
+
+		$client_result->file_content->secret_key = sha1($secret_key);
+
+		$new_client_data = (array) $client_result->file_content;
+
+		return $clients_model->save([
+			'id' => $client,
+			'content' => $new_client_data
+		]);
+		
 	}
 
 }

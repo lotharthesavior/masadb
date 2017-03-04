@@ -34,9 +34,15 @@ class ClientRepository implements ClientRepositoryInterface
 
         $client_model = new Clients;
 
-        $client_loaded = $client_model->find( $clientIdentifier );
+        $client_model->find($clientIdentifier);
 
-        return $client_loaded;
+        if( $client_model->file_content->secret_key != $clientSecret ){
+
+            throw new \Exception("Key not valid!");
+
+        }
+
+        return $client_model;
 
     }
 
