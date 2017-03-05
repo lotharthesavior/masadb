@@ -54,7 +54,7 @@ class RepositoriesController
 
 		$generic_model = new Generic();
 
-		$generic_model->setRepo( $repository->address );
+		$generic_model->setRepo( $repository->file_content->address );
 
 		$result = $generic_model->lsTreeHead();
 
@@ -75,7 +75,7 @@ class RepositoriesController
 
 		$generic_model = new Generic();
 
-		$generic_model->setRepo( $repository->address );
+		$generic_model->setRepo( $repository->file_content->address );
 
 		$assets_list = $generic_model->lsTreeHead();
 
