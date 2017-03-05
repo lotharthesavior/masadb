@@ -2,15 +2,19 @@
 
 ### Dependencies
 
-##### Templates
+##### PHP Framework
 
-Reference: http://platesphp.com/
+Reference: http://slimframework.com/
 
-##### Route
+##### Git interaction
 
-Reference: http://route.thephpleague.com/
+Reference: https://github.com/coyl/git
 
-### Clients Credential Workflow
+##### OAuth2 library
+
+Reference: https://oauth2.thephpleague.com/
+
+##### Clients Credential Workflow
 
 **Reference**: https://tools.ietf.org/html/rfc6749#section-4.4
 

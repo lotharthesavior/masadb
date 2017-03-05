@@ -8,18 +8,30 @@ use Psr\Http\Message\ServerRequestInterface;
 use \Models\Repositories;
 use \Models\Generic;
 
-class RepositoriesController
+/**
+ * 
+ * Repositories Controller
+ * 
+ * @author Savio Resende <savio@savioresende.com.br>
+ * 
+ * Custom behaviour from normal Controllers:
+ * 
+ *     1. getRepository - list assets kept in version control
+ *     2. getAsset - get the content of an specific asset in specific version in specific branch
+ * 
+ */
+
+class RepositoriesController extends MasaController
 {
 
 	use \Controllers\traits\commonController;
 
 	/**
-	 * 
-	 */
-	public function __construct(){}
-
-	/**
 	 * Get All Repositories
+	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ResponseInterface
 	 */
 	public function getRepositories(ServerRequestInterface $request, ResponseInterface $response){
 
@@ -34,17 +46,14 @@ class RepositoriesController
 	}
 
 	/**
-	 * Get Repository
+	 * Get Repository list of assets in it's original address
 	 * 
-	 * Necessary Data from the Repository:
+	 * Ex.: http://{domain}/repositories/{id}
 	 * 
-	 * 1. Address
-	 * 2. ls-tree recursive
-	 * 3. list of branches
-	 * 4. readme file content
-	 * 
-	 * Ex.: http://lotharthesavior.dns1.us/resources/repositories/savioresende/
-	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @param Array $args
+	 * @return ResponseInterface
 	 */
 	public function getRepository(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
@@ -65,7 +74,12 @@ class RepositoriesController
 	}
 
 	/**
+	 * Get Specific Asset content
 	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @param Array $args
+	 * @return String
 	 */
 	public function getAsset(ServerRequestInterface $request, ResponseInterface $response, array $args){
 

@@ -7,6 +7,14 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use \Models\Users;
 
+/**
+ *
+ * Controller for user management
+ * 
+ * @author Savio Resende <savio@savioresende.com.br> 
+ * 
+ */
+
 class UsersController
 {
 	
@@ -18,7 +26,11 @@ class UsersController
 	public function __construct(){}
 
 	/**
+	 * Get a list of users
 	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ResponseInterface
 	 */
 	public function getUsers(ServerRequestInterface $request, ResponseInterface $response){
 
@@ -33,7 +45,11 @@ class UsersController
 	 }
 
 	/**
+	 * Get user by id
 	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @param Array $args
 	 */
 	public function getUser(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
@@ -59,13 +75,21 @@ class UsersController
 	 }
 
 	 /**
+	  * Persist user information
+	  * 
 	  * Expected Body Format: 
+	  * 
 	  * 	{
 	  * 		"title": {string},
 	  * 		"author": {string},
 	  * 		"email": {string},
 	  * 		"content": {string}
 	  * 	}
+	  * 
+	  * @param ServerRequestInterface $request
+	  * @param ResponseInterface $response
+	  * @param Array $args
+	  * @return Boolean
 	  */
 	 public function saveUser(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
@@ -76,7 +100,12 @@ class UsersController
 	 }
 
 	 /**
+	  * Delete user record
 	  * 
+	  * @param ServerRequestInterface $request
+	  * @param ResponseInterface $response
+	  * @param Array $args
+	  * @return Boolean
 	  */
 	 public function delete(ServerRequestInterface $request, ResponseInterface $response, array $args){
 

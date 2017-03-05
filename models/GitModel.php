@@ -8,6 +8,64 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Plugin\ListPaths;
 
+/**
+ * 
+ * Abstraction for the Model that keeps the data with Git
+ * 
+ * @author Savio Resende <savio@savioresende.com.br>
+ * 
+ * Dependency: this model uses the project https://github.com/coyl/git to interact with Git.
+ * 
+ * Outline:
+ * 
+ *     1. find
+ *     2. findAll
+ *     3. save
+ *     4. delete
+ *     5. lsTreeHead
+ *     6. showFile
+ *     7. lsTree
+ *     8. splitByLine
+ *     9. nextId
+ *     10. parseLsTree
+ *     11. loadObject
+ * 
+ */
+
+// ------------------------------------------------------------------------
+
+// -- Primary concepts --
+
+// use \Git\Coyl\Git;
+
+// require_once('Git.php');
+
+// $repo = \Coyl\Git\Git::open('.');
+// $repo = \Coyl\Git\Git::open('data');
+// -or- Git::create('/path/to/repo')
+
+// echo "<pre>";var_dump($repo);exit;
+
+// code example for the usage of the Git class
+// $repo->add('.');
+// $repo->commit('Some commit message');
+// $repo->push('origin', 'master');
+
+// list all files in the root directory
+// $result = $repo->run("ls-tree HEAD");
+// var_dump($result);
+
+// list all files in all directories
+// git ls-tree --full-tree -r HEAD
+
+// search
+// https://git-scm.com/book/en/v2/Git-Tools-Searching
+// git grep test
+// $result = $repo->run("grep -n test");
+// var_dump($result);
+
+// ------------------------------------------------------------------------
+
 abstract class GitModel
 {
 
@@ -236,35 +294,3 @@ abstract class GitModel
 	}
 
 }
-
-// ------------------------------------------------------------------------
-
-// use \Git\Coyl\Git;
-
-// require_once('Git.php');
-
-// $repo = \Coyl\Git\Git::open('.');
-// $repo = \Coyl\Git\Git::open('data');
-// -or- Git::create('/path/to/repo')
-
-// echo "<pre>";var_dump($repo);exit;
-
-// code example for the usage of the Git class
-// $repo->add('.');
-// $repo->commit('Some commit message');
-// $repo->push('origin', 'master');
-
-// list all files in the root directory
-// $result = $repo->run("ls-tree HEAD");
-// var_dump($result);
-
-// list all files in all directories
-// git ls-tree --full-tree -r HEAD
-
-// search
-// https://git-scm.com/book/en/v2/Git-Tools-Searching
-// git grep test
-// $result = $repo->run("grep -n test");
-// var_dump($result);
-
-// ------------------------------------------------------------------------

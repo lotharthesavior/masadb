@@ -17,6 +17,12 @@ class OAuthController
 
 	/**
 	 * Access Token
+	 * 
+	 * Example: grant_type=client_credentials&client_id={client id}&client_secret={secret}&scope={scopes list}
+	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ResponseInterface
 	 */
 	public function accessToken(ServerRequestInterface $request, ResponseInterface $response){
 
@@ -70,12 +76,15 @@ class OAuthController
 
 	/**
 	  * Expected Body Format:
+	  * 
 	  *     {
 	  *         "email": string
 	  *         "password": string
 	  *     }
 	  * 
-	  * @todo improve this method
+	  * @param ServerRequestInterface $request
+	  * @param ResponseInterface $response
+	  * @return Boolean
 	  */
 	public function generateClientKey(ServerRequestInterface $request, ResponseInterface $response){
 
