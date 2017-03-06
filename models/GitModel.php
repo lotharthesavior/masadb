@@ -30,6 +30,10 @@ use League\Flysystem\Plugin\ListPaths;
  *     10. parseLsTree
  *     11. loadObject
  * 
+ * @internal This project supports BagIt, this means that, if the model that is extending this abstract
+ * class has a Trait "BagUtilities", it will use it and manage the record s bags. For this, there is a 
+ * dependency: https://github.com/lotharthesavior/BagItPHP.git
+ * 
  */
 
 // ------------------------------------------------------------------------
@@ -75,7 +79,10 @@ abstract class GitModel
 
 	public function __construct(){
 
-		$this->repo = \Coyl\Git\Git::open('data');
+		$config_json = file_get_contents("config.json");
+		$this->config = json_decode($config_json, true);
+
+		$this->repo = \Coyl\Git\Git::open( $this->config['database-address'] );
 
 	}
 
@@ -84,8 +91,8 @@ abstract class GitModel
 	 */
 	public function find( $id ){
 
-		$address = "data/" . $this->database . "/" . $id . ".json";
-
+		$address = $this->config['database-address'] . "/" . $this->database . $this->locationOfBag( $id ) . ".json";
+		
 		if( !file_exists($address) ){
 
 			throw new \Exception("Inexistent Record.");
@@ -108,15 +115,14 @@ abstract class GitModel
 	 */
 	public function findAll(){
 
-		$result = $this->lsTree();
+		$result = $this->lsTreeHead( $this->database . '/' );
 
 		$result_complete = [];
-		foreach ($result as $key => $value) {
+		foreach ($result as $key => $record) {
 			
-			$content_temp = file_get_contents( "data/" . $value->address );
-			$value->file_content = json_decode($content_temp);
+			$record->file_content = $this->getFileContent( $record );
 			
-			array_push($result_complete, $value);
+			array_push($result_complete, $record);
 
 		}
 
@@ -131,19 +137,33 @@ abstract class GitModel
 
 		$client_data = (object) $client_data;
 
-		$adapter = new Local('data/' . $this->database);
+		$adapter = new Local( $this->config['database-address'] . '/' . $this->database );
 
 		$filesystem = new Filesystem($adapter);
 
 		$content = json_encode($client_data->content, JSON_PRETTY_PRINT);
 
+		$id = null;
+
 		if( is_null($client_data->id) ){
 
-			$filesystem->write( $this->nextId() . '.json', $content);
+			$id = $this->nextId();
+
+			$filesystem->write( $id . '.json', $content);
+
+			if( $this->isBag() ){
+
+				$this->createBagForRecord( $id );
+
+			}
+
+			$this->last_inserted_id = $id;
 
 		}else{
 
-			$filesystem->update( $client_data->id . '.json', $content);
+			$id = $client_data->id;
+
+			$filesystem->update( $this->locationOfBag( $id ) . '.json', $content);
 
 		}
 
@@ -158,7 +178,7 @@ abstract class GitModel
 	 */
 	public function delete( $id ){
 
-		$adapter = new Local('data/' . $this->database);
+		$adapter = new Local( $this->config['database-address'] . '/' . $this->database );
 
 		$filesystem = new Filesystem($adapter);
 
@@ -173,11 +193,15 @@ abstract class GitModel
 	/**
 	 * 
 	 */
-	public function lsTreeHead(){
+	public function lsTreeHead( $database = '' ){
 
-		$result = $this->repo->run('ls-tree HEAD');
+		$command = 'ls-tree HEAD ' . $database;
 
-		$result_array_parsed = $this->parseLsTree( $result );
+		$result = $this->repo->run( $command );
+
+		$is_db = $database != '';
+
+		$result_array_parsed = $this->parseLsTree( $result, $is_db );
 
 		return $result_array_parsed;
 
@@ -243,7 +267,8 @@ abstract class GitModel
 	 * discriminated metadata
 	 * 
 	 * @param String $cli_result
-	 * @param Bool $is_db
+	 * @param Bool $is_db - here is decided if the parsing will fill id 
+	 *                      attribute or not
 	 * @return Array
 	 */
 	private function parseLsTree( $cli_result, $is_db = false ){
@@ -279,7 +304,9 @@ abstract class GitModel
 	}
 
 	/**
+	 * This will load the resultant object into file_content attribute
 	 * 
+	 * @param Array $data_loaded
 	 */
 	private function loadObject( Array $data_loaded ){
 
@@ -290,6 +317,68 @@ abstract class GitModel
 			$this->file_content->{$key} = $record;
 
 		}
+
+	}
+
+	/**
+	 * Verify if the current model is compatible with Bagit
+	 * 
+	 * @return Boolean
+	 */
+	function isBag(){
+
+		$is_bag = false;
+
+		if( method_exists($this, 'createBagForRecord') ){
+
+			$is_bag = true;
+
+		}
+
+		return $is_bag;
+
+	}
+
+	/**
+	 * Define location for bag
+	 * 
+	 * @internal the verified method 'createBagForRecord' is from 'BagUtilities' Trait
+	 * @param Integer $id
+	 */
+	private function locationOfBag( $id ){
+
+		$location = '/' . $id;
+
+		if( $this->isBag() ){
+
+			$location = '/' . $id . '/data/' . $id;
+
+		}
+
+		return $location;
+
+	}
+
+	/**
+	 * Get file content of the record
+	 */
+	private function getFileContent( $record ){
+
+		$location = $record->address;
+
+		if( $this->isBag() ){
+
+			$id = preg_replace("/[^0-9]/", '', $record->address);
+
+			$location = $record->address . '/data/' . $id . '.json';
+
+		}
+
+		$content_temp = file_get_contents( $this->config['database-address'] . "/" . $location );
+
+		$record->file_content = json_decode($content_temp);
+
+		return $record->file_content;
 
 	}
 

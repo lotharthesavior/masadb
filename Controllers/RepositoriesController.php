@@ -57,13 +57,19 @@ class RepositoriesController extends MasaController
 	 */
 	public function getRepository(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
+		// repsitories model 
+
 		$repositories_model = new Repositories();
 
 		$repository = $repositories_model->find( $args['id'] );
 
+		// generic model 
+
 		$generic_model = new Generic();
 
 		$generic_model->setRepo( $repository->file_content->address );
+
+		// parsing results
 
 		$result = $generic_model->lsTreeHead();
 
@@ -83,13 +89,19 @@ class RepositoriesController extends MasaController
 	 */
 	public function getAsset(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
+		// repositories model 
+
 		$repositories_model = new Repositories();
 
 		$repository = $repositories_model->find( $args['id'] );
 
+		// generic model 
+
 		$generic_model = new Generic();
 
 		$generic_model->setRepo( $repository->file_content->address );
+
+		// parsing results
 
 		$assets_list = $generic_model->lsTreeHead();
 

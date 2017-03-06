@@ -22,7 +22,7 @@ trait commonController
 	 * @param Array $args
 	 * @param \Models\GitModel $model
 	 */
-	public function saveRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitModel $model){
+	public function saveRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitModel &$model){
 
 	 	// request data
 		
