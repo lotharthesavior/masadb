@@ -191,10 +191,10 @@ abstract class GitModel
 	}
 
 	/**
-	 * 
+	 * @param String $database  - format expected: "{string}/"
 	 */
 	public function lsTreeHead( $database = '' ){
-
+		
 		$command = 'ls-tree HEAD ' . $database;
 
 		$result = $this->repo->run( $command );
@@ -252,7 +252,7 @@ abstract class GitModel
 	 */
 	protected function nextId(){
 
-		$ls_tree_result = $this->lsTree();
+		$ls_tree_result = $this->lsTreeHead( $this->database . '/' );
 
 		return count($ls_tree_result) + 1;
 

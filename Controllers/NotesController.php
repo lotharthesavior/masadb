@@ -64,8 +64,6 @@ class NotesController extends MasaController
 
 	 	$result = $this->saveRecord($request, $response, $args, $notes_model);
 
-	 	var_dump($result);exit;
-
 	 	return $result;
 
 	 }
