@@ -18,7 +18,13 @@ class OAuthController
 	/**
 	 * Access Token
 	 * 
-	 * Example: grant_type=client_credentials&client_id={client id}&client_secret={secret}&scope={scopes list}
+	 * Post header data example:
+	 * 
+	 *     Content-Type: application/x-www-form-urlencoded
+	 * 
+	 * Post body data example: 
+	 * 
+	 *     grant_type=client_credentials&client_id={client id}&client_secret={secret}&scope={scopes list}
 	 * 
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
