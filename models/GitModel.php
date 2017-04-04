@@ -73,6 +73,9 @@ use League\Flysystem\Plugin\ListPaths;
 abstract class GitModel
 {
 
+	// attribute to specify the sorting type: ASC | DESC
+	// protected $sortType;
+
 	// ------------------------------------------------------------------------
 	// PUBLIC
 	// ------------------------------------------------------------------------
@@ -126,6 +129,10 @@ abstract class GitModel
 
 		}
 
+		$result_complete = $this->sortResult($result_complete);
+
+		// echo "<pre>";var_dump($result_complete);exit;
+
 		return $result_complete;
 
 	}
@@ -174,6 +181,7 @@ abstract class GitModel
 	}
 
 	/**
+	 * @todo handle exceptions
 	 * @param Int $id
 	 */
 	public function delete( $id ){
@@ -182,7 +190,15 @@ abstract class GitModel
 
 		$filesystem = new Filesystem($adapter);
 
-		$filesystem->delete( $id . '.json');
+		if( file_exists($id . '.json') ){
+
+			$filesystem->delete( $id . '.json');
+
+		}else{
+
+			$filesystem->deleteDir( $id );
+
+		}
 
 		$result = $this->saveVersion();
 
@@ -254,7 +270,11 @@ abstract class GitModel
 
 		$ls_tree_result = $this->lsTreeHead( $this->database . '/' );
 
-		return count($ls_tree_result) + 1;
+		$ls_tree_result = array_map(function( $item ){
+			return $item->id;
+		}, $ls_tree_result);
+
+		return max($ls_tree_result) + 1;
 
 	}
 
@@ -381,5 +401,50 @@ abstract class GitModel
 		return $record->file_content;
 
 	}
+
+	/**
+	 * Sort a Collection
+	 * 
+	 * @todo this function will encapsulate the sorting functions
+	 * @todo validate $this->sortType
+	 * @param Array $collection
+	 */
+	private function sortResult( $collection ){
+
+		$sort_type = "ASC";
+		if( 
+			isset($this->sortType) 
+			&& !empty($this->sortType)
+		){
+			$sort_type = $this->sortType;
+		}
+
+		switch ( $sort_type ) {
+
+			case 'ASC':
+				$collection = $this->sortAscendingOrder( $collection );
+				break;
+
+		}
+
+		return $collection;
+
+	}
+
+	/**
+	 * Sort Ascending
+	 * 
+	 * @param Array $collection
+	 */
+	private function sortAscendingOrder( $collection ){
+
+		usort($collection, function($a, $b){
+			return (int) $a->id > (int) $b->id;
+		});
+
+		return $collection;
+
+	}
+
 
 }

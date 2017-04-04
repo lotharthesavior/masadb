@@ -17,7 +17,7 @@ $app->post('/notes', 'NotesController:saveNote')
 $app->put('/notes/{id}', 'NotesController:saveNote')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
-$app->delete('/notes/{id}', 'NotesController:delete')
+$app->delete('/notes/{id}', 'NotesController:deleteNote')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
 // / NOTES ----------------------------------------------------------------------------------------

@@ -47,25 +47,38 @@ class NotesController extends MasaController
 
     	return $response;
 
-	 }
+	}
 
-	 /**
-	  * Expected Body Format: 
-	  * 	{
-	  * 		"title": {string},
-	  * 		"author": {string},
-	  * 		"email": {string},
-	  * 		"content": {string}
-	  * 	}
-	  */
-	 public function saveNote(ServerRequestInterface $request, ResponseInterface $response, array $args){
+	/**
+	 * Expected Body Format: 
+	 * 	{
+	 * 		"title": {string},
+	 * 		"author": {string},
+	 * 		"email": {string},
+	 * 		"content": {string}
+	 * 	}
+	 */
+	public function saveNote(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
 	 	$notes_model = new Notes();
 
 	 	$result = $this->saveRecord($request, $response, $args, $notes_model);
 
-	 	return $result;
+		return $result;
 
-	 }
+	}
+
+	/**
+	 * 
+	 */
+	public function deleteNote(ServerRequestInterface $request, ResponseInterface $response, array $args){
+
+	 	$notes_model = new Notes();
+
+	 	$result = $notes_model->delete($args['id']);
+
+		return $result;
+
+	}
 
 }

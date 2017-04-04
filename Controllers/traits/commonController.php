@@ -28,6 +28,13 @@ trait commonController
 		
 		$request_body = json_decode($request->getBody(), true);
 
+		// handling put data
+		if( is_null($request_body) ){
+			$rawData = file_get_contents('php://input');
+		 	$rawData = mb_substr($rawData, 3, -3);
+			parse_str($rawData, $request_body);
+		}
+
 		$id = null;
 		if( isset($args['id']) ){
 			$id = $args['id'];
