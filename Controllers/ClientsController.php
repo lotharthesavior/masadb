@@ -12,10 +12,15 @@ class ClientsController
 	
 	use \Controllers\traits\commonController;
 
-	/**
-	 * 
-	 */
-	public function __construct(){}
+	protected $container;
+
+        /**
+         * Start the controller instantiating the Slim Container
+         * @todo move this to a controller parent class
+         */
+        public function __construct($container){
+                $this->container = $container;
+        }
 
 	/**
 	 * 

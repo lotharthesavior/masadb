@@ -2,3 +2,7 @@ vendor
 data
 private.key
 public.key
+cert.pem
+public.pub
+config.json
+composer.lock

@@ -15,15 +15,11 @@ require __DIR__ . '/vendor/autoload.php';
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-$configuration = [
-    'settings' => [
-        'displayErrorDetails' => true,
-    ],
-];
+// Load configuration
+$config_json = file_get_contents("config.json");
+$config['settings'] = json_decode($config_json, true);
 
-$c = new \Slim\Container($configuration);
-
-$app = new \Slim\App($c);
+$app = new \Slim\App($config);
 
 $container = $app->getContainer();
 
@@ -34,8 +30,8 @@ $container = $app->getContainer();
 $accessTokenRepository = new \Repositories\AccessTokenRepository(); // instance of AccessTokenRepositoryInterface
 
 // Path to authorization server's public key
-$publicKey = '/home/vagrant/Code/gitdev/public.key';
-        
+$publicKey = '/etc/apache2/ssl/public.key'; 
+      
 // Setup the authorization server
 $server = new \League\OAuth2\Server\ResourceServer(
     $accessTokenRepository,

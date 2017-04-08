@@ -1,0 +1,7 @@
+{
+	"database-address": "data",
+	"domain": "db.masa.tech",
+        "displayErrorDetails": true,
+	"private_key": "/etc/apache2/ssl/private.key",
+	"public_key": "/etc/apache2/ssl/public.key"
+}

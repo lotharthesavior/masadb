@@ -14,9 +14,9 @@ abstract class MasaController
 
 		// Init our repositories
 		$accessTokenRepository = new AccessTokenRepository(); // instance of AccessTokenRepositoryInterface
-
+		
 		// Path to authorization server's public key
-		$publicKey = '/home/vagrant/Code/gitdev/public.key';
+		$publicKey = $this->container->get('settings')['public_key'];
 		        
 		// Setup the authorization server
 		$server = new \League\OAuth2\Server\ResourceServer(

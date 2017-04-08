@@ -10,18 +10,21 @@ use \Models\Notes;
 class HomeController
 {
 
-	/**
-	 * 
-	 */
-	public function __construct(){
-		
-	}
+	protected $container;
+
+        /**
+         * Start the controller instantiating the Slim Container
+         * @todo move this to a controller parent class
+         */
+        public function __construct($container){
+                $this->container = $container;
+        }
 
 	/**
 	 * 
 	 */
 	public function home(ServerRequestInterface $request, ResponseInterface $response){
-
+		
 		$response->getBody()->write( "masa git repository" );
 
     	return $response;

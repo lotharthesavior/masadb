@@ -15,6 +15,16 @@ use League\OAuth2\Server\AuthorizationServer;
 class OAuthController
 {
 
+	protected $container;
+
+	/**
+	 * Start the controller instantiating the Slim Container
+	 * @todo move this to a controller parent class
+	 */
+	public function __construct($container){
+		$this->container = $container;
+	}
+
 	/**
 	 * Access Token
 	 * 
@@ -33,9 +43,9 @@ class OAuthController
 	public function accessToken(ServerRequestInterface $request, ResponseInterface $response){
 
 		// Path to public and private keys
-		$privateKey = '/home/vagrant/Code/gitdev/private.key';
-		//$privateKey = new CryptKey('file://path/to/private.key', 'passphrase'); // if private key has a pass phrase
-		$publicKey = '/home/vagrant/Code/gitdev/public.key';
+		$privateKey = $this->container->get('settings')['private_key'];
+		// $privateKey = new \League\OAuth2\Server\CryptKey('/var/www/masadb/private_key.pem', 'lothar5'); // if private key has a pass phrase
+		$publicKey = $this->container->get('settings')['public_key'];
 
 		$client_repository = new \Repositories\ClientRepository;
 

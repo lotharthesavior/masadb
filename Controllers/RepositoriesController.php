@@ -26,6 +26,16 @@ class RepositoriesController extends MasaController
 
 	use \Controllers\traits\commonController;
 
+	protected $container;
+
+        /**
+         * Start the controller instantiating the Slim Container
+         * @todo move this to a controller parent class
+         */
+        public function __construct($container){
+                $this->container = $container;
+        }
+
 	/**
 	 * Get All Repositories
 	 * 
