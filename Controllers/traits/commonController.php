@@ -97,4 +97,32 @@ trait commonController
 
 	}
 
+	/**
+	 * Organinize unlimited params with the Slimframework Router
+	 * 
+	 * @param String $params
+	 */
+	protected function processUnlimitedParams( $params ){
+
+		$param  = [];
+		$values = [];
+
+		$params = explode("/", $params['params']);
+
+
+		foreach ($params as $key => $value) {
+			if ($key % 2 == 0) {
+				array_push($param, $value);
+			}else{
+				array_push($values, $value);
+			}
+		}
+
+		return [
+			'field' => $param,
+			'value' => $values
+		];
+
+	}
+
 }

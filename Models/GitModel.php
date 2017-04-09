@@ -160,17 +160,17 @@ abstract class GitModel
 		// filter by the search
 		$result_complete = array_filter($result_complete, function( $item ) use ($param, $value){
 
-			if( is_string($param) ){
+			foreach ($param as $key => $current_param) {
 
-				switch ($param) {
+				switch ($current_param) {
 					case 'title':
-						if( strstr($item->file_content->title, $value) === false ){
+						if( strstr($item->file_content->title, $value[$key]) === false ){
 							return false;
 						}
 						break;
 
 					case 'content':
-						if( strstr(strip_tags($item->file_content->content), $value) === false ){
+						if( strstr($item->file_content->content, $value[$key]) === false ){
 							return false;
 						}
 						break;
@@ -178,33 +178,7 @@ abstract class GitModel
 					case 'timestamp':
 						// TODO
 						break;
-				}
-
-			}else{
-
-				// TODO
-				// foreach ($param as $key => $current_param) {
-
-				// 	switch ($current_param) {
-				// 		case 'title':
-				// 			echo "<pre>";var_dump($value);exit;
-				// 			if( strstr($item['file_content']->title, $value[$key]) === false ){
-				// 				return false;
-				// 			}
-				// 			break;
-
-				// 		case 'content':
-				// 			if( strstr($item['file_content']->content, $value[$key]) === false ){
-				// 				return false;
-				// 			}
-				// 			break;
-
-				// 		case 'timestamp':
-				// 			// TODO
-				// 			break;
-				// 	}	
-
-				// }
+				}	
 
 			}
 

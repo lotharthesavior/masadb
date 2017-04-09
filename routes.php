@@ -11,7 +11,10 @@ $app->get('/notes', 'NotesController:getNotes')
 $app->get('/notes/{id}', 'NotesController:getNote')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
-$app->get('/notes/{field}/{value}', 'NotesController:searchNote')
+/**
+ * @internal infinite params
+ */
+$app->get('/notes/{params:.*}', 'NotesController:searchNote')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
 $app->post('/notes', 'NotesController:saveNote')
