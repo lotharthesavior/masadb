@@ -55,6 +55,25 @@ class NotesController extends MasaController
 	}
 
 	/**
+	 * Search Note
+	 * 
+	 * @param Array $args | ['field' => string, 'value' => string]
+	 */
+	public function searchNote(ServerRequestInterface $request, ResponseInterface $response, array $args){
+
+	 	$notes_model = new Notes();
+
+		$note = $notes_model->search( $args['field'], $args['value'] );
+
+		var_dump($note);exit;
+
+		$response->getBody()->write( json_encode($note) );
+
+    	return $response;
+
+	}
+
+	/**
 	 * Expected Body Format: 
 	 * 	{
 	 * 		"title": {string},

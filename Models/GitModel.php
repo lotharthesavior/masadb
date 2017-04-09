@@ -7,6 +7,8 @@ use \Git\Coyl\Git;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Plugin\ListPaths;
+use League\Flysystem\Plugin\ListWith;
+use League\Flysystem\Plugin\GetWithMetadata;
 
 /**
  * 
@@ -132,6 +134,83 @@ abstract class GitModel
 		$result_complete = $this->sortResult($result_complete);
 
 		// echo "<pre>";var_dump($result_complete);exit;
+
+		return $result_complete;
+
+	}
+
+	/**
+	 * 
+	 * @param String $param || Array $param
+	 * @param String $value || Array $value
+	 */
+	public function search( $param, $value){
+
+		$result = $this->lsTreeHead( $this->database . '/' );
+
+		$result_complete = [];
+		foreach ($result as $key => $record) {
+			
+			$record->file_content = $this->getFileContent( $record );
+			
+			array_push($result_complete, $record);
+
+		}
+
+		// filter by the search
+		$result_complete = array_filter($result_complete, function( $item ) use ($param, $value){
+
+			if( is_string($param) ){
+
+				switch ($param) {
+					case 'title':
+						if( strstr($item->file_content->title, $value) === false ){
+							return false;
+						}
+						break;
+
+					case 'content':
+						if( strstr(strip_tags($item->file_content->content), $value) === false ){
+							return false;
+						}
+						break;
+
+					case 'timestamp':
+						// TODO
+						break;
+				}
+
+			}else{
+
+				// TODO
+				// foreach ($param as $key => $current_param) {
+
+				// 	switch ($current_param) {
+				// 		case 'title':
+				// 			echo "<pre>";var_dump($value);exit;
+				// 			if( strstr($item['file_content']->title, $value[$key]) === false ){
+				// 				return false;
+				// 			}
+				// 			break;
+
+				// 		case 'content':
+				// 			if( strstr($item['file_content']->content, $value[$key]) === false ){
+				// 				return false;
+				// 			}
+				// 			break;
+
+				// 		case 'timestamp':
+				// 			// TODO
+				// 			break;
+				// 	}	
+
+				// }
+
+			}
+
+			return $item;
+
+		});
 
 		return $result_complete;
 
