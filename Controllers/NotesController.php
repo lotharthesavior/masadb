@@ -66,6 +66,8 @@ class NotesController extends MasaController
 	 	$args = $this->processUnlimitedParams( $args );
 
 		$note = $notes_model->search( $args['field'], $args['value'] );
+		
+		$note = array_values($note);
 
 		$response->getBody()->write( json_encode($note) );
 
