@@ -476,9 +476,25 @@ abstract class GitModel
 
 		}
 
-		$content_temp = file_get_contents( $this->config['database-address'] . "/" . $location );
+		$full_record_addess = $this->config['database-address'] . "/" . $location;
+
+		$content_temp = file_get_contents( $full_record_addess );
 
 		$record->file_content = json_decode($content_temp);
+
+		// get timestamp of file
+
+			$adapter = new Local( $this->config['database-address'] );
+
+			$filesystem = new Filesystem( $adapter );
+
+			$timestamp = filemtime( $full_record_addess );
+
+			$record->file_content->timestamp = $timestamp;
+
+			$record->file_content->updated_at = gmdate("Y-m-d H:i:s", $timestamp);
+
+		// / get timestamp of file
 
 		return $record->file_content;
 
@@ -507,6 +523,10 @@ abstract class GitModel
 				$collection = $this->sortAscendingOrder( $collection );
 				break;
 
+			case 'creation_DESC':
+				$collection = $this->sortCreationDescendingOrder( $collection );
+				break;
+
 		}
 
 		return $collection;
@@ -522,6 +542,21 @@ abstract class GitModel
 
 		usort($collection, function($a, $b){
 			return (int) $a->id > (int) $b->id;
+		});
+
+		return $collection;
+
+	}
+
+	/**
+	 * Sort Ascending
+	 * 
+	 * @param Array $collection
+	 */
+	private function sortCreationDescendingOrder( $collection ){
+
+		usort($collection, function($a, $b){
+			return (int) $b->file_content->timestamp > (int) $a->file_content->timestamp;
 		});
 
 		return $collection;

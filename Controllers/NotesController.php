@@ -31,6 +31,8 @@ class NotesController extends MasaController
 
 	 	$model = new Notes();
 
+	 	$model->sortType = "creation_DESC";
+
 		$result = $model->findAll();
 
 		$response->getBody()->write( json_encode($result) );
