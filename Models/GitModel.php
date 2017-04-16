@@ -257,8 +257,8 @@ abstract class GitModel
 		}
 
 		$result = $this->saveVersion();
-
-		return $content;
+		
+		return $id;
 
 	}
 
