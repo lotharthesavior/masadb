@@ -170,8 +170,11 @@ abstract class GitModel
                 $result_complete = array_filter($result_complete, function( $item ) use ($param, $value){
 
                     $found = false;
-echo "<pre>";var_dump($item->file_content);exit;
-						if( strstr($item->file_content->title, $value) !== false ){
+// echo "<pre>";var_dump($item->file_content);exit;
+						if( 
+                                                    isset($item->file_content->{$param})
+                                                    && strstr($item->file_content->{$param}, $value) !== false 
+                                                ){
 						    $found= true;
 						}
                     return $found;
