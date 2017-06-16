@@ -6,3 +6,4 @@ cert.pem
 public.pub
 config.json
 composer.lock
+.phpintel

@@ -69,12 +69,12 @@ class MasaDBController extends MasaController
 
 	 	$db_model = new Generic();
 
-                $db_model->setDatabase( $args['database'] );
+        $db_model->setDatabase( $args['database'] );
 
 	 	$args = $this->processUnlimitedParams( $args );
 
 		$record = $db_model->search( $args['field'], $args['value'] );
-	echo "<pre>";var_dump($record);exit;	
+        echo "<pre>";var_dump($record);exit;
 		$record = array_values($record);
 
 		$response->getBody()->write( json_encode($record) );
