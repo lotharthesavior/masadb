@@ -160,57 +160,21 @@ abstract class GitModel
 
 		// prepare the logic
 		// TODO: accept different logic conditions
-		$logic_condition = "AND";
-		if( array_search('logic', $param) !== false ){
-			$logic_condition = $value[array_search('logic', $param)];
-		}
+		// $logic_condition = "AND";
+		// if( array_search('logic', $param) !== false ){
+		//	$logic_condition = $value[array_search('logic', $param)];
+		// }
 
 		// filter by the search
-		$result_complete = array_filter($result_complete, function( $item ) use ($param, $value, $logic_condition){
+		// $result_complete = array_filter($result_complete, function( $item ) use ($param, $value, $logic_condition){
+                $result_complete = array_filter($result_complete, function( $item ) use ($param, $value){
 
-			$validation_results = [];
-
-			foreach ($param as $key => $current_param) {
-
-				switch ($current_param) {
-					case 'title':
-						if( strstr($item->file_content->title, $value[$key]) === false ){
-							if( $logic_condition == "AND" ){
-								return false;
-							}
-							array_push($validation_results, false);
-						}else{
-							array_push($validation_results, true);
+                    $found = false;
+echo "<pre>";var_dump($item->file_content);exit;
+						if( strstr($item->file_content->title, $value) !== false ){
+						    $found= true;
 						}
-						break;
-
-					case 'content':
-						if( strstr($item->file_content->content, $value[$key]) === false ){
-							if( $logic_condition == "AND" ){
-								return false;
-							}
-							array_push($validation_results, false);
-						}else{
-							array_push($validation_results, true);
-						}
-						break;
-
-					case 'timestamp':
-						// TODO
-						break;
-				}
-
-			}
-
-			// process logic operation - if none, return false
-			if( 
-				$logic_condition == "OR" 
-				&& in_array(true, $validation_results) === false
-			){
-				return false;
-			}
-
-			return $item;
+                    return $found;
 
 		});
 

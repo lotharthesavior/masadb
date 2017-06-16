@@ -680,3 +680,17 @@
 [Fri Jun 16 01:56:24.710433 2017] [ssl:warn] [pid 1767] AH01906: RSA server certificate is a CA certificate (BasicConstraints: CA == TRUE !?)
 [Fri Jun 16 01:56:24.710444 2017] [ssl:warn] [pid 1767] AH01909: RSA certificate configured for masadb.dev:443 does NOT include an ID which matches the server name
 [Fri Jun 16 03:02:30.832538 2017] [php7:notice] [pid 1771] [client 192.168.33.1:56209] PHP Notice:  Undefined index: params in /var/www/masadb/Controllers/traits/commonController.php on line 110
+[Fri Jun 16 03:21:30.894452 2017] [php7:notice] [pid 2323] [client 192.168.33.1:56363] PHP Notice:  Undefined index: params in /var/www/masadb/Controllers/traits/commonController.php on line 110
+[Fri Jun 16 03:23:47.896437 2017] [php7:notice] [pid 1770] [client 192.168.33.1:56373] PHP Notice:  Undefined index: field in /var/www/masadb/Controllers/MasaDBController.php on line 76
+[Fri Jun 16 03:23:47.900083 2017] [php7:warn] [pid 1770] [client 192.168.33.1:56373] PHP Warning:  array_search() expects parameter 2 to be array, null given in /var/www/masadb/Models/GitModel.php on line 164
+[Fri Jun 16 03:23:47.900109 2017] [php7:warn] [pid 1770] [client 192.168.33.1:56373] PHP Warning:  array_search() expects parameter 2 to be array, null given in /var/www/masadb/Models/GitModel.php on line 165
+[Fri Jun 16 03:23:47.900114 2017] [php7:notice] [pid 1770] [client 192.168.33.1:56373] PHP Notice:  String offset cast occurred in /var/www/masadb/Models/GitModel.php on line 165
+[Fri Jun 16 03:23:47.900134 2017] [php7:warn] [pid 1770] [client 192.168.33.1:56373] PHP Warning:  Invalid argument supplied for foreach() in /var/www/masadb/Models/GitModel.php on line 173
+[Fri Jun 16 03:25:01.633922 2017] [php7:warn] [pid 2184] [client 192.168.33.1:56375] PHP Warning:  array_search() expects parameter 2 to be array, string given in /var/www/masadb/Models/GitModel.php on line 164
+[Fri Jun 16 03:25:01.633968 2017] [php7:warn] [pid 2184] [client 192.168.33.1:56375] PHP Warning:  array_search() expects parameter 2 to be array, string given in /var/www/masadb/Models/GitModel.php on line 165
+[Fri Jun 16 03:25:01.633974 2017] [php7:notice] [pid 2184] [client 192.168.33.1:56375] PHP Notice:  String offset cast occurred in /var/www/masadb/Models/GitModel.php on line 165
+[Fri Jun 16 03:25:01.633981 2017] [php7:warn] [pid 2184] [client 192.168.33.1:56375] PHP Warning:  Invalid argument supplied for foreach() in /var/www/masadb/Models/GitModel.php on line 173
+[Fri Jun 16 03:27:32.498377 2017] [php7:notice] [pid 2328] [client 192.168.33.1:56377] PHP Notice:  Undefined variable: logic_condition in /var/www/masadb/Models/GitModel.php on line 169
+[Fri Jun 16 03:27:32.498416 2017] [php7:warn] [pid 2328] [client 192.168.33.1:56377] PHP Warning:  Invalid argument supplied for foreach() in /var/www/masadb/Models/GitModel.php on line 173
+[Fri Jun 16 03:29:33.824684 2017] [php7:warn] [pid 2323] [client 192.168.33.1:56385] PHP Warning:  Invalid argument supplied for foreach() in /var/www/masadb/Models/GitModel.php on line 174
+[Fri Jun 16 03:38:34.146934 2017] [php7:notice] [pid 2327] [client 192.168.33.1:56433] PHP Notice:  Undefined property: stdClass::$title in /var/www/masadb/Models/GitModel.php on line 173
