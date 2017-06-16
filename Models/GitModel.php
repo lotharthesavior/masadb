@@ -182,48 +182,48 @@ echo "<pre>";var_dump($item->file_content);exit;
 
 	}
 
-	/**
-	 * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]
-	 */
+    /**
+     * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]
+     */
 	public function save( Array $client_data ){
 
-		$client_data = (object) $client_data;
-// var_dump($client_data);exit;
-		$adapter = new Local( $this->config['database-address'] . '/' . $this->database );
+        $client_data = (object) $client_data;
 
-		$filesystem = new Filesystem($adapter);
+        $adapter = new Local( $this->config['database-address'] . '/' . $this->database );
 
-		$content = json_encode($client_data->content, JSON_PRETTY_PRINT);
+        $filesystem = new Filesystem($adapter);
 
-		$id = null;
-// var_dump($client_data);exit;
-		if( is_null($client_data->id) ){
+        $content = json_encode($client_data->content, JSON_PRETTY_PRINT);
 
-			$id = $this->nextId();
+        $id = null;
 
-			$filesystem->write( $id . '.json', $content);
+        if( is_null($client_data->id) ){
 
-			if( $this->isBag() ){
+            $id = $this->nextId();
 
-				$this->createBagForRecord( $id );
+            $filesystem->write( $id . '.json', $content);
 
-			}
+            if( $this->isBag() ){
 
-			$this->last_inserted_id = $id;
+                $this->createBagForRecord( $id );
 
-		}else{
+            }
 
-			$id = $client_data->id;
+            $this->last_inserted_id = $id;
 
-			$filesystem->update( $this->locationOfBag( $id ) . '.json', $content);
+        }else{
 
-		}
+            $id = $client_data->id;
 
-		$result = $this->saveVersion();
+            $filesystem->update( $this->locationOfBag( $id ) . '.json', $content);
+
+        }
+
+        $result = $this->saveVersion();
 		
-		return $id;
+        return $id;
 
-	}
+    }
 
 	/**
 	 * @todo handle exceptions
