@@ -147,7 +147,6 @@ abstract class GitModel
 	 * @param String $value || Array $value
 	 */
 	public function search( $param, $value){
-
 		$result = $this->lsTreeHead( $this->database . '/' );
 
 		$result_complete = [];
@@ -161,13 +160,13 @@ abstract class GitModel
 
 		// prepare the logic
 		// TODO: accept different logic conditions
-		$logic_contition = "AND";
+		$logic_condition = "AND";
 		if( array_search('logic', $param) !== false ){
-			$logic_contition = $value[array_search('logic', $param)];
+			$logic_condition = $value[array_search('logic', $param)];
 		}
 
 		// filter by the search
-		$result_complete = array_filter($result_complete, function( $item ) use ($param, $value, $logic_contition){
+		$result_complete = array_filter($result_complete, function( $item ) use ($param, $value, $logic_condition){
 
 			$validation_results = [];
 
@@ -176,7 +175,7 @@ abstract class GitModel
 				switch ($current_param) {
 					case 'title':
 						if( strstr($item->file_content->title, $value[$key]) === false ){
-							if( $logic_contition == "AND" ){
+							if( $logic_condition == "AND" ){
 								return false;
 							}
 							array_push($validation_results, false);
@@ -187,7 +186,7 @@ abstract class GitModel
 
 					case 'content':
 						if( strstr($item->file_content->content, $value[$key]) === false ){
-							if( $logic_contition == "AND" ){
+							if( $logic_condition == "AND" ){
 								return false;
 							}
 							array_push($validation_results, false);
@@ -205,7 +204,7 @@ abstract class GitModel
 
 			// process logic operation - if none, return false
 			if( 
-				$logic_contition == "OR" 
+				$logic_condition == "OR" 
 				&& in_array(true, $validation_results) === false
 			){
 				return false;
@@ -356,7 +355,12 @@ abstract class GitModel
 			return $item->id;
 		}, $ls_tree_result);
 
-		return max($ls_tree_result) + 1;
+		$next_id = 1;
+		if( count($ls_tree_result) > 0 ){
+			$next_id = max($ls_tree_result) + 1;
+		}
+
+		return $next_id;
 
 	}
 

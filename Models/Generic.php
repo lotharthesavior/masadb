@@ -6,11 +6,15 @@ use \Git\Coyl\Git;
 
 class Generic extends GitModel
 {
+
+        use Traits\GitWorkflow;
+
+        // add this to make the GitModel knows where to find the record
+        use Traits\BagUtilities;
+
 	protected $repo;
 
 	protected $database = '';
-
-	public function __construct(){}
 
 	/**
 	 * 

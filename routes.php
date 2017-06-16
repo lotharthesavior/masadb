@@ -2,73 +2,6 @@
 
 $app->get('/', 'HomeController:home');
 
-
-// NOTES ------------------------------------------------------------------------------------------
-
-$app->get('/notes', 'NotesController:getNotes')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->get('/notes/{id}', 'NotesController:getNote')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-/**
- * @internal infinite params
- */
-$app->get('/notes/{params:.*}', 'NotesController:searchNote')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->post('/notes', 'NotesController:saveNote')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->put('/notes/{id}', 'NotesController:saveNote')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->delete('/notes/{id}', 'NotesController:deleteNote')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-// / NOTES ----------------------------------------------------------------------------------------
-
-
-// USERS ------------------------------------------------------------------------------------------
-
-$app->get('/users', 'UsersController:getUsers')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->get('/users/{id}', 'UsersController:getUser')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->post('/users', 'UsersController:saveUser')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->put('/users/{id}', 'UsersController:saveUser')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->delete('/users/{id}', 'UsersController:delete')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-// / USERS ----------------------------------------------------------------------------------------
-
-
-// CLIENTS ------------------------------------------------------------------------------------------
-
-$app->get('/clients', 'ClientsController:getClients')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->get('/clients/{id}', 'ClientsController:getClient')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->post('/clients', 'ClientsController:saveClient')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->put('/clients/{id}', 'ClientsController:saveClient')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->delete('/clients/{id}', 'ClientsController:delete')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-// / CLIENTS ----------------------------------------------------------------------------------------
-
-
 // REPOSITORIES ------------------------------------------------------------------------------------------
 
 $app->get('/listRepositories', 'RepositoriesController:getRepositories')
@@ -91,3 +24,35 @@ $app->post('/generate_key', 'OAuthController:generateClientKey');
     // ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
 // / OAUTH2 ----------------------------------------------------------------------------------------
+
+
+// Generic Database ------------------------------------------------------------------------------------------
+
+$app->get('/{database}', 'MasaDBController:getFullCollection')
+    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+$app->get('/{database}/{id}', 'MasaDBController:getRecord')
+    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+// $app->get('/{database}/{params:.*}', 'MasaDBController:searchRecords')
+$app->get('/{database}/{key}/{value}', 'MasaDBController:searchRecords')
+    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+/**
+ * @todo specify format
+ */
+$app->post('/{database}/search', 'MasaDBController:searchRecordsPost')
+    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+$app->post('/{database}', 'MasaDBController:saveGeneric')
+    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+$app->put('/{database}/{id}', 'MasaDBController:saveGeneric')
+    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+$app->delete('/{database}/{id}', 'MasaDBController:deleteNote')
+    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+// / Generic Database ------------------------------------------------------------------------------------------
+
+

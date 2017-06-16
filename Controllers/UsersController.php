@@ -49,6 +49,27 @@ class UsersController
 
 	 }
 
+        /** 
+         * Search Note
+         * 
+         * @param Array $args | ['field' => string, 'value' => string]
+         */
+        public function searchUsers(ServerRequestInterface $request, ResponseInterface $response, array $args){
+
+                $users_model = new Users;
+
+                $args = $this->processUnlimitedParams( $args );
+
+                $user = $users_model->search( $args['field'], $args['value'] );
+    
+                $user = array_values($user);
+
+                $response->getBody()->write( json_encode($user) );
+
+                return $response;
+
+        }
+
 	/**
 	 * Get user by id
 	 * 

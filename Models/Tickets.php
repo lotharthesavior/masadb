@@ -8,7 +8,7 @@ use League\Flysystem\Filesystem;
 
 use League\Flysystem\Adapter\Local;
 
-class Notes extends GitModel
+class Tickets extends GitModel
 {
 
 	use Traits\GitWorkflow;
@@ -18,7 +18,7 @@ class Notes extends GitModel
 
 	protected $repo;
 
-	protected $database = 'notes';
+	protected $database = 'tickets';
 
 	/**
 	 * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]

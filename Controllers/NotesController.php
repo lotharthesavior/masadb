@@ -73,7 +73,7 @@ class NotesController extends MasaController
 
 		$response->getBody()->write( json_encode($note) );
 
-    	return $response;
+                return $response;
 
 	}
 

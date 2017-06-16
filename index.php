@@ -5,12 +5,7 @@
  * @todo 2. create navigation itself though the repository
  */
 
-// use Psr\Http\Message\ResponseInterface;
-// use Psr\Http\Message\ServerRequestInterface;
-
 require __DIR__ . '/vendor/autoload.php';
-
-// $templates = new League\Plates\Engine('themes/masa1');
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
@@ -50,8 +45,12 @@ $server = new \League\OAuth2\Server\ResourceServer(
 
 // Controllers -------------------------------------------------------------------------
 
-$container['NotesController'] = function($c) {
-    return new Controllers\NotesController($c);
+$container['MasaDBController'] = function($c) {
+    return new Controllers\MasaDBController($c);
+};
+
+$container['TicketsController'] = function($c) {
+    return new Controllers\TicketsController($c);
 };
 
 $container['UsersController'] = function($c) {
