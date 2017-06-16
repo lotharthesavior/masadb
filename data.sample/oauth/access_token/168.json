@@ -1,0 +1,13 @@
+{
+    "identifier": "1a207649479eaae4e4832951da69b2b2f4acd0d5b8589a48f0b8b1f7178442dceeae0ace983057d3",
+    "expiry_date": {
+        "date": "2017-06-11 18:54:03.650893",
+        "timezone_type": 3,
+        "timezone": "UTC"
+    },
+    "user_identifier": null,
+    "scopes": [
+        "basic"
+    ],
+    "client_identifier": "1"
+}

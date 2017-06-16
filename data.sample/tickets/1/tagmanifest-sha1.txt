@@ -1,0 +1,2 @@
+5316b5922e2ff90c14b63d64c49cf86ee51f346b bagit.txt
+57ed9cf4c4b10ff4a67473bc3d480ed0542f82b2 manifest-sha1.txt
