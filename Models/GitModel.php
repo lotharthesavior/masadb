@@ -158,26 +158,17 @@ abstract class GitModel
 
 		}
 
-		// prepare the logic
-		// TODO: accept different logic conditions
-		// $logic_condition = "AND";
-		// if( array_search('logic', $param) !== false ){
-		//	$logic_condition = $value[array_search('logic', $param)];
-		// }
+        $result_complete = array_filter($result_complete, function( $item ) use ($param, $value){
 
-		// filter by the search
-		// $result_complete = array_filter($result_complete, function( $item ) use ($param, $value, $logic_condition){
-                $result_complete = array_filter($result_complete, function( $item ) use ($param, $value){
+            $found = false;
+            if( 
+                isset($item->file_content->{$param})
+                && strstr($item->file_content->{$param}, $value) !== false 
+            ){
+                $found= true;
+            }
 
-                    $found = false;
-// echo "<pre>";var_dump($item->file_content);exit;
-						if( 
-                                                    isset($item->file_content->{$param})
-                                                    && strstr($item->file_content->{$param}, $value) !== false 
-                                                ){
-						    $found= true;
-						}
-                    return $found;
+            return $found;
 
 		});
 
