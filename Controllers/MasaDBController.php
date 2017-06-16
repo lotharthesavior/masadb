@@ -74,7 +74,7 @@ class MasaDBController extends MasaController
 	 	// $args = $this->processUnlimitedParams( $args );
 
         $record = $db_model->search( $args['key'], $args['value'] );
-        echo "<pre>";var_dump($record);exit;	
+//        echo "<pre>";var_dump($record);exit;	
 
 		$record = array_values($record);
 
