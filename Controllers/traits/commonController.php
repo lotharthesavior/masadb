@@ -24,9 +24,7 @@ trait commonController
 	 */
 	public function saveRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitModel &$model){
 
-	 	// request data
-		
-		$request_body = json_decode($request->getBody(), true);
+            $request_body = $request->getParsedBody();
 
 		// handling put data
 		if( is_null($request_body) ){

@@ -188,7 +188,7 @@ echo "<pre>";var_dump($item->file_content);exit;
 	public function save( Array $client_data ){
 
 		$client_data = (object) $client_data;
-
+// var_dump($client_data);exit;
 		$adapter = new Local( $this->config['database-address'] . '/' . $this->database );
 
 		$filesystem = new Filesystem($adapter);
@@ -196,7 +196,7 @@ echo "<pre>";var_dump($item->file_content);exit;
 		$content = json_encode($client_data->content, JSON_PRETTY_PRINT);
 
 		$id = null;
-
+// var_dump($client_data);exit;
 		if( is_null($client_data->id) ){
 
 			$id = $this->nextId();

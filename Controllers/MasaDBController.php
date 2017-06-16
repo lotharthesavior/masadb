@@ -98,7 +98,7 @@ class MasaDBController extends MasaController
 	 	$generic_model = new Generic();
 
                 $generic_model->setDatabase( $args['database'] );
-
+// var_dump($request->getParsedBody());exit;
 	 	$result = $this->saveRecord($request, $response, $args, $generic_model);
 
 		return $result;

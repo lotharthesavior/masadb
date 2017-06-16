@@ -7,3 +7,7 @@ public.pub
 config.json
 composer.lock
 .phpintel
+apache_error.log
+apache_error_ssl.log
+apache_access_ssl.log
+apache_access.log
