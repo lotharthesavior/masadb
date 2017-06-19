@@ -19,5 +19,8 @@
            "Controllers\\": "Controllers/",
            "Repositories\\": "Repositories/"
 	   }
-	}
+	},
+    "require-dev": {
+        "phpunit/phpunit": "^6.2"
+    }
 }

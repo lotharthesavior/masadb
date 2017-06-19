@@ -179,7 +179,7 @@ abstract class GitModel
     /**
      * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]
      */
-	public function save( Array $client_data ){
+    public function save( Array $client_data ){
 
         $client_data = (object) $client_data;
 
@@ -191,7 +191,10 @@ abstract class GitModel
 
         $id = null;
 
-        if( is_null($client_data->id) ){
+        if( 
+            !isset($client_data->id)
+            || is_null($client_data->id) 
+        ){
 
             $id = $this->nextId();
 
