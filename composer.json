@@ -22,5 +22,12 @@
 	},
     "require-dev": {
         "phpunit/phpunit": "^6.2"
-    }
+    },
+    "autoload-dev": {
+        "psr-4": {
+           "Models\\": "Models/",
+           "Controllers\\": "Controllers/",
+           "Repositories\\": "Repositories/"
+           }   
+        }
 }

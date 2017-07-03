@@ -1,9 +1,12 @@
 <?php
 
 require __DIR__ . "/../vendor/autoload.php";
-
+use \Git\Coyl\Git;
+var_dump(new Git);
+exit("test");
 use PHPUnit\Framework\TestCase;
 
+use \Git\Coyl\Git;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Adapter\Local;
 
@@ -24,28 +27,23 @@ final class GenericModelTest extends TestCase
     }
 
     /**
-     * @afterClass
+     * @after
      */
     public function tearDownTestData(){
-        $repo = \Coyl\Git\Git::open(__DIR__ . '/../data');  // -or- Git::create('/path/to/repo')
+        $repo = \Git\Coyl\Git::open(__DIR__ . '/../data');  // -or- Git::create('/path/to/repo')
 
         $adapter = new Local(__DIR__.'/../data');
         $filesystem = new Filesystem($adapter);
-        $result = $filesystem->deleteDir(__DIR__.'/../data/test');
-throw Exception($result);exit;
+        $filesystem->deleteDir(__DIR__.'/../data/test');
+
         $repo->add('.');
-        
-        try{
-	    $commit_result = $repo->commit('Cleaning test.');
-        } catch (Exception $e) {
-            // --
-        }
+        $repo->commit('Cleaning test.');
     }
 
     /**
      * @todo test if it is a bag
-    */
-/*    public function testCreateTest(){
+     */
+    public function testCreateTest(){
         $this->generic->save([
             "title" => "test data",
             "content" => "test data content"
@@ -60,7 +58,7 @@ throw Exception($result);exit;
 
         var_dump($results);exit;
     }
-*/
+
     // public function testFindAll
     // public function testSearch
     // public function testSave

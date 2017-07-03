@@ -29,8 +29,7 @@ trait commonController
 		// handling put data
 		if( is_null($request_body) ){
 			$rawData = file_get_contents('php://input');
-		 	$rawData = mb_substr($rawData, 3, -3);
-			parse_str($rawData, $request_body);
+		 	$request_body = json_decode($rawData, 1);
 		}
 
 		$id = null;
@@ -45,7 +44,7 @@ trait commonController
 			$client_data = array_merge(["id" => $id, "content" => $request_body]);
 
 			$message = $model->save( $client_data );
-			
+
 			$result = [
 				"Success"        => 1,
 				"SuccessMessage" => $message
