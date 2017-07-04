@@ -183,7 +183,9 @@ abstract class GitModel
 
         $client_data = (object) $client_data;
 
-        $adapter = new Local( $this->config['database-address'] . '/' . $this->database );
+        $local_address = $this->config['database-address'] . '/' . $this->database;
+
+        $adapter = new Local( $local_address );
 
         $filesystem = new Filesystem($adapter);
 

@@ -28,10 +28,14 @@ Content-Type: application/x-www-form-urlencoded
 ```json
 {
 	"grant_type": "client_credentials",
-	"client_id": "test",
+	"client_id": "1",
 	"client_secret": "secret",
-	"scope": "basic update"
+	"scope": "basic"
 }
+
+OR
+
+grant_type=client_credentials&client_id=1&client_secret=e776dbd85f227b0f6851d10eb76cdb04903b9632&scope=basic
 ```
 **Response**
 ```json

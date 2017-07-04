@@ -14,13 +14,13 @@ class MasaDBController extends MasaController
 
 	protected $container;
 
-        /**
-         * Start the controller instantiating the Slim Container
-         * @todo move this to a controller parent class
-         */
-        public function __construct($container){
-                $this->container = $container;
-        }
+    /**
+     * Start the controller instantiating the Slim Container
+     * @todo move this to a controller parent class
+     */
+    public function __construct($container){
+        $this->container = $container;
+    }
 
 	/**
 	 * Fetch all records
@@ -31,7 +31,7 @@ class MasaDBController extends MasaController
 
 	 	$generic_model = new Generic();
 
-                $generic_model->setDatabase($args["database"]);
+        $generic_model->setDatabase($args["database"]);
 
 	 	$generic_model->sortType = "creation_DESC";
 
@@ -39,7 +39,7 @@ class MasaDBController extends MasaController
 
 		$response->getBody()->write( json_encode($result) );
 
-    	        return $response;
+    	return $response;
 
 	}
 
@@ -50,7 +50,7 @@ class MasaDBController extends MasaController
 
 	 	$generic_model = new Generic();
 
-                // $generic_model->setDatabase("users");
+        // $generic_model->setDatabase("users");
 
 		$record = $generic_model->find( $args['id'] );
 
@@ -74,13 +74,12 @@ class MasaDBController extends MasaController
 	 	// $args = $this->processUnlimitedParams( $args );
 
         $record = $db_model->search( $args['key'], $args['value'] );
-//        echo "<pre>";var_dump($record);exit;	
 
 		$record = array_values($record);
 
 		$response->getBody()->write( json_encode($record) );
 
-                return $response;
+        return $response;
 
 	}
 
@@ -97,8 +96,8 @@ class MasaDBController extends MasaController
 
 	 	$generic_model = new Generic();
 
-                $generic_model->setDatabase( $args['database'] );
-// var_dump($request->getParsedBody());exit;
+        $generic_model->setDatabase( $args['database'] );
+
 	 	$result = $this->saveRecord($request, $response, $args, $generic_model);
 
 		return $result;
