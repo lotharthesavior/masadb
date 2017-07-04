@@ -1,9 +1,16 @@
 vendor
+
 data
+
 private.key
 public.key
 cert.pem
 public.pub
+masadb.crt
+masadb.key
+masadb.csr
+masadb.pub
+
 config.json
 composer.lock
 .phpintel

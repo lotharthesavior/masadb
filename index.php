@@ -5,6 +5,10 @@
  * @todo 2. create navigation itself though the repository
  */
 
+if( !file_exists("config.json") ){
+	header("Location: install.php");
+}
+
 require __DIR__ . '/vendor/autoload.php';
 
 use \Psr\Http\Message\ServerRequestInterface as Request;

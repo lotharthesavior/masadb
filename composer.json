@@ -3,10 +3,14 @@
         {
             "url": "https://github.com/lotharthesavior/BagItPHP.git",
             "type": "vcs"
+        },
+        {
+            "url": "https://github.com/lotharthesavior/git.git",
+            "type": "vcs"
         }
     ],
     "require": {
-        "coyl/git": "^0.1.6",
+        "lotharthesavior/git": "^0.1.6",
         "zendframework/zend-diactoros": "^1.3",
         "league/flysystem": "^1.0",
         "league/oauth2-server": "^5.1",
