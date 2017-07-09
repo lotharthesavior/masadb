@@ -39,7 +39,11 @@ class Clients extends GitModel implements ClientEntityInterface
 
 		$client_loaded = parent::find( $id );
 
-		$client_loaded->setIdentifier( $id );
+		$result_parsed = json_decode( $client_loaded, true );
+
+		$this->loadObject( $result_parsed );
+
+		$this->setIdentifier( $id );
 
 		return $this;
 

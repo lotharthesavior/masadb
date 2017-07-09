@@ -382,7 +382,7 @@ abstract class GitModel
 	 * 
 	 * @param Array $data_loaded
 	 */
-	private function loadObject( Array $data_loaded ){
+	protected function loadObject( Array $data_loaded ){
 
 		$this->file_content = new \stdClass;
 
