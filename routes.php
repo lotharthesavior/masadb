@@ -31,7 +31,7 @@ $app->post('/generate_key', 'OAuthController:generateClientKey');
 $app->get('/{database}', 'MasaDBController:getFullCollection')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
-$app->get('/{database}/{id}', 'MasaDBController:getRecord')
+$app->get('/{database}/{id}', 'MasaDBController:getGeneric')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
 // $app->get('/{database}/{params:.*}', 'MasaDBController:searchRecords')
@@ -50,7 +50,7 @@ $app->post('/{database}', 'MasaDBController:saveGeneric')
 $app->put('/{database}/{id}', 'MasaDBController:saveGeneric')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
-$app->delete('/{database}/{id}', 'MasaDBController:deleteNote')
+$app->delete('/{database}/{id}', 'MasaDBController:deleteGeneric')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
 // / Generic Database ------------------------------------------------------------------------------------------

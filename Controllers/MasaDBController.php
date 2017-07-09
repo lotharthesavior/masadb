@@ -50,11 +50,26 @@ class MasaDBController extends MasaController
 
 	 	$generic_model = new Generic();
 
-        // $generic_model->setDatabase("users");
+        $generic_model->setDatabase( $args['database'] );
 
-		$record = $generic_model->find( $args['id'] );
+        try {
+        	
+			$record = $generic_model->find( $args['id'] );
 
-		$response->getBody()->write( json_encode($record) );
+        } catch (\Exception $e) {
+
+        	$return_message = [
+	 			"status" => "error",
+	 			"message" => $e->getMessage()
+	 		];
+
+	 		return $response->withStatus(200)
+                     ->withHeader('Content-Type', 'application/json')
+                     ->write( json_encode( $return_message ) );
+        	
+        }
+
+		$response->getBody()->write( $record );
 
     	return $response;
 
@@ -71,8 +86,6 @@ class MasaDBController extends MasaController
 
         $db_model->setDatabase( $args['database'] );
 
-	 	// $args = $this->processUnlimitedParams( $args );
-
         $record = $db_model->search( $args['key'], $args['value'] );
 
 		$record = array_values($record);
@@ -84,13 +97,17 @@ class MasaDBController extends MasaController
 	}
 
 	/**
-	 * Expected Body Format: 
+	 * Persist record
+	 * 
+	 * Expected Request Body Format: 
 	 * 	{
 	 * 		"title": {string},
 	 * 		"author": {string},
 	 * 		"email": {string},
 	 * 		"content": {string}
 	 * 	}
+	 * 
+	 * @return JSON String - e.g: {"success": 1, "successMessage": {id}}
 	 */
 	public function saveGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
@@ -100,7 +117,9 @@ class MasaDBController extends MasaController
 
 	 	$result = $this->saveRecord($request, $response, $args, $generic_model);
 
-		return $result;
+	 	return $response->withStatus(200)
+                 ->withHeader('Content-Type', 'application/json')
+                 ->write( $result );
 
 	}
 
@@ -111,9 +130,33 @@ class MasaDBController extends MasaController
 
 	 	$generic_model = new Generic();
 
-	 	$result = $generic_model->delete($args['id']);
+	 	$generic_model->setDatabase( $args['database'] );
 
-		return $result;
+	 	try {
+
+	 		$result = $generic_model->delete($args['id']);
+
+	 	} catch (\Exception $e) {
+	 		
+	 		$return_message = [
+	 			"error" => 1,
+	 			"message" => $e->getMessage()
+	 		];
+
+	 		return $response->withStatus(500)
+                     ->withHeader('Content-Type', 'application/json')
+                     ->write( json_encode( $return_message ) );
+
+	 	}
+
+	 	$return_message = [
+ 			"success" => 1,
+ 			"message" => "Record successfully removed!"
+ 		];
+
+ 		return $response->withStatus(200)
+                 ->withHeader('Content-Type', 'application/json')
+                 ->write( json_encode( $return_message ) );
 
 	}
 

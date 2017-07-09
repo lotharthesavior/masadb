@@ -2,6 +2,8 @@
 
 /**
  * MasaDB install program
+ * 
+ * @todo build a reset function
  */
 
 // phpinfo();exit;
@@ -15,6 +17,14 @@ use League\Flysystem\Adapter\Local;
 use \Git\Coyl\Git;
 use Models\Generic;
 
+$adapter = new Local(__DIR__);
+$filesystem = new Filesystem($adapter);
+
+// check if there is any configuration
+if( $filesystem->has('config.lock') ){
+	exit("config.lock already exists!");
+}
+
 if( isset($_POST) && !empty($_POST) ){ // post
 
 	$post_data = $_POST;
@@ -24,9 +34,6 @@ if( isset($_POST) && !empty($_POST) ){ // post
 	// echo "<pre>";var_dump(json_encode($config_data));exit;
 
 	// create the config file ------------ 1
-	$adapter = new Local(__DIR__);
-	$filesystem = new Filesystem($adapter);
-
 	if( $filesystem->has('config.json') ){
 		$filesystem->delete('config.json');
 	}
@@ -81,8 +88,20 @@ if( isset($_POST) && !empty($_POST) ){ // post
 	// --
 
 
+	// create the config lock file ------------ 1
+	if( $filesystem->has('config.lock') ){
+		$filesystem->delete('config.lock');
+	}
+	if( !$filesystem->write('config.lock', [
+		"installed_in" => date("U")
+	]) ){
+		exit("Error: Problem writing config lock file!");
+	}
+	// --
+
+
 	// header("Location: index.php");
-	exit("End of Post part.");
+	exit("MasaDB is successfully installed! <a href='/'>Go home</a>");
 
 }else{ // form
 

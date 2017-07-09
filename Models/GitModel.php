@@ -106,11 +106,7 @@ abstract class GitModel
 
 		$result = file_get_contents( $address );
 
-		$result_parsed = json_decode( $result, true );
-
-		$this->loadObject( $result_parsed );
-
-		return $this;
+		return $result;
 
 	}
 
@@ -225,22 +221,31 @@ abstract class GitModel
     }
 
 	/**
-	 * @todo handle exceptions
+	 * 
+	 * @internal simple registers can be simple json files, but 
+	 *           any other type of file, have to be a BagIt.
 	 * @param Int $id
 	 */
 	public function delete( $id ){
 
-		$adapter = new Local( $this->config['database-address'] . '/' . $this->database );
+		$database_url = $this->config['database-address'] . '/' . $this->database;
+
+		$adapter = new Local( $database_url );
 
 		$filesystem = new Filesystem($adapter);
 
-		if( file_exists($id . '.json') ){
+
+		if( $filesystem->has($id . '.json') ){
 
 			$filesystem->delete( $id . '.json');
 
-		}else{
+		} elseif ( $filesystem->has($id) ){
 
 			$filesystem->deleteDir( $id );
+
+		} else {
+
+			throw new \Exception("Record not found!", 1);
 
 		}
 

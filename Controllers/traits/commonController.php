@@ -21,6 +21,8 @@ trait commonController
 	 * @param ResponseInterface $response
 	 * @param Array $args
 	 * @param \Models\GitModel $model
+	 * @return JSON String - {"error": 1, "errorMessage": string}
+	 *                       || {"success": 1, "successMessage": {inserted_id}}
 	 */
 	public function saveRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitModel &$model){
 
@@ -46,22 +48,20 @@ trait commonController
 			$message = $model->save( $client_data );
 
 			$result = [
-				"Success"        => 1,
-				"SuccessMessage" => $message
+				"success"        => 1,
+				"successMessage" => $message
 			];
 
 		} catch (\Exception $e) {
 			
 			$result = [
-				"Error"        => 1, 
-				"ErrorMessage" => $e->getMessage()
+				"error"        => 1, 
+				"errorMessage" => $e->getMessage()
 			];
 
 		}
 
-		$response->getBody()->write( json_encode($result) );
-
-    	return $response;
+		return json_encode($result);
 
 	}
 
@@ -75,15 +75,15 @@ trait commonController
 			$message = $model->delete( $args['id'] );
 			
 			$result = [
-				"Success"        => 1,
-				"SuccessMessage" => $message
+				"success"        => 1,
+				"successMessage" => $message
 			];
 
 		} catch (\Exception $e) {
 			
 			$result = [
-				"Error"        => 1, 
-				"ErrorMessage" => $e->getMessage()
+				"error"        => 1, 
+				"errorMessage" => $e->getMessage()
 			];
 
 		}
