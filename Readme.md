@@ -66,7 +66,13 @@ Obs.: to generaste a pub from the private, do as follow:
 ```sh
 openssl rsa -in mykey.pem -pubout > mykey.pub
 ```
+Self Signed Certificate:
 Reference: https://stackoverflow.com/questions/5244129/use-rsa-private-key-to-generate-public-key#5246045
+Self Signed Certificate:
+```sh
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server_name.key -out server_name.crt
+```
+Reference: https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04
 2. create the "data" directory using the server user, so you avoid problem with permissions:
 ```sh
 sudo -u www-data mkdir data
