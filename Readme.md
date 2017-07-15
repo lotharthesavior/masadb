@@ -8,15 +8,19 @@ Reference: http://slimframework.com/
 
 ##### Git interaction
 
-Reference: https://github.com/coyl/git
+Reference: https://github.com/lotharthesavior/git
 
 ##### OAuth2 library
 
 Reference: https://oauth2.thephpleague.com/
 
+##### Flysystem (filesystem library)
+
+Reference: https://flysystem.thephpleague.com/
+
 ##### Clients Credential Workflow
 
-**Reference**: https://tools.ietf.org/html/rfc6749#section-4.4
+Reference: https://tools.ietf.org/html/rfc6749#section-4.4
 
 **Request**:
 
@@ -26,17 +30,18 @@ HTTP Verb: "POST"
 
 Content-Type: application/x-www-form-urlencoded
 ```json
+grant_type=client_credentials&client_id=1&client_secret=e776dbd85f227b0f6851d10eb76cdb04903b9632&scope=basic
+```
+The previous data is this:
+```json
 {
 	"grant_type": "client_credentials",
 	"client_id": "1",
 	"client_secret": "secret",
 	"scope": "basic"
 }
-
-OR
-
-grant_type=client_credentials&client_id=1&client_secret=e776dbd85f227b0f6851d10eb76cdb04903b9632&scope=basic
 ```
+
 **Response**
 ```json
 {
@@ -46,12 +51,11 @@ grant_type=client_credentials&client_id=1&client_secret=e776dbd85f227b0f6851d10e
 }
 ```
 **Persistent Data**:
-1. **\Users**: common database for authorization
-2. **\oauth\Access Tokens**: 
-3. **\oauth\Auth Codes**
+1. **\oauth\Access Tokens**: 
+2. **\oauth\Auth Codes**
 **Description**: Instead of requesting authorization directly from the resource owner, the client directs the resource owner to an authorization server (via its user-agent as defined in [RFC2616]), which in turn directs the resource owner back to the client with the authorization code.
 **Reference**: https://tools.ietf.org/html/rfc6749#section-1.3.1 
-4. **\oauth\Clients**: client created for authorization in regard of other users
+3. **\oauth\Clients**: client created for authorization in regard of other users
  
 **Step-by-Step**
 
@@ -78,7 +82,7 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server_name.key
 ```
 Reference: https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04
 
-2. create the "data" directory using the server user, so you avoid problem with permissions:
+2. Create the "data" directory using the server user, so you avoid problem with permissions:
 
 ```sh
 sudo -u www-data mkdir data
@@ -91,3 +95,29 @@ cd data
 ```sh
 sudo -u www-data git init
 ```
+
+3. Configure Apache user
+
+The www-data must have enough permission to access the data through git.
+To do that, you can edit the envvars of apache with this:
+```sh
+sudo vim /etc/apache2/envvars
+```
+
+Add the following line to it:
+```sh
+export HOME=/var/www
+```
+
+Restart apache
+```sh
+sudo services apache2 restart
+```
+
+4. Give permission to www-data to the folder of the project:
+
+```sh
+sudo chown -R www-data {directory of the project}
+```
+
+###### OR Run https://{domain}/install.php and the steps 1, 3 and 4.
