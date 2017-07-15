@@ -96,7 +96,7 @@ cd data
 sudo -u www-data git init
 ```
 
-3. Configure Apache user
+3. Configure Apache server
 
 The www-data must have enough permission to access the data through git.
 To do that, you can edit the envvars of apache with this:
@@ -121,3 +121,19 @@ sudo chown -R www-data {directory of the project}
 ```
 
 ###### OR Run https://{domain}/install.php and the steps 1, 3 and 4.
+
+4. Configure Nginx server (laravel homestead vm)
+
+In this environment, there is the necessity to configure the permission of the synced folder. To do this you can insert this in the Vagrantfile:
+
+```sh
+config.vm.synced_folder "./shared", "/home/vagrant/Code", :owner => "www-data", :group => "www-data"
+```
+
+This will give permission to www-data to change the files inside the necessary folder.
+
+It might be required to give the permission manually too:
+
+```sh
+sudo chown -R www-data /home/vagrant/Code/masadb
+```
