@@ -34,13 +34,9 @@ $app->get('/{database}', 'MasaDBController:getFullCollection')
 $app->get('/{database}/{id}', 'MasaDBController:getGeneric')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
-// $app->get('/{database}/{params:.*}', 'MasaDBController:searchRecords')
 $app->get('/{database}/{key}/{value}', 'MasaDBController:searchRecords')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
-/**
- * @todo specify format
- */
 $app->post('/{database}/search', 'MasaDBController:searchRecordsPost')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 

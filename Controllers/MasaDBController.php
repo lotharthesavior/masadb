@@ -29,9 +29,13 @@ class MasaDBController extends MasaController
 
 		$this->oauthBefore();
 
-	 	$generic_model = new Generic();
+		$generic_model = new Generic();
 
-        $generic_model->setDatabase($args["database"]);
+	 	if( !empty($request->getHeader("ClientId")) ){
+			$generic_model->setClientId( $request->getHeader("ClientId") );
+		}
+
+	 	$generic_model->setDatabase($args["database"]);
 
 	 	$generic_model->sortType = "creation_DESC";
 
@@ -49,6 +53,10 @@ class MasaDBController extends MasaController
 	public function getGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
 	 	$generic_model = new Generic();
+
+	 	if( !empty($request->getHeader("ClientId")) ){
+			$generic_model->setClientId( $request->getHeader("ClientId") );
+		}
 
         $generic_model->setDatabase( $args['database'] );
 
@@ -82,11 +90,15 @@ class MasaDBController extends MasaController
 	 */
 	public function searchRecords(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
-	 	$db_model = new Generic();
+	 	$generic_model = new Generic();
 
-        $db_model->setDatabase( $args['database'] );
+	 	if( !empty($request->getHeader("ClientId")) ){
+			$generic_model->setClientId( $request->getHeader("ClientId") );
+		}
 
-        $record = $db_model->search( $args['key'], $args['value'] );
+        $generic_model->setDatabase( $args['database'] );
+
+        $record = $generic_model->search( $args['key'], $args['value'] );
 
 		$record = array_values($record);
 
@@ -113,6 +125,10 @@ class MasaDBController extends MasaController
 
 	 	$generic_model = new Generic();
 
+	 	if( !empty($request->getHeader("ClientId")) ){
+			$generic_model->setClientId( $request->getHeader("ClientId") );
+		}
+
         $generic_model->setDatabase( $args['database'] );
 
 	 	$result = $this->saveRecord($request, $response, $args, $generic_model);
@@ -129,6 +145,10 @@ class MasaDBController extends MasaController
 	public function deleteGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
 	 	$generic_model = new Generic();
+
+	 	if( !empty($request->getHeader("ClientId")) ){
+			$generic_model->setClientId( $request->getHeader("ClientId") );
+		}
 
 	 	$generic_model->setDatabase( $args['database'] );
 

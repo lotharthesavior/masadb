@@ -7,10 +7,10 @@ use \Git\Coyl\Git;
 class Generic extends GitModel
 {
 
-        use Traits\GitWorkflow;
+    use Traits\GitWorkflow;
 
-        // add this to make the GitModel knows where to find the record
-        use Traits\BagUtilities;
+    // add this to make the GitModel knows where to find the record
+    use Traits\BagUtilities;
 
 	protected $repo;
 
@@ -21,6 +21,13 @@ class Generic extends GitModel
 	 */
 	public function setDatabase( $database ){
 		$this->database = $database;
+	}
+
+	/**
+	 * 
+	 */
+	public function setClientId( $client_id ){
+		$this->client_id = $client_id;
 	}
 
 	/**
