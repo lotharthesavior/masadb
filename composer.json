@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "lotharthesavior/git": "^0.1.6",
+        "lotharthesavior/git": "dev-master",
         "zendframework/zend-diactoros": "^1.3",
         "league/flysystem": "^1.0",
         "league/oauth2-server": "^5.1",

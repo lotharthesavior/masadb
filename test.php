@@ -1,8 +1,12 @@
 <?php
 
-require __DIR__ . "/../vendor/autoload.php";
-use \Git\Coyl\Git;
-var_dump(new Git);
+echo "test";
+echo exec('whoami;');
+echo exec('export HOME=/var/www');
+echo exec('echo $HOME');
+exit;
+require __DIR__ . "/vendor/autoload.php";
+var_dump(new \Git\Coyl\Git);
 exit("test");
 use PHPUnit\Framework\TestCase;
 
