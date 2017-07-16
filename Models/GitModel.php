@@ -96,7 +96,7 @@ abstract class GitModel
 	 */
 	public function find( $id ){
 
-		$address = $this->config['database-address'] . "/" . $this->database . $this->locationOfBag( $id ) . ".json";
+		$address = $this->config['database-address'] . "/" . $this->getDatabaseLocation() . "/" . $this->locationOfBag( $id ) . ".json";
 		
 		if( !file_exists($address) ){
 
@@ -116,7 +116,7 @@ abstract class GitModel
 	 */
 	public function findAll(){
 
-		$result = $this->lsTreeHead( $this->database . '/' );
+		$result = $this->lsTreeHead( $this->getDatabaseLocation() . "/" );
 
 		$result_complete = [];
 		foreach ($result as $key => $record) {
@@ -143,7 +143,7 @@ abstract class GitModel
 	 * @param String $value || Array $value
 	 */
 	public function search( $param, $value){
-		$result = $this->lsTreeHead( $this->database . '/' );
+		$result = $this->lsTreeHead( $this->getDatabaseLocation() . '/' );
 
 		$result_complete = [];
 		foreach ($result as $key => $record) {
@@ -179,11 +179,13 @@ abstract class GitModel
 
         $client_data = (object) $client_data;
 
-        $local_address = $this->config['database-address'] . '/' . $this->database;
+        $local_address = $this->config['database-address'] . '/' . $this->getDatabaseLocation();
 
         $adapter = new Local( $local_address );
 
         $filesystem = new Filesystem($adapter);
+
+        // var_dump($client_data);exit;
 
         $content = json_encode($client_data->content, JSON_PRETTY_PRINT);
 
@@ -228,7 +230,7 @@ abstract class GitModel
 	 */
 	public function delete( $id ){
 
-		$database_url = $this->config['database-address'] . '/' . $this->database;
+		$database_url = $this->config['database-address'] . '/' . $this->getDatabaseLocation();
 
 		$adapter = new Local( $database_url );
 
@@ -292,7 +294,7 @@ abstract class GitModel
 	 */
 	protected function lsTree(){
 
-		$command = "ls-tree HEAD -r " . $this->database;
+		$command = "ls-tree HEAD -r " . $this->getDatabaseLocation();
 
 		$cli_result = $this->repo->run($command);
 
@@ -317,7 +319,7 @@ abstract class GitModel
 	 */
 	protected function nextId(){
 
-		$ls_tree_result = $this->lsTreeHead( $this->database . '/' );
+		$ls_tree_result = $this->lsTreeHead( $this->getDatabaseLocation() . '/' );
 
 		$ls_tree_result = array_map(function( $item ){
 			return $item->id;
@@ -325,7 +327,7 @@ abstract class GitModel
 
 		$next_id = 1;
 		if( count($ls_tree_result) > 0 ){
-			$next_id = max($ls_tree_result) + 1;
+			$next_id = intval(max($ls_tree_result)) + intval(1);
 		}
 
 		return $next_id;
@@ -335,6 +337,28 @@ abstract class GitModel
 	// ------------------------------------------------------------------------
 	// PRIVATE
 	// ------------------------------------------------------------------------
+
+	/**
+	 * Analyze the presence of client_id and add it to the database 
+	 * folder to keep data into the client scope
+	 */
+	protected function getDatabaseLocation(){
+
+		$database_location = "";
+
+		if( 
+			isset($this->client_id) 
+			&& !empty($this->client_id) 
+		){
+			// var_dump($this->client_id);exit;
+			$database_location .= "client_" . $this->client_id[0] . '/';
+		}
+
+		$database_location .= $this->database;
+
+		return $database_location;
+
+	}
 
 	/**
 	 * Turn the git ls-tree command into Array with
@@ -353,6 +377,7 @@ abstract class GitModel
 
 		$result_array = array_filter($result_array);
 
+
 		foreach ($result_array as $key => $value) {
 			
 			$result = preg_split('/\s+/', $value);
@@ -361,8 +386,9 @@ abstract class GitModel
 
 			$new_object = new \stdClass;
 
-			if( $is_db )
-				$new_object->id = preg_replace("/[^\d]/", "", $result[3]);
+			if( $is_db ){
+				$new_object->id = $this->getIdOfAsset( $result[3] );
+			}
 
 			$new_object->permissions 	= $result[0];
 			$new_object->type 			= $result[1];
@@ -442,8 +468,8 @@ abstract class GitModel
 
 		if( $this->isBag() ){
 
-			$id = preg_replace("/[^0-9]/", '', $record->address);
-
+			$id = $this->getIdOfAsset( $record->address );
+			
 			$location = $record->address . '/data/' . $id . '.json';
 
 		}
@@ -535,5 +561,21 @@ abstract class GitModel
 
 	}
 
+	/**
+	 * Return the Id of the physical address
+	 * 
+	 * @return Int
+	 */
+	private function getIdOfAsset( $address ){
+
+		$address_exploded = explode('/', $address);
+
+		$asset_name = end($address_exploded);
+
+		$id = preg_replace("/[^\d]/", "", $asset_name);
+
+		return $id;
+
+	}
 
 }

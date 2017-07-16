@@ -53,26 +53,6 @@ $container['MasaDBController'] = function($c) {
     return new Controllers\MasaDBController($c);
 };
 
-$container['TicketsController'] = function($c) {
-    return new Controllers\TicketsController($c);
-};
-
-$container['UsersController'] = function($c) {
-    return new Controllers\UsersController($c);
-};
-
-$container['HomeController'] = function($c) {
-    return new Controllers\HomeController($c);
-};
-
-$container['ClientsController'] = function($c) {
-    return new Controllers\ClientsController($c);
-};
-
-$container['RepositoriesController'] = function($c) {
-    return new Controllers\RepositoriesController($c);
-};
-
 $container['OAuthController'] = function($c) {
     return new Controllers\OAuthController($c);
 };
@@ -86,9 +66,5 @@ include "routes.php";
 
 // -------------------------------------------------------------------------------------
 
-
-// TODO: erase if not used until 2017/03/10
-// $origin = "*";
-// header("Access-Control-Allow-Origin: " . $origin);
 
 $app->run();

@@ -26,8 +26,8 @@ trait commonController
 	 */
 	public function saveRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitModel &$model){
 
-            $request_body = $request->getParsedBody();
-
+        $request_body = $request->getParsedBody();
+        
 		// handling put data
 		if( is_null($request_body) ){
 			$rawData = file_get_contents('php://input');
