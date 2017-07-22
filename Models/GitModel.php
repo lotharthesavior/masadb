@@ -198,7 +198,12 @@ abstract class GitModel
 
             $id = $this->nextId();
 
-            $filesystem->write( $id . '.json', $content);
+            $item_address = $id . '.json';
+
+            // this method may turn into static
+            $this->checkPreExistence( $filesystem,  $item_address );
+
+            $filesystem->write( $item_address, $content);
 
             if( $this->isBag() ){
 
@@ -212,13 +217,36 @@ abstract class GitModel
 
             $id = $client_data->id;
 
-            $filesystem->update( $this->locationOfBag( $id ) . '.json', $content);
+            $item_address = $this->locationOfBag( $id ) . '.json';
+
+            $this->checkPreExistence( $filesystem,  $item_address );
+
+            $filesystem->update( $item_address, $content);
 
         }
 
         $result = $this->saveVersion();
 		
         return $id;
+
+    }
+
+    /**
+     * Check the pre-existence of the item. This method 
+     * will identify elements that are not detected by 
+     * the working directory verison, in other words, not 
+     * commited items
+     *
+     * @todo send the $result into the log
+     * @param Filesystem $filesystem
+     * @param String $item_address
+     * @return void
+     */
+    public function checkPreExistence( Filesystem $filesystem,  $item_address ){
+
+        if( $filesystem->has( $item_address ) ){
+            $result = $this->saveVersion();
+        }
 
     }
 
