@@ -147,9 +147,11 @@ abstract class GitModel
 
 		$result_complete = [];
 		foreach ($result as $key => $record) {
-			
+
 			$record->file_content = $this->getFileContent( $record );
-			
+
+			$record->file_content->id = $record->id;
+
 			array_push($result_complete, $record);
 
 		}
@@ -161,7 +163,15 @@ abstract class GitModel
                 isset($item->file_content->{$param})
                 && strstr($item->file_content->{$param}, $value) !== false 
             ){
-                $found= true;
+                $found = true;
+            }
+
+            if(
+                isset($item->file_content->{$param})
+                && $param == "id"
+                && $item->file_content->{$param} != $value
+            ){
+                $found = false;
             }
 
             return $found;
