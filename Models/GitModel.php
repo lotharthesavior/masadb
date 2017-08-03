@@ -506,7 +506,7 @@ abstract class GitModel
 
 		$content_temp = file_get_contents( $full_record_addess );
 
-		$record->file_content = json_decode($content_temp);
+		$record->file_content = (object) json_decode($content_temp);
 
 		// get timestamp of file
 
