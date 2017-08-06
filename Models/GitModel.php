@@ -27,7 +27,6 @@ use League\Flysystem\Plugin\GetWithMetadata;
  *     5. lsTreeHead
  *     6. showFile
  *     7. lsTree
- *     8. splitByLine
  *     9. nextId
  *     10. parseLsTree
  *     11. loadObject
@@ -116,70 +115,55 @@ abstract class GitModel
 	 */
 	public function findAll(){
 
-		$result = $this->lsTreeHead( $this->getDatabaseLocation() . "/" );
-
-		$result_complete = [];
-		foreach ($result as $key => $record) {
-			
-			$record->file_content = $this->getFileContent( $record );
-			
-			array_push($result_complete, $record);
-
-		}
+		$result_complete = $this->getAllRecords();
 
 		$result_complete = $this->sortResult($result_complete);
-
-		// echo "<pre>";var_dump($result_complete);exit;
 
 		return $result_complete;
 
 	}
 
 	/**
+	 * @return mix
+	 */
+	private function getAllRecords( $format = "Array" ){
+		$result = new \Ds\Vector($this->lsTreeHead( $this->getDatabaseLocation() . '/' ));
+
+		return $result;
+	}
+
+	/**
+	 * Search for a single param
 	 * 
 	 * @internal Any param with field name 'logic', will be considered
 	 *           logic condition for the search
 	 * @param String $param || Array $param
 	 * @param String $value || Array $value
 	 */
-	public function search( $param, $value){
-		$result = $this->lsTreeHead( $this->getDatabaseLocation() . '/' );
+	public function search( $param, $value ){
+		$result_complete = $this->getAllRecords();
 
-		$result_complete = [];
-		foreach ($result as $key => $record) {
-
-			$record->file_content = $this->getFileContent( $record );
-
-			$record->file_content->id = $record->id;
-
-			array_push($result_complete, $record);
-
-		}
-
-        $result_complete = array_filter($result_complete, function( $item ) use ($param, $value){
-
-            $found = false;
-            if( 
-                isset($item->file_content->{$param})
-                && strstr($item->file_content->{$param}, $value) !== false 
-            ){
-                $found = true;
-            }
-
-            if(
-                isset($item->file_content->{$param})
-                && $param == "id"
-                && $item->file_content->{$param} != $value
-            ){
-                $found = false;
-            }
-
-            return $found;
-
+		$result_complete = $result_complete->filter(function( $record ) use ($param, $value){
+			if( $param != "id" ) return $record->stringMatch( $param, $value );
+            if( $param == "id" && $record->valueEqual( $param, $value ) ) return false;
 		});
 
 		return $result_complete;
+	}
 
+	/**
+	 * Search that works with multiple params
+	 * 
+	 * @param Array $params
+	 */
+	public function searchRecord( $params, $logic = [] ){
+		$result_complete = $this->getAllRecords();
+
+		$result_complete = $result_complete->filter(function( $record ) use ($params){
+			return $record->multipleParamsMatch( $params );
+		});
+
+		return $result_complete;
 	}
 
     /**
@@ -306,9 +290,7 @@ abstract class GitModel
 
 		$is_db = $database != '';
 
-		$result_array_parsed = $this->parseLsTree( $result, $is_db );
-
-		return $result_array_parsed;
+		return $this->parseLsTree( $result, $is_db );
 
 	}
 
@@ -344,32 +326,17 @@ abstract class GitModel
 	/**
 	 * 
 	 */
-	protected function splitByLine( $string ){
-
-		$array = preg_split ('/$\R?^/m', $string);
-
-		return $array;
-
-	}
-
-	/**
-	 * 
-	 */
 	protected function nextId(){
 
 		$ls_tree_result = $this->lsTreeHead( $this->getDatabaseLocation() . '/' );
 
-		$ls_tree_result = array_map(function( $item ){
-			return $item->id;
-		}, $ls_tree_result);
+		$ls_tree_result = $ls_tree_result->map(function($record){
+			return (int) $record->getId();
+		});
 
-		$next_id = 1;
-		if( count($ls_tree_result) > 0 ){
-			$next_id = intval(max($ls_tree_result)) + intval(1);
-		}
+		$ls_tree_result->sort();
 
-		return $next_id;
-
+		return $ls_tree_result->last() + 1;
 	}
 
 	// ------------------------------------------------------------------------
@@ -402,42 +369,25 @@ abstract class GitModel
 	 * Turn the git ls-tree command into Array with
 	 * discriminated metadata
 	 * 
+	 * @internal the $cli_result param "row" is expected to be like this: 
+	 *               structure1: "100644 blob 0672e3d1ca4498ea4f6de663764e28f712468b03	oauth/access_token/1.json"
 	 * @param String $cli_result
 	 * @param Bool $is_db - here is decided if the parsing will fill id 
 	 *                      attribute or not
-	 * @return Array
+	 * @return \Ds\Deque
 	 */
 	private function parseLsTree( $cli_result, $is_db = false ){
 
-		$result_array = $this->splitByLine($cli_result);
+		$result_array = new \Ds\Deque(\Helpers\AppHelper::splitByLine($cli_result));
 		
-		$result_array_parsed = array();
+		$result_array = $result_array->map(function( $records_row ) use ($is_db){
+			$new_record = new Record;
+			$new_record->loadRowStructure1( $records_row, $is_db );
+			$new_record = $this->getFileContent( $new_record );
+			return $new_record;
+		});
 
-		$result_array = array_filter($result_array);
-
-
-		foreach ($result_array as $key => $value) {
-			
-			$result = preg_split('/\s+/', $value);
-
-			$result = array_filter($result);
-
-			$new_object = new \stdClass;
-
-			if( $is_db ){
-				$new_object->id = $this->getIdOfAsset( $result[3] );
-			}
-
-			$new_object->permissions 	= $result[0];
-			$new_object->type 			= $result[1];
-			$new_object->revision_hash 	= $result[2];
-			$new_object->address 		= $result[3];
-
-			array_push($result_array_parsed, $new_object);
-
-		}
-
-		return $result_array_parsed;
+		return $result_array;
 
 	}
 
@@ -502,13 +452,13 @@ abstract class GitModel
 	 */
 	private function getFileContent( $record ){
 
-		$location = $record->address;
+		$location = $record->getAddress();
 
 		if( $this->isBag() ){
 
-			$id = $this->getIdOfAsset( $record->address );
+			$id = $record->getIdOfAsset( $record->getAddress() );
 			
-			$location = $record->address . '/data/' . $id . '.json';
+			$location = $record->getAddress() . '/data/' . $id . '.json';
 
 		}
 
@@ -516,7 +466,7 @@ abstract class GitModel
 
 		$content_temp = file_get_contents( $full_record_addess );
 
-		$record->file_content = (object) json_decode($content_temp);
+		$record->setFileContent((object) json_decode($content_temp));
 
 		// get timestamp of file
 
@@ -526,13 +476,13 @@ abstract class GitModel
 
 			$timestamp = filemtime( $full_record_addess );
 
-			$record->file_content->timestamp = $timestamp;
+			$record->setFileTimestamp( $timestamp );
 
-			$record->file_content->updated_at = gmdate("Y-m-d H:i:s", $timestamp);
+			$record->setFileUpdatedAt( gmdate("Y-m-d H:i:s", $timestamp) );
 
 		// / get timestamp of file
 
-		return $record->file_content;
+		return $record;
 
 	}
 
@@ -553,14 +503,19 @@ abstract class GitModel
 			$sort_type = $this->sortType;
 		}
 
+
 		switch ( $sort_type ) {
 
 			case 'ASC':
-				$collection = $this->sortAscendingOrder( $collection );
+				$collection->sort(function($a, $b){
+					return (int) $a->getId() > (int) $b->getId();
+				});
 				break;
 
 			case 'creation_DESC':
-				$collection = $this->sortCreationDescendingOrder( $collection );
+				$collection->sort(function($a, $b){
+					return (int) $a->getId() < (int) $b->getId();
+				});
 				break;
 
 		}
@@ -592,27 +547,10 @@ abstract class GitModel
 	private function sortCreationDescendingOrder( $collection ){
 
 		usort($collection, function($a, $b){
-			return (int) $b->file_content->timestamp > (int) $a->file_content->timestamp;
+			return (int) $b->getFileTimestamp() > (int) $a->getFileTimestamp();
 		});
 
 		return $collection;
-
-	}
-
-	/**
-	 * Return the Id of the physical address
-	 * 
-	 * @return Int
-	 */
-	private function getIdOfAsset( $address ){
-
-		$address_exploded = explode('/', $address);
-
-		$asset_name = end($address_exploded);
-
-		$id = preg_replace("/[^\d]/", "", $asset_name);
-
-		return $id;
 
 	}
 

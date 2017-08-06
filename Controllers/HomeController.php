@@ -7,18 +7,18 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use \Models\Notes;
 
-class HomeController
+class HomeController extends MasaController
 {
 
 	protected $container;
 
-        /**
-         * Start the controller instantiating the Slim Container
-         * @todo move this to a controller parent class
-         */
-        public function __construct($container){
-                $this->container = $container;
-        }
+    /**
+     * Start the controller instantiating the Slim Container
+     * @todo move this to a controller parent class
+     */
+    public function __construct($container){
+            $this->container = $container;
+    }
 
 	/**
 	 * 

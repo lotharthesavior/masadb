@@ -16,6 +16,7 @@ class MasaDBController extends MasaController
 
     /**
      * Start the controller instantiating the Slim Container
+     * 
      * @todo move this to a controller parent class
      */
     public function __construct($container){
@@ -23,7 +24,11 @@ class MasaDBController extends MasaController
     }
 
 	/**
-	 * Fetch all records
+	 * Fetch All Records
+	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @param Array $args
 	 */
 	public function getFullCollection(ServerRequestInterface $request, ResponseInterface $response, $args){
 
@@ -48,7 +53,11 @@ class MasaDBController extends MasaController
 	}
 
 	/**
-	 * Get single record
+	 * Get a Single Record
+	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @param Array $args
 	 */
 	public function getGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
@@ -84,8 +93,10 @@ class MasaDBController extends MasaController
 	}
 
 	/**
-	 * Search Note
+	 * Search Records
 	 * 
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
 	 * @param Array $args | ['field' => string, 'value' => string]
 	 */
 	public function searchRecords(ServerRequestInterface $request, ResponseInterface $response, array $args){
@@ -98,11 +109,40 @@ class MasaDBController extends MasaController
 
         $generic_model->setDatabase( $args['database'] );
 
-        $record = $generic_model->search( $args['key'], $args['value'] );
+        $records_found = $generic_model->search( $args['key'], $args['value'] );
+        
+        $result = json_encode($records_found->jsonSerialize());
+		
+		$response->getBody()->write( $result );
 
-		$record = array_values($record);
+        return $response;
 
-		$response->getBody()->write( json_encode($record) );
+	}
+
+	/**
+	 * Search Records Post
+	 * 
+	 * @param Array $args
+	 */
+	public function searchRecordsPost(ServerRequestInterface $request, ResponseInterface $response, array $args){
+
+	 	$generic_model = new Generic();
+
+	 	$logic = [];
+
+	 	if( !empty($request->getHeader("ClientId")) ){
+			$generic_model->setClientId( $request->getHeader("ClientId") );
+		}
+
+		$post_data = $request->getParsedBody();
+
+        $generic_model->setDatabase( $args['database'] );
+
+        $records_found = $generic_model->searchRecord(  $post_data, $logic );
+
+        $result = json_encode($records_found->jsonSerialize());
+
+        $response->getBody()->write( $result );
 
         return $response;
 

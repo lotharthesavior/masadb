@@ -4,7 +4,7 @@
  * @todo 1. create class for navigation through the repository
  * @todo 2. create navigation itself though the repository
  */
-
+// phpinfo();exit;
 if( !file_exists("config.json") ){
 	header("Location: install.php");
 }
@@ -48,6 +48,10 @@ $server = new \League\OAuth2\Server\ResourceServer(
 
 
 // Controllers -------------------------------------------------------------------------
+
+$container['HomeController'] = function($c) {
+    return new Controllers\HomeController($c);
+};
 
 $container['MasaDBController'] = function($c) {
     return new Controllers\MasaDBController($c);

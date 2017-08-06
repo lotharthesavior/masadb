@@ -21,7 +21,8 @@
         "psr-4": {
            "Models\\": "Models/",
            "Controllers\\": "Controllers/",
-           "Repositories\\": "Repositories/"
+           "Repositories\\": "Repositories/",
+           "Helpers\\": "Helpers/"
 	   }
 	},
     "require-dev": {
