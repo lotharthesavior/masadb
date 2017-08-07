@@ -85,17 +85,21 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	}
 
 	/**
+	 * @param String $format | Array - Vector
 	 * @return mix
 	 */
-	private function getAllRecords( $format = "Array" ){
-		$result = new \Ds\Vector($this->git->lsTreeHead( 
+	private function getAllRecords( $format = "Vector" ){
+		$result_array = $this->git->lsTreeHead( 
 			$this->_getDatabaseLocation() . '/', 
 			$this->filesystem, 
 			$this->isBag(),
 			$this->config['database-address'] 
-		));
+		);
 
-		return $result;
+		if($format == "Array")
+			return $result_array;
+
+		return new \Ds\Vector($result_array);
 	}
 
 	/**
@@ -125,8 +129,8 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	public function searchRecord( $params, $logic = [] ){
 		$result_complete = $this->getAllRecords();
 
-		$result_complete = $result_complete->filter(function( $record ) use ($params){
-			return $record->multipleParamsMatch( $params );
+		$result_complete = $result_complete->filter(function( $record ) use ($params, $logic){
+			return $record->multipleParamsMatch( $params, $logic );
 		});
 
 		return $result_complete;

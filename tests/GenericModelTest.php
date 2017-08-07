@@ -39,7 +39,8 @@ final class GenericModelTest extends TestCase
     private function createDummyRecord(){
         return $this->generic->save([
             "content" => [
-                "title" => "Lorem Ipsum"
+                "title" => "Lorem Ipsum",
+                "content" => "Content Content ..."
             ]
         ]);
     }
@@ -92,7 +93,13 @@ final class GenericModelTest extends TestCase
 
         $result = $this->generic->find($id);
         
-        $this->assertEquals(json_decode($result, true), ["title" => "Lorem Ipsum"]);
+        $this->assertEquals(
+            json_decode($result, true), 
+            [
+                "title" => "Lorem Ipsum",
+                "content" => "Content Content ..."
+            ]
+        );
 
         try {
             $results = $this->generic->find(242343232);
@@ -127,6 +134,28 @@ final class GenericModelTest extends TestCase
         $list = $this->getPhysicalNumberOrRecords();
 
         $this->assertEquals(count($list), $results->count());
+    }
+
+    public function testSearchRecordSearchParam(){
+        $results = $this->generic->searchRecord([
+            "title" => "Lorem Ipsum",
+            "content" => "Lorem Ipsum"
+        ], 1);
+
+        $list = $this->getPhysicalNumberOrRecords();
+
+        $this->assertEquals(count($list), $results->count());
+    }
+
+    public function testSearchRecordSearchParamAND(){
+        $results = $this->generic->searchRecord([
+            "title" => "Lorem Ipsum",
+            "content" => "Lorem Ipsum"
+        ]);
+
+        $list = $this->getPhysicalNumberOrRecords();
+
+        $this->assertTrue(count($list) != $results->count());
     }
 
     public function testSave(){

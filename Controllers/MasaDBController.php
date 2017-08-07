@@ -147,6 +147,8 @@ class MasaDBController extends MasaController
 	 */
 	public function searchRecordsPost(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
+		$logic = [];
+
 	 	$generic_model = new Generic(
 	 		// \Models\Interfaces\FileSystemInterface 
             new \Models\FileSystem\FileSystemBasic,
@@ -156,15 +158,18 @@ class MasaDBController extends MasaController
             new \Models\Bag\BagBasic
 	 	);
 
-	 	$logic = [];
-
-	 	if( !empty($request->getHeader("ClientId")) ){
-			$generic_model->setClientId( $request->getHeader("ClientId") );
+		$post_data = $request->getParsedBody();
+		if( isset($post_data['logic']) ){
+		 	$logic = $post_data['logic'];
+		 	unset($post_data['logic']);
 		}
 
-		$post_data = $request->getParsedBody();
+		$client_id_header = $request->getHeader("ClientId");
+	 	if( !empty($client_id_header) ){
+			$generic_model->setClientId( $client_id_header );
+		}
 
-        $generic_model->setDatabase( $args['database'] );
+		$generic_model->setDatabase( $args['database'] );
 
         $records_found = $generic_model->searchRecord(  $post_data, $logic );
 

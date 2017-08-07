@@ -133,7 +133,6 @@ class Record implements \JsonSerializable {
 	 */
 	public function multipleParamsMatch( $params, $logic = [] ){
 
-
 		// --------------------------------------------------------
 		// AND for all logics -------------------------------------
 		// --------------------------------------------------------
