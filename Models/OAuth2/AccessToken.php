@@ -13,7 +13,7 @@ use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
 
 use \Models\Traits\GitWorkflow;
 
-class AccessToken extends \Models\GitModel implements AccessTokenEntityInterface
+class AccessToken extends \Models\Abstraction\GitDAO implements AccessTokenEntityInterface
 {
 
 	use AccessTokenTrait;

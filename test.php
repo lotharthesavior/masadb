@@ -20,7 +20,7 @@ use League\Flysystem\Adapter\Local;
 final class GenericModelTest extends TestCase
 {
 
-    // --- GitModel abstract methods --- //
+    // --- GitDAO abstract methods --- //
     
     /**
      *

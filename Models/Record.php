@@ -207,6 +207,11 @@ class Record implements \JsonSerializable {
 	public function loadRowStructure1( $records_row, $is_db ){
 		$records_row = preg_split('/\s+/', $records_row);
 
+		$records_row = array_filter($records_row);
+		
+		if( empty($records_row) )
+			return $this;
+
 		if( $is_db )
 			$this->setId( $this->getIdOfAsset($records_row[3]) );
 

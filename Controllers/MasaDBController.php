@@ -34,7 +34,14 @@ class MasaDBController extends MasaController
 
 		$this->oauthBefore();
 
-		$generic_model = new Generic();
+		$generic_model = new Generic(
+			// \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+		);
 
 	 	if( !empty($request->getHeader("ClientId")) ){
 			$generic_model->setClientId( $request->getHeader("ClientId") );
@@ -61,7 +68,14 @@ class MasaDBController extends MasaController
 	 */
 	public function getGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
-	 	$generic_model = new Generic();
+	 	$generic_model = new Generic(
+	 		// \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+	 	);
 
 	 	if( !empty($request->getHeader("ClientId")) ){
 			$generic_model->setClientId( $request->getHeader("ClientId") );
@@ -101,7 +115,14 @@ class MasaDBController extends MasaController
 	 */
 	public function searchRecords(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
-	 	$generic_model = new Generic();
+	 	$generic_model = new Generic(
+	 		// \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+	 	);
 
 	 	if( !empty($request->getHeader("ClientId")) ){
 			$generic_model->setClientId( $request->getHeader("ClientId") );
@@ -126,7 +147,14 @@ class MasaDBController extends MasaController
 	 */
 	public function searchRecordsPost(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
-	 	$generic_model = new Generic();
+	 	$generic_model = new Generic(
+	 		// \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+	 	);
 
 	 	$logic = [];
 
@@ -163,7 +191,14 @@ class MasaDBController extends MasaController
 	 */
 	public function saveGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
-	 	$generic_model = new Generic();
+	 	$generic_model = new Generic(
+	 		// \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+	 	);
 
 	 	if( !empty($request->getHeader("ClientId")) ){
 			$generic_model->setClientId( $request->getHeader("ClientId") );
@@ -184,7 +219,14 @@ class MasaDBController extends MasaController
 	 */
 	public function deleteGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
-	 	$generic_model = new Generic();
+	 	$generic_model = new Generic(
+	 		// \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+	 	);
 
 	 	if( !empty($request->getHeader("ClientId")) ){
 			$generic_model->setClientId( $request->getHeader("ClientId") );

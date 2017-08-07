@@ -13,65 +13,153 @@ use League\Flysystem\Adapter\Local;
 final class GenericModelTest extends TestCase
 {
 
-    // --- GitModel abstract methods --- //
+    protected $generic;
     
     /**
      *
      */
     public function setUp(){
-        $this->generic = new \Models\Generic;
+        $this->generic = new \Models\Generic(
+            // \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+        );
+
         $this->generic->setDatabase("test");
+
+        $this->generic->setClientId("1");
+    }
+
+    /**
+     * 
+     */
+    private function createDummyRecord(){
+        return $this->generic->save([
+            "content" => [
+                "title" => "Lorem Ipsum"
+            ]
+        ]);
+    }
+    
+    /**
+     * 
+     */
+    private function getPhysicalNumberOrRecords(){
+        $adapter = new Local("/");
+
+        $filesystem = new Filesystem($adapter);
+
+        return $filesystem->listContents(__DIR__ . "/../data/client_1/test");
     }
 
     /**
      * @afterClass
      */
-    public function tearDownTestData(){
-        $repo = \Coyl\Git\Git::open(__DIR__ . '/../data');  // -or- Git::create('/path/to/repo')
+    public static function tearDownTestData(){
+        $generic = new \Models\Generic(
+            // \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+        );
 
-        $adapter = new Local(__DIR__.'/../data');
-        $filesystem = new Filesystem($adapter);
-        $result = $filesystem->deleteDir(__DIR__.'/../data/test');
-throw Exception($result);exit;
-        $repo->add('.');
-        
-        try{
-	    $commit_result = $repo->commit('Cleaning test.');
-        } catch (Exception $e) {
-            // --
+        $generic->setDatabase("test");
+
+        $generic->setClientId("1");
+
+        $results = $generic->search("title", "Lorem Ipsum");
+
+        foreach ($results as $key => $record) {
+            $generic->delete( $record->getId() );
         }
     }
 
-    /**
-     * @todo test if it is a bag
-    */
-/*    public function testCreateTest(){
-        $this->generic->save([
-            "title" => "test data",
-            "content" => "test data content"
-        ]);
-        $this->assertEquals(true, file_exists(__DIR__ . '/../data/test/1/data/1.json'));
-        // TODO: test if it is a bag
+    public function testSetDatabase(){
+        $this->assertEquals("test", $this->generic->getDatabase());
     }
 
-    // public function testFind
+    public function testSetClientId(){
+        $this->assertEquals(1, $this->generic->getClientId());
+    }
+
     public function testFind(){
-        $results = $this->generic->find(1);
+        $id = $this->createDummyRecord();
 
-        var_dump($results);exit;
+        $result = $this->generic->find($id);
+        
+        $this->assertEquals(json_decode($result, true), ["title" => "Lorem Ipsum"]);
+
+        try {
+            $results = $this->generic->find(242343232);
+        } catch (\Exception $e) {
+            $results = $e->getMessage();
+        }
+
+        $this->assertEquals($results, "Inexistent Record.");
     }
-*/
-    // public function testFindAll
-    // public function testSearch
-    // public function testSave
-    // public function testDelete
-    // public function testLsTreeHead
-    // public function testLoadObject
-    // public function testIsBag
-    // public function testLocationOfBag
-    // public function testGetFileContent
-    // public function testSortResult
-    // public function testSortAscendingOrder
-    // public function testSortDescendingOrder
+
+    public function testFindAll(){
+        $results = $this->generic->findAll();
+
+        $list = $this->getPhysicalNumberOrRecords();
+
+        $this->assertEquals(count($list), $results->count());
+    }
+
+    public function testSearch(){
+        $results = $this->generic->search("title", "Lorem Ipsum");
+
+        $list = $this->getPhysicalNumberOrRecords();
+
+        $this->assertEquals(count($list), $results->count());
+    }
+
+    public function testSearchRecord(){
+        $results = $this->generic->searchRecord([
+            "title" => "Lorem Ipsum"
+        ]);
+
+        $list = $this->getPhysicalNumberOrRecords();
+
+        $this->assertEquals(count($list), $results->count());
+    }
+
+    public function testSave(){
+        $results = $this->generic->searchRecord([
+            "title" => "Lorem Ipsum"
+        ]);
+        $results_count_before = count($results);
+
+        $this->createDummyRecord();
+
+        $results = $this->generic->searchRecord([
+            "title" => "Lorem Ipsum"
+        ]);
+        $results_count_after = count($results);
+
+        $this->assertTrue($results_count_after > $results_count_before);
+    }
+
+    public function testDelete(){
+        $test_id = $this->createDummyRecord();
+        
+        $this->assertTrue( (int)$test_id > 0 );
+
+        $this->generic->delete($test_id);
+
+        try {
+            $results = $this->generic->find($test_id);
+        } catch (Exception $e) {
+            $results = $e->getMessage();
+        }
+
+        $this->assertEquals($results, "Inexistent Record.");
+
+    }
 }
 

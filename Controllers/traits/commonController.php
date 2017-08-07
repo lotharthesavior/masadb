@@ -20,11 +20,11 @@ trait commonController
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
 	 * @param Array $args
-	 * @param \Models\GitModel $model
+	 * @param \Models\GitDAO $model
 	 * @return JSON String - {"error": 1, "errorMessage": string}
 	 *                       || {"success": 1, "successMessage": {inserted_id}}
 	 */
-	public function saveRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitModel &$model){
+	public function saveRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitDAO &$model){
 
         $request_body = $request->getParsedBody();
         
@@ -68,7 +68,7 @@ trait commonController
 	/**
 	 * 
 	 */
-	protected function deleteRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitModel $model){
+	protected function deleteRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\GitDAO $model){
 
 		try {
 

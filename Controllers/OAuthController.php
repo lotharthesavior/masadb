@@ -112,12 +112,10 @@ class OAuthController
 		$password = $request->getParam('password');
 
 		// find client 
-
 		$clients_model = new Clients;
 		$client_result = $clients_model->find( $client );
 
 		// find user
-
 		$users_model = new Users;
 		$users_result = $users_model->find( $client_result->file_content->user_id );
 		

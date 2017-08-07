@@ -10,7 +10,7 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\ClientTrait;
 
-use \Models\GitModel;
+use \Models\GitDAO;
 
 /**
  * Format of data:
@@ -20,7 +20,7 @@ use \Models\GitModel;
  *     "redirect_uri": string
  * }
  */
-class Clients extends GitModel implements ClientEntityInterface
+class Clients extends \Models\Abstraction\GitDAO implements ClientEntityInterface
 {
 
 	use EntityTrait;
@@ -41,7 +41,7 @@ class Clients extends GitModel implements ClientEntityInterface
 
 		$result_parsed = json_decode( $client_loaded, true );
 
-		$this->loadObject( $result_parsed );
+		$this->file_content = $this->filesystem->loadFileObject( $result_parsed );
 
 		$this->setIdentifier( $id );
 

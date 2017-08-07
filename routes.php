@@ -2,19 +2,6 @@
 
 $app->get('/', 'HomeController:home');
 
-// REPOSITORIES ------------------------------------------------------------------------------------------
-
-$app->get('/listRepositories', 'RepositoriesController:getRepositories')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->get('/repositories/{id}', 'RepositoriesController:getRepository')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-$app->get('/repositories/{id}/{asset}', 'RepositoriesController:getAsset')
-    ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-// / REPOSITORIES ----------------------------------------------------------------------------------------
-
 
 // OAUTH2 ------------------------------------------------------------------------------------------
 

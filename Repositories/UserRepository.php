@@ -26,6 +26,8 @@ class UserRepository implements UserRepositoryInterface
      * @param string                $password
      * @param string                $grantType    The grant type used
      * @param ClientEntityInterface $clientEntity
+     * 
+     * @todo finish this
      *
      * @return UserEntityInterface
      */

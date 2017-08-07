@@ -34,7 +34,14 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
 	public function getNewToken(ClientEntityInterface $clientEntity, array $scopes, $userIdentifier = null){
 
-		$access_token_model = new AccessToken;
+		$access_token_model = new AccessToken(
+            // \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+        );
 
 		return $access_token_model;
 
@@ -48,7 +55,14 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity){
 
-        $access_token_model = new AccessToken;
+        $access_token_model = new AccessToken(
+            // \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+        );
 
         $access_token_model->save([
             'id' => null,

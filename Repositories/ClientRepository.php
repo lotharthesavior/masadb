@@ -32,7 +32,14 @@ class ClientRepository implements ClientRepositoryInterface
      */
     public function getClientEntity($clientIdentifier, $grantType, $clientSecret = null, $mustValidateSecret = true){
 
-        $client_model = new Clients;
+        $client_model = new Clients(
+            // \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+        );
 
         $client_model->find($clientIdentifier);
 
