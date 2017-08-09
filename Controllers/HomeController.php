@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use \Models\Notes;
 
-class HomeController extends MasaController
+class HomeController extends Abstraction\MasaController
 {
 
 	protected $container;

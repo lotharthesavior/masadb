@@ -1,6 +1,6 @@
 <?php 
 
-namespace Controllers;
+namespace Controllers\Abstraction;
 
 use \Repositories\AccessTokenRepository;
 

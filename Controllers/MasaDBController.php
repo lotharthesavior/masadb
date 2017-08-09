@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use Models\Generic;
 
-class MasaDBController extends MasaController
+class MasaDBController extends Abstraction\MasaController
 {
 	
 	use \Controllers\traits\commonController;
