@@ -32,6 +32,14 @@ final class OauthCredentialsTest extends TestCase
     }
 
     /**
+     * Reference: https://stackoverflow.com/questions/6041741/fastest-way-to-check-if-a-string-is-json-in-php
+     */
+    // private function isJson($string){
+    //     json_decode($string);
+    //     return (json_last_error() == JSON_ERROR_NONE);
+    // }
+
+    /**
      * @afterClass
      */
     public static function tearDownTestData(){
@@ -69,9 +77,18 @@ final class OauthCredentialsTest extends TestCase
             'verify' => false
         ]);
 
-        var_dump($response->getBody()->getContents());exit;
+        $json_result = $response->getBody()->getContents();
 
-        $this->assertEquals(false, true);
+        $isjson_result = \PHPUnit\Framework\Assert::isJson($json_result);
+
+        $parsed_result = json_decode($json_result, true);
+
+        $this->assertEquals($isjson_result->toString(), "is valid JSON");
+        $this->assertTrue(isset($parsed_result["token_type"]));
+        $this->assertTrue(isset($parsed_result["expires_in"]));
+        $this->assertTrue(isset($parsed_result["access_token"]));
     }
+
+    // build test that depends on testOAuthCredentialsAuth Authorization to execute requests
 }
 
