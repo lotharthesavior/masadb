@@ -32,14 +32,6 @@ final class OauthCredentialsTest extends TestCase
     }
 
     /**
-     * Reference: https://stackoverflow.com/questions/6041741/fastest-way-to-check-if-a-string-is-json-in-php
-     */
-    // private function isJson($string){
-    //     json_decode($string);
-    //     return (json_last_error() == JSON_ERROR_NONE);
-    // }
-
-    /**
      * @afterClass
      */
     public static function tearDownTestData(){
