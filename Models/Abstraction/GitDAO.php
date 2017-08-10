@@ -14,6 +14,8 @@ use \Git\Coyl\Git;
 
 abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 {
+	use \Models\Traits\Pagination;
+
 	// Core instance for FileSystem interaction
 	// proteced filesystem;
 
@@ -125,15 +127,30 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	 * Search that works with multiple params
 	 * 
 	 * @param Array $params
+	 * @return \Ds\Vector
 	 */
 	public function searchRecord( $params, $logic = [] ){
 		$result_complete = $this->getAllRecords();
 
-		$result_complete = $result_complete->filter(function( $record ) use ($params, $logic){
-			return $record->multipleParamsMatch( $params, $logic );
+		$search_params = $this->filterPaginationParams($params);
+
+		$result_complete = $result_complete->filter(function( $record ) use ($search_params, $logic){
+			return $record->multipleParamsMatch( $search_params, $logic );
 		});
 
-		return $result_complete;
+		$result_complete->sort(function($a, $b){
+			return (int) $a->getId() > (int) $b->getId();
+		});
+
+		if( !$this->_isPaginated($params) )
+			return $result_complete;
+
+		$result_paginated = $this->_preparePages($result_complete, $params);
+		// var_dump($result_paginated['pages']);exit;
+
+		// $this->storeCache( $result_paginated );
+
+		return json_encode($result_paginated);
 	}
 
     /**
