@@ -18,4 +18,53 @@ class AppHelper {
 
 	}
 
+	/**
+     * Reference: https://stackoverflow.com/questions/14587514/php-fire-and-forget-post-request
+     * 
+     * @todo put this in a helper
+     */
+    public static function curlPostAsync($url, $params = array(), $header = array()){
+        // create POST string   
+        $post_params = array();
+        foreach ($params as $key => &$val) {
+            $post_params[] = $key . '=' . urlencode($val);
+        }
+        $post_string = implode('&', $post_params);
+
+        // get URL segments
+        $parts = parse_url($url);
+
+        // workout port and open socket
+        $port = isset($parts['port']) ? $parts['port'] : 80;
+        $fp = fsockopen($parts['host'], $port, $errno, $errstr, 30);
+
+        // create output string
+        $output  = "POST " . $parts['path'] . " HTTP/1.1\r\n";
+        $output .= "Host: " . $parts['host'] . "\r\n";
+        
+        if( isset($header['ClientId']) )
+        	$output .= "ClientId: " . $header['ClientId'] . "\r\n";
+        
+        if( isset($header['Authorization']) )
+        	$output .= "Authorization: " . $header['Authorization'] . "\r\n";
+        
+        if( isset($header['Content-Type']) )
+        	$output .= "Content-Type: " . $header['Content-Type'] . "\r\n";
+        else
+        	$output .= "Content-Type: application/x-www-form-urlencoded\r\n";
+
+        $output .= "Content-Length: " . strlen($post_string) . "\r\n";
+        $output .= "Connection: Close\r\n\r\n";
+        $output .= isset($post_string) ? $post_string : '';
+
+        // send output to $url handle
+        fwrite($fp, $output);
+
+		// while (!feof($fp)) {
+		//     echo fgets($fp, 128);
+		// }
+        fclose($fp);
+	    // exit();
+    }
+
 }

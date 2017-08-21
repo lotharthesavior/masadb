@@ -35,6 +35,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 */
 	public function lsTreeHead( $database = '', \Models\Interfaces\FileSystemInterface $filesystem, $is_bag, $database_address ){
 		$this->checkRepo();
+		// var_dump($database_address);exit;
 
 		$command = 'ls-tree HEAD ' . $database;
 
@@ -107,9 +108,12 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * 
 	 * @todo analyze the result
 	 */
-	public function stageChanges(){
+	public function stageChanges( $item = null ){
 
-		$this->repo->add();
+		if( !is_null($item) )
+			$this->repo->add($item);
+		else
+			$this->repo->add();
 
 		return true;
 
@@ -122,12 +126,73 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * @return bool
 	 */
 	public function commitChanges(){
-
-		$message = "Commit from Masa manager - " . date("Y-d-m H:i:s") . ". - by Savio";
+		$message = "Commit from Masa - " . date("Y-d-m H:i:s") . ".";
 
 		$this->repo->commit( $message );
 
 		return true;
+	}
 
+	/**
+	 * Get the last version timestamp for cache purpose
+	 */
+	public function getLastVersionTimestamp(){
+		return $this->repo->logFormatted("%at", "", "1");
+	}
+
+	/**
+	 * @internal for metadata spec, see @prepareMetadata method.
+	 */
+	public function placeMetadata($database, \League\Flysystem\Filesystem $filesystem){
+		$note_message = "";
+
+		$metadata_json = $this->prepareMetadata($database, $filesystem);
+
+		return $this->repo->run("notes add -f -m '" . $metadata_json . "'");
+	}
+
+	/**
+	 * 
+	 */
+	public function getMetadata(){
+		try {
+			$return = $this->repo->run("notes show");
+		} catch (\Exception $e) {
+			$return = $e->getMessage();
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Metadata:
+	 * 1. total number of records
+	 * 2. last ID
+	 */
+	public function prepareMetadata($database, \League\Flysystem\Filesystem $filesystem){
+		$current_metadata = $this->getMetadata();
+		
+		if( strpos($current_metadata, "error") != -1 )
+			return $this->generateMetadata($database, $filesystem);
+
+		return $current_metadata;
+	}
+
+	/**
+	 * @internal for metadata spec, see @prepareMetadata method.
+	 */
+	public function generateMetadata($database, \League\Flysystem\Filesystem $filesystem){
+		$metadata = new \stdClass;
+
+		$filesystem_report = new \Ds\Deque($filesystem->listContents("/"));
+
+		$filesystem_report->sort(function($a, $b){
+			return (int) $a['filename'] > (int) $b['filename'];
+		});
+
+		$metadata->total_records = $filesystem_report->count();
+		$metadata->last_id = ((object) $filesystem_report->last())->filename;
+
+		return json_encode($metadata);
 	}
 }

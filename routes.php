@@ -13,6 +13,17 @@ $app->post('/generate_key', 'OAuthController:generateClientKey');
 // / OAUTH2 ----------------------------------------------------------------------------------------
 
 
+// ASYNC CALLS ----------------------------------------------------------------------------------------
+
+$app->post('/git-async', 'MasaDBController:gitAsync');
+    // ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+$app->post('/update-cache-async', 'MasaDBController:updateCacheAsync');
+    // ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
+
+// / ASYNC CALLS ----------------------------------------------------------------------------------------
+
+
 // Generic Database ------------------------------------------------------------------------------------------
 
 $app->get('/{database}', 'MasaDBController:getFullCollection')
@@ -37,5 +48,4 @@ $app->delete('/{database}/{id}', 'MasaDBController:deleteGeneric')
     ->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
 
 // / Generic Database ------------------------------------------------------------------------------------------
-
 

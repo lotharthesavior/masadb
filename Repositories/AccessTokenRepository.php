@@ -54,7 +54,6 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      * @todo persist the elements present
      */
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity){
-
         $access_token_model = new AccessToken(
             // \Models\Interfaces\FileSystemInterface 
             new \Models\FileSystem\FileSystemBasic,
@@ -64,6 +63,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
             new \Models\Bag\BagBasic
         );
 
+        // $result = $access_token_model->save([
         $access_token_model->save([
             'id' => null,
             'content' => [
@@ -85,7 +85,6 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
             ]
         ]);
-
     }
 
 	/**

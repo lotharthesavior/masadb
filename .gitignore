@@ -28,3 +28,7 @@ masatech.key
 masatech.pub
 starmasatech.crt
 masadb.dev.key
+
+cache
+git_async_result
+updatecache_async_result

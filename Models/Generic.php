@@ -30,6 +30,9 @@ class Generic extends \Models\Abstraction\GitDAO implements \Models\Interfaces\G
 	 */
 	public function setDatabase( $database ){
 		$this->database = $database;
+		
+		if( isset($this->git) )
+			$this->git->setRepo( $this->config['database-address'] . "/" . $this->_getDatabaseLocation() );
 	}
 
 	/**

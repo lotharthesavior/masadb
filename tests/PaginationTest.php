@@ -41,7 +41,7 @@ final class PaginationTest extends TestCase
 
         $this->http = new Client([
             'base_uri' => "https://" . $this->config['settings']['domain'],
-            'timeout'  => 2.0,
+            'timeout'  => 10.0,
         ]);
 
         $this->authorization = self::loginOAuthCredentialsAuth( $this->http );
@@ -52,26 +52,26 @@ final class PaginationTest extends TestCase
     /**
      * @afterClass
      */
-    public static function tearDownTestData(){
-        $generic = new \Models\Generic(
-            // \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
-            // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
-            // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
-        );
+    // public static function tearDownTestData(){
+        // $generic = new \Models\Generic(
+        //     // \Models\Interfaces\FileSystemInterface 
+        //     new \Models\FileSystem\FileSystemBasic,
+        //     // \Models\Interfaces\GitInterface
+        //     new \Models\Git\GitBasic,
+        //     // \Models\Interfaces\BagInterface
+        //     new \Models\Bag\BagBasic
+        // );
 
-        $generic->setDatabase("test");
+        // $generic->setDatabase("test");
 
-        $generic->setClientId("1");
+        // $generic->setClientId("1");
 
-        $results = $generic->search("title", "Lorem Ipsum");
+        // $results = $generic->search("title", "Lorem Ipsum");
 
-        foreach ($results as $key => $record) {
-            $generic->delete( $record->getId() );
-        }
-    }
+        // foreach ($results as $key => $record) {
+        //     $generic->delete( $record->getId() );
+        // }
+    // }
 
     /**
      * This method exists as a test on OAuthTest.php
@@ -139,11 +139,12 @@ final class PaginationTest extends TestCase
 
         $json_result = $response->getBody()->getContents();
 
-        $parsed_result = json_decode($json_result, true);
+        $parsed_result = json_decode($json_result);
+        // var_dump($parsed_result);exit;
 
-        $this->AssertTrue( !isset($parsed_result['pages']) );
-        $this->AssertTrue( !isset($parsed_result['results']) );
-        $this->AssertTrue( is_array($parsed_result) );
+        $this->AssertTrue( !isset($parsed_result->pages) );
+        $this->AssertTrue( isset($parsed_result->results) );
+        $this->AssertTrue( is_object($parsed_result) );
     }
 
     public function testPostRequestPaginationResult(){
@@ -164,12 +165,40 @@ final class PaginationTest extends TestCase
 
         $json_result = $response->getBody()->getContents();
 
-        $parsed_result = json_decode($json_result, true);
+        $parsed_result = json_decode($json_result);
 
-        $this->AssertTrue( isset($parsed_result['pages']) );
-        $this->AssertTrue( isset($parsed_result['results']) );
-        $this->AssertTrue( is_array($parsed_result['results']) );
-        $this->AssertTrue( $parsed_result['results']->count() <= (count($parsed_result['pages']) * $page_size) );
+        $this->AssertTrue( isset($parsed_result->pages) );
+        $this->AssertTrue( isset($parsed_result->results) );
+        $this->AssertTrue( is_object($parsed_result) );
+        $this->AssertTrue( count($parsed_result->results) <= (count($parsed_result->pages) * $page_size) );
+    }
+
+    public function testPostRequestPaginationResultTimeout(){
+        for ($i=0; $i < 300; $i++) { 
+            self::createDummyDataToTest();
+        }
+
+        $before = new DateTime();
+        $page_size = 2;
+
+        $response = $this->http->request('POST', '/test/search', [
+            'headers' => [
+                'Authorization' => $this->authorization["access_token"],
+                'ClientId' => '1',
+                'Content-Type'  => 'application/x-www-form-urlencoded'
+            ],
+            'form_params' => [
+                'pageSize' => '2',
+                'page' => '1'
+            ],
+            'verify' => false
+        ]);
+
+        $after = new DateTime();
+
+        $interval = $after->diff($before);
+
+        $this->AssertTrue( $interval->s < 3 );
     }
 }
 

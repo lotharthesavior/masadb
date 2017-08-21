@@ -46,8 +46,6 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 		
 		$this->filesystem = $filesystem;
 		$this->git = $git;
-		$this->git->setRepo( $this->config['database-address'] );
-
 		$this->bag = $bag;
 	}
 
@@ -77,31 +75,55 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	 * @return \Ds\Deque
 	 */
 	public function findAll(){
-
 		$result_complete = $this->getAllRecords();
 
 		$result_complete = $this->_sortResult($result_complete);
 
 		return $result_complete;
-
 	}
 
 	/**
-	 * @param String $format | Array - Vector
+	 * @todo store cache in a async request
+	 * 
 	 * @return mix
 	 */
-	private function getAllRecords( $format = "Vector" ){
-		$result_array = $this->git->lsTreeHead( 
-			$this->_getDatabaseLocation() . '/', 
+	private function getAllRecords(){
+		$cache_helper = new \Helpers\CacheHelper;
+
+		// var_dump($this->database);
+		$cache_result = $cache_helper->getCacheData( 1, $this->database );
+		if( $cache_result !== false ){
+			return $cache_result;
+		}
+
+		return $this->getGitData( $cache_helper );
+	}
+
+	/**
+	 * Execute the Full Search on Git and store cache
+	 * 
+	 * @internal used to update cache
+	 * @internal used to search when there is no cache
+	 * @param \Helpers\CacheHelper $cache_helper
+	 */
+	public function getGitData( \Helpers\CacheHelper $cache_helper ){
+		$result_array = $this->git->lsTreeHead(
+			// $this->_getDatabaseLocation() . '/', 
+			'.', 
 			$this->filesystem, 
 			$this->isBag(),
-			$this->config['database-address'] 
+			// $this->config['database-address'] . '/' . $this->database
+			$this->config['database-address'] . "/" . $this->_getDatabaseLocation()
 		);
 
-		if($format == "Array")
-			return $result_array;
+		$result_array->sort(function($a, $b){
+			return $a->getId() > $b->getId();
+		});
 
-		return new \Ds\Vector($result_array);
+		$cache_helper->setData($result_array);
+		$cache_helper->persistCache( $this->_getDatabaseLocation() );
+
+		return $result_array;
 	}
 
 	/**
@@ -127,9 +149,10 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	 * Search that works with multiple params
 	 * 
 	 * @param Array $params
-	 * @return \Ds\Vector
+	 * @return JSON | ["results": \Ds\Vector, "pages": \Ds\Vector]
 	 */
 	public function searchRecord( $params, $logic = [] ){
+
 		$result_complete = $this->getAllRecords();
 
 		$search_params = $this->filterPaginationParams($params);
@@ -143,24 +166,22 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 		});
 
 		if( !$this->_isPaginated($params) )
-			return $result_complete;
+			return json_encode(["results"=> $result_complete]);
 
-		$result_paginated = $this->_preparePages($result_complete, $params);
-		// var_dump($result_paginated['pages']);exit;
+		$result_page = $this->_getPage($result_complete, $params);
 
-		// $this->storeCache( $result_paginated );
-
-		return json_encode($result_paginated);
+		return json_encode($result_page);
 	}
 
     /**
      * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]
      */
     public function save( Array $client_data ){
-
-        $client_data = (object) $client_data;
+    	$client_data = (object) $client_data;
 
         $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
+        // var_dump($client_data);//exit;
+        // var_dump($local_address);//exit;
 
         // League\Flysystem\Filesystem
         $filesystem = $this->filesystem->getFileSystemAbstraction( $local_address );
@@ -169,25 +190,26 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
         $id = null;
 
+        $item_address = null;
+
         if( 
             !isset($client_data->id)
             || is_null($client_data->id) 
         ){
 
-            $id = $this->_nextId();
+        	$id = $this->_nextId();	
 
             $item_address = $id . '.json';
 
+            // this will register the generic version 
+            // for this file to avoid problem
             if( $filesystem->has( $item_address ) )
             	$this->saveVersion();
 
             $filesystem->write( $item_address, $content);
 
-            if( $this->isBag() ){
-
+            if( $this->isBag() )
                 $this->createBagForRecord( $id );
-
-            }
 
             $this->last_inserted_id = $id;
 
@@ -198,16 +220,45 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
             $item_address = $this->bag->locationOfBag( $id, $this->isBag() ) . '.json';
 
             if( $filesystem->has( $item_address ) )
-            	$this->saveVersion();
+            	$this->saveRecordVersion( $item_address );
 
             $filesystem->update( $item_address, $content);
 
         }
+        // var_dump($this->_getDatabaseLocation());exit;
+        // var_dump($item_address);exit;
 
-        $result = $this->saveVersion();
-		
+        $result = $this->saveRecordVersion( $item_address );
+
         return $id;
+    }
 
+    /**
+     * Update Cache
+     */
+    public function updateCache(){
+    	$url = "https" . '://' . $this->config['domain'] . "/update-cache-async";
+
+    	$body = [
+            'database' => $this->_getDatabaseLocation()
+        ];
+    	// var_dump($body);exit;
+
+		// $header = [
+		//     'ClientId' => $_SERVER['HTTP_CLIENTID'],
+		//     'Authorization' => $_SERVER['HTTP_AUTHORIZATION'],
+		//     'Content-Type' => $_SERVER['HTTP_CONTENT_TYPE']
+		// ];
+        
+        // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
+        \Helpers\AppHelper::curlPostAsync($url, $body);
+    }
+
+    /**
+     * 
+     */
+    public function stageAndCommitAll(){
+    	return $this->saveVersion();
     }
 
 	/**
@@ -250,12 +301,14 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	 * @return int
 	 */
 	protected function _nextId(){
-
+		// var_dump($this->git);exit;
 		$ls_tree_result = $this->git->lsTreeHead( 
-			$this->_getDatabaseLocation() . '/', 
+			// $this->_getDatabaseLocation() . '/', 
+			'.', 
 			$this->filesystem, 
 			$this->isBag(),
-			$this->config['database-address']
+			// $this->config['database-address'] . '/' . $this->database
+			$this->config['database-address'] . "/" . $this->_getDatabaseLocation()
 		);
 
 		if( $ls_tree_result->count() < 1 )
@@ -289,6 +342,9 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
 	/**
 	 * Verify if the current model is compatible with Bagit
+	 * 
+	 * @internal this method analyze the trait. For a more 
+	 *           reliable use a BagIt Instance.
 	 * 
 	 * @return Boolean
 	 */

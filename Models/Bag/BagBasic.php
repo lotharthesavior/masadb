@@ -13,7 +13,6 @@ class BagBasic implements \Models\Interfaces\BagInterface
 	 * @return String
 	 */
 	public function locationOfBag( $id, $is_bag ){
-
 		$location = '/' . $id;
 
 		if( $is_bag ){
@@ -23,6 +22,6 @@ class BagBasic implements \Models\Interfaces\BagInterface
 		}
 
 		return $location;
-
 	}
+
 }

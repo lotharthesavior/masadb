@@ -26,7 +26,6 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 	 * @param Record $record
 	 */
 	public function getFileContent( \Models\Record $record, $is_bag, $database_address ){
-
 		$location = $record->getAddress();
 
 		if( $is_bag ){
@@ -36,9 +35,10 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 			$location = $record->getAddress() . '/data/' . $id . '.json';
 
 		}
+		// var_dump($location);exit;
 
 		$full_record_addess = $database_address . "/" . $location;
-		// var_dump($full_record_addess);exit;
+		// var_dump($full_record_addess);//exit;
 
 		$content_temp = file_get_contents( $full_record_addess );
 

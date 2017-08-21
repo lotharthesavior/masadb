@@ -4,7 +4,9 @@
  * @todo 1. create class for navigation through the repository
  * @todo 2. create navigation itself though the repository
  */
-// phpinfo();exit;
+
+date_default_timezone_set("America/Vancouver");
+
 if( !file_exists("config.json") ){
 	header("Location: install.php");
 }

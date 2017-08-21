@@ -62,7 +62,7 @@ class OAuthController
 	    	$privateKey,
 	        $publicKey
 	    );
-            $server->setEncryptionKey('lxZFUEsBCJ2Yb14IF2ygAHI5N4+ZAUXXaSeeJm6+twsUmIensavio');
+        $server->setEncryptionKey('lxZFUEsBCJ2Yb14IF2ygAHI5N4+ZAUXXaSeeJm6+twsUmIensavio');
 
 	    // Enable the client credentials grant on the server
 		$server->enableGrantType(

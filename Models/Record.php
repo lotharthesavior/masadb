@@ -138,13 +138,17 @@ class Record implements \JsonSerializable {
 		// --------------------------------------------------------
 		if( empty($logic) ){
 			foreach ($params as $key => $attribute) {
-
 				if( 
-					isset($this->file_content->{$key}) && (
-						(
-							$this->file_content->{$key} == "id"
-							&& $this->valueEqual( $key, $attribute )
-						) || $this->stringMatch( $key, $attribute )
+					(
+						isset($this->file_content->{$key}) && (
+							(
+								$this->file_content->{$key} == "id"
+								&& $this->valueEqual( $key, $attribute )
+							) || $this->stringMatch( $key, $attribute )
+						)
+					) || (
+						isset($this->{$key})
+						&& $this->{$key} == $attribute
 					)
 				) 
 					continue;
@@ -200,7 +204,12 @@ class Record implements \JsonSerializable {
     }
 
 	/**
+	 * This method loads the Structure 1. This structure is 
+	 * the structure that the Coyl/Git returns in the line,
+	 * which is the same as running the git CLI.
+	 * 
 	 * @param String $records_row
+	 * @param Bool $is_db
 	 * @return $this
 	 */
 	public function loadRowStructure1( $records_row, $is_db ){
@@ -220,6 +229,22 @@ class Record implements \JsonSerializable {
 		$this->setAddress( $records_row[3] );
 
 		return $this;
+	}
+
+	/**
+	 * Load structure from cache, which is basic Array.
+	 * 
+	 * @todo to be deleted soon (maybe)
+	 * @param Array $record_row
+	 * @return void
+	 */
+	public function loadRecordCacheStructure( $record_row ){
+		$this->setId( $record_row['id'] );
+		$this->setPermissions( $record_row['permissions'] );
+		$this->setType( $record_row['type'] );
+		$this->setRevisionHash( $record_row['revision_hash'] );
+		$this->setAddress( $record_row['address'] );
+		$this->setFileContent( (object) $record_row['file_content'] );
 	}
 
 	/**

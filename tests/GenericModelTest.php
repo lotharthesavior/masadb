@@ -130,10 +130,11 @@ final class GenericModelTest extends TestCase
         $results = $this->generic->searchRecord([
             "title" => "Lorem Ipsum"
         ]);
+        $results = json_decode($results);
 
         $list = $this->getPhysicalNumberOrRecords();
 
-        $this->assertEquals(count($list), $results->count());
+        $this->assertEquals(count($list), count($results->results));
     }
 
     public function testSearchRecordSearchParam(){
@@ -141,10 +142,11 @@ final class GenericModelTest extends TestCase
             "title" => "Lorem Ipsum",
             "content" => "Lorem Ipsum"
         ], 1);
+        $results = json_decode($results);
 
         $list = $this->getPhysicalNumberOrRecords();
 
-        $this->assertEquals(count($list), $results->count());
+        $this->assertEquals(count($list), count($results->results));
     }
 
     public function testSearchRecordSearchParamAND(){
@@ -152,30 +154,34 @@ final class GenericModelTest extends TestCase
             "title" => "Lorem Ipsum",
             "content" => "Lorem Ipsum"
         ]);
+        $results = json_decode($results);
 
         $list = $this->getPhysicalNumberOrRecords();
 
-        $this->assertTrue(count($list) != $results->count());
+        $this->assertTrue(count($list) != count($results->results));
     }
 
     public function testSave(){
         $results = $this->generic->searchRecord([
             "title" => "Lorem Ipsum"
         ]);
-        $results_count_before = count($results);
+        $results = json_decode($results);
+        $results_count_before = count($results->results);
 
         $this->createDummyRecord();
 
         $results = $this->generic->searchRecord([
             "title" => "Lorem Ipsum"
         ]);
-        $results_count_after = count($results);
+        $results = json_decode($results);
+        $results_count_after = count($results->results);
 
         $this->assertTrue($results_count_after > $results_count_before);
     }
 
     public function testDelete(){
         $test_id = $this->createDummyRecord();
+        // var_dump((int)$test_id);exit;
         
         $this->assertTrue( (int)$test_id > 0 );
 
@@ -186,6 +192,7 @@ final class GenericModelTest extends TestCase
         } catch (Exception $e) {
             $results = $e->getMessage();
         }
+        // var_dump($results);exit;
 
         $this->assertEquals($results, "Inexistent Record.");
 

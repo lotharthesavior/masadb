@@ -7,6 +7,12 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use Models\Generic;
 
+use League\Flysystem\Filesystem;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Plugin\ListPaths;
+use League\Flysystem\Plugin\ListWith;
+use League\Flysystem\Plugin\GetWithMetadata;
+
 class MasaDBController extends Abstraction\MasaController
 {
 	
@@ -31,7 +37,6 @@ class MasaDBController extends Abstraction\MasaController
 	 * @param Array $args
 	 */
 	public function getFullCollection(ServerRequestInterface $request, ResponseInterface $response, $args){
-
 		$this->oauthBefore();
 
 		$generic_model = new Generic(
@@ -56,7 +61,6 @@ class MasaDBController extends Abstraction\MasaController
 		$response->getBody()->write( json_encode($result) );
 
     	return $response;
-
 	}
 
 	/**
@@ -67,7 +71,6 @@ class MasaDBController extends Abstraction\MasaController
 	 * @param Array $args
 	 */
 	public function getGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
-
 	 	$generic_model = new Generic(
 	 		// \Models\Interfaces\FileSystemInterface 
             new \Models\FileSystem\FileSystemBasic,
@@ -103,7 +106,6 @@ class MasaDBController extends Abstraction\MasaController
 		$response->getBody()->write( $record );
 
     	return $response;
-
 	}
 
 	/**
@@ -114,7 +116,6 @@ class MasaDBController extends Abstraction\MasaController
 	 * @param Array $args | ['field' => string, 'value' => string]
 	 */
 	public function searchRecords(ServerRequestInterface $request, ResponseInterface $response, array $args){
-
 	 	$generic_model = new Generic(
 	 		// \Models\Interfaces\FileSystemInterface 
             new \Models\FileSystem\FileSystemBasic,
@@ -137,7 +138,6 @@ class MasaDBController extends Abstraction\MasaController
 		$response->getBody()->write( $result );
 
         return $response;
-
 	}
 
 	/**
@@ -146,7 +146,6 @@ class MasaDBController extends Abstraction\MasaController
 	 * @param Array $args
 	 */
 	public function searchRecordsPost(ServerRequestInterface $request, ResponseInterface $response, array $args){
-
 		$logic = [];
 
 	 	$generic_model = new Generic(
@@ -171,14 +170,13 @@ class MasaDBController extends Abstraction\MasaController
 
 		$generic_model->setDatabase( $args['database'] );
 
+		// JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector]
         $records_found = $generic_model->searchRecord(  $post_data, $logic );
+        // var_dump($records_found);exit;
 
-        $result = json_encode($records_found->jsonSerialize());
-
-        $response->getBody()->write( $result );
+        $response->getBody()->write( $records_found );
 
         return $response;
-
 	}
 
 	/**
@@ -266,5 +264,80 @@ class MasaDBController extends Abstraction\MasaController
                  ->write( json_encode( $return_message ) );
 
 	}
+
+	/**
+	 * This method is used to keep version after each change.
+     * 
+     * Description: It is necessary because the "git add" and 
+     *              "git commit" are expensive once the database
+     *              grows bigger.
+	 */
+	public function gitAsync(ServerRequestInterface $request, ResponseInterface $response, array $args){
+        $request_body = $request->getParsedBody();
+
+        $date1 = new \DateTime;
+
+        $adapter = new Local( __DIR__."/../" );
+        $filesystem = new Filesystem($adapter);
+
+        $generic_model = new Generic(
+            // \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+        );
+
+        if( !empty($request->getHeader("ClientId")) ){
+            $generic_model->setClientId( $request->getHeader("ClientId") );
+        }
+
+        $generic_model->setDatabase( $request_body['database'] );
+
+        $result = $generic_model->stageAndCommitAll();
+
+        $date2 = new \DateTime;
+        $date_diff = $date1->diff($date2);
+
+        $filesystem->put("git_async_result", $result . ' - ' . date("Y-m-d H:i:s") . ' | ' . $date_diff->s . ' seconds.');
+	}
+
+    /**
+     * This method is to update a cache of a specific database
+     * 
+     * @internal It comes from @save on the Generic Model
+     */
+    public function updateCacheAsync(ServerRequestInterface $request, ResponseInterface $response, array $args){
+        $request_body = $request->getParsedBody();
+
+        $date1 = new \DateTime;
+
+        $adapter = new Local( __DIR__."/../" );
+        $filesystem = new Filesystem($adapter);
+        
+        $generic_model = new Generic(
+            // \Models\Interfaces\FileSystemInterface 
+            new \Models\FileSystem\FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new \Models\Git\GitBasic,
+            // \Models\Interfaces\BagInterface
+            new \Models\Bag\BagBasic
+        );
+
+        if( !empty($request->getHeader("ClientId")) ){
+            $generic_model->setClientId( $request->getHeader("ClientId") );
+        }
+
+        $generic_model->setDatabase( $request_body['database'] );
+
+        $cache_helper = new \Helpers\CacheHelper;
+        $result = $generic_model->getGitData( $cache_helper );
+
+        $date2 = new \DateTime;
+        $date_diff = $date1->diff($date2);
+
+        $filesystem->put("updatecache_async_result", $result . ' - ' . date("Y-m-d H:i:s") . ' | ' . $date_diff->s . ' seconds.');
+    }
 
 }
