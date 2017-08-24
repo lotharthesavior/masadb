@@ -24,6 +24,9 @@ trait Pagination
 	 * @return \Ds\Deque
 	 */
 	protected function _getPage(\Ds\Deque $result_complete, Array $params){
+		if( !isset($params['page']) || !isset($params['pageSize']) )
+			return $result_complete;
+
 		$current_page = $result_complete->slice(
 			($params['page'] - 1) * $params['pageSize'], 
 			$params['pageSize']
