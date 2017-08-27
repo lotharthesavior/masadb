@@ -27,7 +27,7 @@ class CacheHelper
 	 * @param bool $create_cache - create cache after the current request
 	 * @return mix (JSON | Bool)
 	 */
-	public function getCacheData( $client, $database, $search = "all" ){
+	public function getCacheData( $client, $database, $search = "all", $create_cache = false ){
 		$root_path_cache = getcwd() . '/cache/client_' . $client . '/';
 		$root_path_database = getcwd() . '/data/client_' . $client . '/';
         $full_database_address = $root_path_database . $database;
@@ -40,24 +40,48 @@ class CacheHelper
 				$database_cache_path .= "/all";
 
 			if( !$filesystem->has($database_cache_path) )
-				return false;
+                return false;
+            
+            $cache_filestamp = $this->getTimeOfFileSystem($filesystem, $database_cache_path);
+        // ------------------------------------
 
-			$cache_filestamp = $this->getTimeOfFileSystem($filesystem, $database_cache_path);
-		// ------------------------------------
+        $config_json = file_get_contents("config.json");
+        $config = json_decode($config_json, true);
+        // var_dump($config);exit;
 
-		// get the database tiemstamp ---
-			$filesystem2 = $this->getFileSystem( $root_path_database );
+        // get the database tiemstamp ---
+            $filesystem2 = $this->getFileSystem( $root_path_database );
 
-			$directory_filestamp = $this->getTimeOfFileSystem($filesystem2, $database);
-		// ------------------------------------
+            // this is commented as its validation in a few lines because the validation has to be able
+            // to happen through git
+            // $directory_filestamp = $this->getTimeOfFileSystem( $filesystem2, $database );
+            $git_filestamp = $this->getTimeOfGitVersion( $full_database_address );
+        // ------------------------------------
+		
+        $cache_deque = unserialize($filesystem->read($database_cache_path));
 
-		if( $cache_filestamp > $directory_filestamp ){
-			$cache_deque = unserialize($filesystem->read($database_cache_path));
+        $this->data = $cache_deque;
 
-			return $cache_deque;
-		}
+        // -- async call --
+        if( 
+            $cache_filestamp < $git_filestamp 
+            && $create_cache
+        ){
+            // $header = [
+                // 'ClientId' => $_SERVER['HTTP_CLIENTID'],
+                // 'Authorization' => $_SERVER['HTTP_AUTHORIZATION'],
+                // 'Content-Type' => $_SERVER['HTTP_CONTENT_TYPE']
+            // ];
+            
+            // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
+            \Helpers\AppHelper::curlPostAsync(
+                "https" . '://' . $config['domain'] . "/git-async", 
+                [ 'database' => $full_database_address ]
+            );
+        }
+        // --
 
-		return false;
+		return $cache_deque;
 	}
 
 	/**
