@@ -100,30 +100,67 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	}
 
 	/**
-	 * Execute the Full Search on Git and store cache
+     * Execute the Full Search on Git and store cache
+     * 
+     * @internal used to update cache
+     * @internal used to search when there is no cache
+     * @param \Helpers\CacheHelper $cache_helper
+     */
+    public function getGitData( \Helpers\CacheHelper $cache_helper ){
+        // $date1 = new \DateTime();
+
+        $results = $this->git->lsTreeHead(
+            '.', 
+            $this->filesystem,
+            $this->isBag(),
+            $this->config['database-address'] . "/" . $this->_getDatabaseLocation()
+        );
+
+        // $date2 = new \DateTime();
+        // var_dump($date2->diff($date1));
+        // var_dump($results);exit;
+
+        $results->sort(function($a, $b){
+            return $a->getId() > $b->getId();
+        });
+
+        $cache_helper->setData($results);
+        $cache_helper->persistCache( $this->_getDatabaseLocation() );
+
+        return $results;
+    }
+
+    /**
+	 * Execute the Full Search on Filesystem and store cache.
+     * 
+     * This method exists as an alternative, but it didn't beat 
+     * the speed of the git ls-tree ($this->getGitData) speed to 
+     * retrieve big amount of data in the working directory.
 	 * 
 	 * @internal used to update cache
 	 * @internal used to search when there is no cache
 	 * @param \Helpers\CacheHelper $cache_helper
 	 */
-	public function getGitData( \Helpers\CacheHelper $cache_helper ){
-		$result_array = $this->git->lsTreeHead(
-			// $this->_getDatabaseLocation() . '/', 
-			'.', 
-			$this->filesystem, 
-			$this->isBag(),
-			// $this->config['database-address'] . '/' . $this->database
-			$this->config['database-address'] . "/" . $this->_getDatabaseLocation()
-		);
+	public function getFilesystemData( \Helpers\CacheHelper $cache_helper ){
+        // $date1 = new \DateTime();
 
-		$result_array->sort(function($a, $b){
+        $results = $this->filesystem->listWorkingDirectory(
+            $this->config['database-address'] . "/" . $this->_getDatabaseLocation(),
+            $this->isBag()
+        );
+
+        // $date2 = new \DateTime();
+        // var_dump($date2->diff($date1));
+        // var_dump($results);exit;
+
+		$results->sort(function($a, $b){
 			return $a->getId() > $b->getId();
 		});
 
-		$cache_helper->setData($result_array);
+		$cache_helper->setData($results);
 		$cache_helper->persistCache( $this->_getDatabaseLocation() );
 
-		return $result_array;
+		return $results;
 	}
 
 	/**
@@ -180,9 +217,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     	$client_data = (object) $client_data;
 
         $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
-        // var_dump($client_data);//exit;
-        // var_dump($local_address);//exit;
-
+        
         // League\Flysystem\Filesystem
         $filesystem = $this->filesystem->getFileSystemAbstraction( $local_address );
 
@@ -196,8 +231,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
             !isset($client_data->id)
             || is_null($client_data->id) 
         ){
-
-        	$id = $this->_nextId();	
+            $id = $this->_nextIdFilesystem();
 
             $item_address = $id . '.json';
 
@@ -209,7 +243,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
             $filesystem->write( $item_address, $content);
 
             if( $this->isBag() )
-                $this->createBagForRecord( $id );
+                $item_address = $this->createBagForRecord( $id );
 
             $this->last_inserted_id = $id;
 
@@ -244,14 +278,36 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         ];
     	// var_dump($body);exit;
 
+        // This is commented because it doesn't perform in the necessary
+        // speed. The alternative is to updae the cache "manually".
 		// $header = [
 		//     'ClientId' => $_SERVER['HTTP_CLIENTID'],
 		//     'Authorization' => $_SERVER['HTTP_AUTHORIZATION'],
 		//     'Content-Type' => $_SERVER['HTTP_CONTENT_TYPE']
 		// ];
-        
         // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
         \Helpers\AppHelper::curlPostAsync($url, $body);
+    }
+
+    /**
+     * This method adds a new filesystem record to the cache 
+     * 
+     * @param int - item id
+     * @return void
+     */
+    public function addItemToCache( $item ){
+        $cache_helper = new \Helpers\CacheHelper;
+
+        $cache_helper->getCacheData( 
+            $this->client_id,
+            $this->database, 
+            'all', 
+            true
+        );
+
+        $new_record = $cache_helper->buildRecordFromPath( $item, $this->client_id, $this->database );
+        $cache_helper->merge($new_record);
+        $cache_helper->persistCache( $this->_getDatabaseLocation() );
     }
 
     /**
@@ -288,39 +344,64 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
 		}
 
-		$result = $this->saveVersion();
+        $result = $this->saveRecordVersion( $id );
+		// $result = $this->saveVersion();
 
 		return $result;
 
 	}
 
 	/**
-	 * Analyze the database to get the next id
-	 * 
+     * Analyze the database to get the next id from Git
+     * 
+     * @return int
+     */
+    protected function _nextId(){
+        // var_dump($this->git);exit;
+        $ls_tree_result = $this->git->lsTreeHead( 
+            // $this->_getDatabaseLocation() . '/', 
+            '.', 
+            $this->filesystem, 
+            $this->isBag(),
+            // $this->config['database-address'] . '/' . $this->database
+            $this->config['database-address'] . "/" . $this->_getDatabaseLocation()
+        );
+
+        if( $ls_tree_result->count() < 1 )
+            return 1;
+
+        $ls_tree_result = $ls_tree_result->map(function($record){
+            return (int) $record->getId();
+        });
+
+        $ls_tree_result->sort();
+
+        return $ls_tree_result->last() + 1;
+    }
+
+    /**
+	 * Analyze the database to get the next id from Filesystem
 	 * 
 	 * @return int
 	 */
-	protected function _nextId(){
-		// var_dump($this->git);exit;
-		$ls_tree_result = $this->git->lsTreeHead( 
-			// $this->_getDatabaseLocation() . '/', 
-			'.', 
-			$this->filesystem, 
-			$this->isBag(),
-			// $this->config['database-address'] . '/' . $this->database
-			$this->config['database-address'] . "/" . $this->_getDatabaseLocation()
-		);
+	protected function _nextIdFilesystem(){
+		$database = $this->config['database-address'] . "/" . $this->_getDatabaseLocation();
 
-		if( $ls_tree_result->count() < 1 )
-			return 1;
+        $records = new \Ds\Deque(scandir($database));
 
-		$ls_tree_result = $ls_tree_result->map(function($record){
-			return (int) $record->getId();
-		});
+        $records = $records->filter(function( $dir ){
+            return $dir != "."
+                   && $dir != ".."
+                   && $dir != ".git";
+        });
 
-		$ls_tree_result->sort();
+        $records = $records->map(function( $dir ){
+            return (int) $dir;
+        });
 
-		return $ls_tree_result->last() + 1;
+        $records->sort();
+
+        return $records->last() + 1;
 	}
 
 	/**

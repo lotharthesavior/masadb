@@ -111,9 +111,9 @@ final class PaginationTest extends TestCase
             new \Models\Bag\BagBasic
         );
 
-        $generic->setDatabase("test");
-
         $generic->setClientId("1");
+
+        $generic->setDatabase("test");
 
         for ($i=0; $i < 10; $i++) {
             $generic->save([

@@ -28,9 +28,9 @@ final class GenericModelTest extends TestCase
             new \Models\Bag\BagBasic
         );
 
-        $this->generic->setDatabase("test");
-
         $this->generic->setClientId("1");
+
+        $this->generic->setDatabase("test");
     }
 
     /**
@@ -59,26 +59,26 @@ final class GenericModelTest extends TestCase
     /**
      * @afterClass
      */
-    public static function tearDownTestData(){
-        $generic = new \Models\Generic(
-            // \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
-            // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
-            // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
-        );
+    // public static function tearDownTestData(){
+    //     $generic = new \Models\Generic(
+    //         // \Models\Interfaces\FileSystemInterface 
+    //         new \Models\FileSystem\FileSystemBasic,
+    //         // \Models\Interfaces\GitInterface
+    //         new \Models\Git\GitBasic,
+    //         // \Models\Interfaces\BagInterface
+    //         new \Models\Bag\BagBasic
+    //     );
 
-        $generic->setDatabase("test");
+    //     $generic->setClientId("1");
 
-        $generic->setClientId("1");
+    //     $generic->setDatabase("test");
 
-        $results = $generic->search("title", "Lorem Ipsum");
+    //     $results = $generic->search("title", "Lorem Ipsum");
 
-        foreach ($results as $key => $record) {
-            $generic->delete( $record->getId() );
-        }
-    }
+    //     foreach ($results as $key => $record) {
+    //         $generic->delete( $record->getId() );
+    //     }
+    // }
 
     public function testSetDatabase(){
         $this->assertEquals("test", $this->generic->getDatabase());
@@ -110,11 +110,18 @@ final class GenericModelTest extends TestCase
         $this->assertEquals($results, "Inexistent Record.");
     }
 
+    /**
+     * This test is useful to test if:
+     *     1. the returning class is a Deque Data Structure
+     *     2. the number of physical files is the same returned 
+     *        but the search
+     */
     public function testFindAll(){
         $results = $this->generic->findAll();
 
         $list = $this->getPhysicalNumberOrRecords();
 
+        $this->assertEquals(get_class($results), 'Ds\Deque');
         $this->assertEquals(count($list), $results->count());
     }
 

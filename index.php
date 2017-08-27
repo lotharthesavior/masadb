@@ -24,53 +24,12 @@ $app = new \Slim\App($config);
 
 $container = $app->getContainer();
 
+include "app/oauth2.php";
 
-// OAuth2 initialization ---------------------------------------------------------------
+include "app/middlewares.php";
 
-// Init our repositories
-$accessTokenRepository = new \Repositories\AccessTokenRepository(); // instance of AccessTokenRepositoryInterface
-
-// Path to authorization server's public key
-$publicKey = $config['settings']['public_key'];
-      
-// Setup the authorization server
-$server = new \League\OAuth2\Server\ResourceServer(
-    $accessTokenRepository,
-    $publicKey
-);
-
-// OAuth2 initialization ---------------------------------------------------------------
-
-
-// Middlewares -------------------------------------------------------------------------
-
-// $app->add(new \League\OAuth2\Server\Middleware\ResourceServerMiddleware($server));
-
-// Middlewares -------------------------------------------------------------------------
-
-
-// Controllers -------------------------------------------------------------------------
-
-$container['HomeController'] = function($c) {
-    return new Controllers\HomeController($c);
-};
-
-$container['MasaDBController'] = function($c) {
-    return new Controllers\MasaDBController($c);
-};
-
-$container['OAuthController'] = function($c) {
-    return new Controllers\OAuthController($c);
-};
-
-// -------------------------------------------------------------------------------------
-
-
-// Routes ------------------------------------------------------------------------------
+include "app/controllers.php";
 
 include "routes.php";
-
-// -------------------------------------------------------------------------------------
-
 
 $app->run();

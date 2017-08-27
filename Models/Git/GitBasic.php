@@ -25,7 +25,11 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * @return void
 	 */
 	public function setRepo( $database_address ){
-		$this->repo = \Coyl\Git\Git::open( $database_address );
+		try {
+			$this->repo = \Coyl\Git\Git::open( $database_address );
+		} catch (GitException $e) {
+			throw $e;
+		}
 	}
 
 	/**

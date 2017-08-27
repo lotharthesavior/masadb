@@ -26,6 +26,8 @@ class AccessToken extends \Models\Abstraction\GitDAO implements AccessTokenEntit
 
 	protected $database = 'oauth/access_token';
 
+	protected $no_cache = true;
+
 	public function __construct(
 		\Models\Interfaces\FileSystemInterface $filesystem,
 		\Models\Interfaces\GitInterface $git,

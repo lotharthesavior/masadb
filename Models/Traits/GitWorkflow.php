@@ -48,21 +48,33 @@ trait GitWorkflow
         $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
         $filesystem = $this->filesystem->getFileSystemAbstraction( $local_address );
         
-        $this->localRequest([
+        // Update cache launching a async request
+        $this->localAsyncRequest([
             'database' => $this->_getDatabaseLocation()
         ]);
 
-        return true;
+        // Update cache by loading it and placing the new record
+        if( 
+        	!isset($this->no_cache) 
+        	|| (isset($this->no_cache) && $this->no_cache == false)
+        ){
+        	$this->addItemToCache( $item );
+        	// var_dump($item);exit;
+        }
 
+        return true;
 	}
 
 	/**
 	 * Make async request
+	 * 
+	 * TODO: this method hes to be changed to inside the 
+	 *       oauth wall
      * 
      * @param Array $body
      * @return void
 	 */
-	private function localRequest($body) {
+	private function localAsyncRequest($body) {
         $url = "https" . '://' . $this->config['domain'] . "/git-async";
 
         // $header = [

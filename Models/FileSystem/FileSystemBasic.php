@@ -3,6 +3,7 @@
 namespace Models\FileSystem;
 
 use League\Flysystem\Filesystem;
+use League\Flysystem\Config;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Plugin\ListPaths;
 use League\Flysystem\Plugin\ListWith;
@@ -17,7 +18,9 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 	public function getFileSystemAbstraction( $local_address ){
 		$adapter = new Local( $local_address );
 
-        return new Filesystem($adapter);
+        return new Filesystem($adapter, new Config([
+		    'disable_asserts' => true,
+		]));
 	}
 
 	/**
@@ -25,7 +28,7 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 	 * 
 	 * @param Record $record
 	 */
-	public function getFileContent( \Models\Record $record, $is_bag, $database_address ){
+	public function getFileContent( \Models\Record $record, $is_bag, $database_address = "." ){
 		$location = $record->getAddress();
 
 		if( $is_bag ){
@@ -37,17 +40,17 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 		}
 		// var_dump($location);exit;
 
-		$full_record_addess = $database_address . "/" . $location;
-		// var_dump($full_record_addess);//exit;
+		$full_record_addess = $location;
+		if( !empty($database_address) )
+			$full_record_addess = $database_address . "/" . $location;
+		// var_dump($full_record_addess);exit;
 
 		$content_temp = file_get_contents( $full_record_addess );
 
 		$record->setFileContent((object) json_decode($content_temp));
+		// var_dump($content_temp);exit;
 
 		// get timestamp of file
-
-			// League\Flysystem\Filesystem
-			$filesystem = $this->getFileSystemAbstraction( $database_address );
 
 			$timestamp = filemtime( $full_record_addess );
 
@@ -79,4 +82,33 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 		return $file_content;
 	}
 
+	/**
+	 * List Records in the working directory
+	 * 
+	 * @param String $database  - format expected: "{string}/"
+	 * @return \Ds\Deque
+	 */
+	public function listWorkingDirectory( $database = '', $is_bag ){
+		$is_db = $database != '';
+
+		if( !$is_db )
+			return new \Ds\Deque([]);
+
+		$records = new \Ds\Deque(scandir($database));
+        $records = $records->filter(function( $dir ){
+        	return $dir != "."
+        		   && $dir != ".."
+        		   && $dir != ".git";
+        });
+
+        // parse resutls
+        $result_deque = $records->map(function( $records_row ) use ($is_db, $is_bag, $database){
+			$new_record = new \Models\Record;
+			$new_record->loadRowStructureSimpleDir( $database, $records_row, $is_db );
+			$new_record = $this->getFileContent( $new_record, $is_bag, "" );
+			return $new_record;
+		});
+
+		return $result_deque;
+	}
 }

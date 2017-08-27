@@ -84,7 +84,9 @@ class Record implements \JsonSerializable {
 	// -- file_content --
 
 	public function setFileContent( $file_content ){
-		$this->file_content = $file_content;
+		foreach ($file_content as $key => $value) {
+			$this->file_content->{$key} = $value;
+		}
 	}
 
 	public function getFileContent(){
@@ -227,6 +229,32 @@ class Record implements \JsonSerializable {
 		$this->setType( $records_row[1] );
 		$this->setRevisionHash( $records_row[2] );
 		$this->setAddress( $records_row[3] );
+
+		return $this;
+	}
+
+	/**
+	 * Load structure for the filesystem search
+	 * 
+	 * @param String $full_database_address (directory tree)
+	 * @param String $records_row
+	 * @return $this
+	 */
+	public function loadRowStructureSimpleDir( $full_database_address, $records_row ){
+		if( empty($records_row) )
+			return $this;
+
+		if( $full_database_address[strlen($full_database_address) - 1] != "/" )
+			$full_database_address = $full_database_address . "/";
+
+		$records_address = $full_database_address . $records_row;
+		
+		$permissions = substr(sprintf('%o', fileperms($records_address)), -4);
+		$this->setId($records_row);
+		$this->setPermissions( $permissions );
+		$this->setAddress( $records_address );
+		$this->setFileTimestamp( filemtime( $records_address ) );
+		$this->setFileUpdatedAt( gmdate("Y-m-d H:i:s", $this->getFileTimestamp()) );
 
 		return $this;
 	}
