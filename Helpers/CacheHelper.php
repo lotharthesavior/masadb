@@ -16,16 +16,21 @@ class CacheHelper
 {
 	protected $data;
 
+	protected $filesystem;
+
 	/**
 	 * Return cache if it is newer than the database itself
 	 * 
 	 * @param int $client
-	 * @param string $database
+	 * @param String $database
+	 * @param String $search
+	 * @param bool $create_cache - create cache after the current request
 	 * @return mix (JSON | Bool)
 	 */
 	public function getCacheData( $client, $database, $search = "all" ){
 		$root_path_cache = getcwd() . '/cache/client_' . $client . '/';
 		$root_path_database = getcwd() . '/data/client_' . $client . '/';
+        $full_database_address = $root_path_database . $database;
 
 		// get the cache timestamp AND check the existence of the cache ---
 			$filesystem = $this->getFileSystem( $root_path_cache );
@@ -67,6 +72,20 @@ class CacheHelper
 	private function getTimeOfFileSystem( \League\Flysystem\Filesystem $filesystem, $path ){
 		return $filesystem->getTimestamp($path);
 	}
+
+    /**
+     * The purpose of this method is to get the timestamp, 
+     * and, in the future replace this to something that is 
+     * more reliable in case the UNIX timestamp is replaced
+     * 
+     * @param String $full_database_address
+     * @return Int (UNIX Timestamp)
+     */
+    private function getTimeOfGitVersion( $full_database_address ){
+        $git_basic = new \Models\Git\GitBasic;
+        $git_basic->setRepo( $full_database_address );
+        return $git_basic->getLastVersionTimestamp();
+    }
 
 	/**
 	 * 
@@ -134,7 +153,9 @@ class CacheHelper
 	}
 
 	/**
-	 * @return void
+	 * @param Int $client
+	 * @param String $database
+	 * @return $this
 	 */
 	public function getAllRecords( $client, $database ){
 		$records = $this->getAllPhysicalRecords( $client, $database );
@@ -150,6 +171,8 @@ class CacheHelper
     }
 
     /**
+     * @param String $database - this is the database address inside 
+     *                           the "cache" directory, eg.: /client_1/users
      * @return void
      */
     public function persistCache( $database ){

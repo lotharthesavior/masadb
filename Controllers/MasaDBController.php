@@ -151,6 +151,8 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 	 	);
 
+	 	// this part is to be improved, right now the simple 
+	 	// presence will change all comparisons to OR
 		$post_data = $request->getParsedBody();
 		if( isset($post_data['logic']) ){
 		 	$logic = $post_data['logic'];
@@ -161,7 +163,7 @@ class MasaDBController extends Abstraction\MasaController
 
 		$generic_model->setDatabase( $args['database'] );
 
-		// JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector]
+		// JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
         $records_found = $generic_model->searchRecord(  $post_data, $logic );
 
         $response->getBody()->write( $records_found );
@@ -278,7 +280,7 @@ class MasaDBController extends Abstraction\MasaController
 	}
 
 	/**
-	 * This method is used to keep version after each change.
+	 * This method is used to create a version after each change.
      * 
      * Description: It is necessary because the "git add" and 
      *              "git commit" are expensive once the database

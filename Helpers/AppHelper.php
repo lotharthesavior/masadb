@@ -67,4 +67,19 @@ class AppHelper {
 	    // exit();
     }
 
+    /**
+     * Return the memory used
+     * 
+     * Reference: http://php.net/manual/en/function.memory-get-usage.php#96280
+     * 
+     * @param Int $size (when it comes not empty, 
+     *        it will just convert Bytes to MB)
+     */
+    public static function getCurrentMemoryUsage( $size = '' ){
+        if( empty($size) )
+            $size = memory_get_usage(true);
+        $unit = array('b','kb','mb','gb','tb','pb');
+        return @round( $size / pow( 1024, ($i = floor(log($size,1024))) ), 2 ) . ' ' . $unit[$i];
+    }
+
 }
