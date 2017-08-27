@@ -125,40 +125,64 @@ class CacheHelper
 	 * 
 	 * @return Array $contents
 	 */
-	private function getAllPhysicalRecords( $client, $database ){
-		$root_path = getcwd() . '/data/client_' . $client . '/' . $database . '/';
-
-			// var_dump($root_path);exit;
-		$filesystem = $this->getFileSystem($root_path);
-
-		$contents = new \Ds\Vector($filesystem->listContents());
+	private function getAllPhysicalRecords( $client, $database, $database_full_address = '' ){
+		$contents = new \Ds\Deque(scandir($database_full_address));
+		$contents = $contents->filter(function( $dir ){
+            return $dir != "."
+                && $dir != ".."
+                && $dir != ".git";
+        });
 		
-		$contents->map(function($path) use ($filesystem, $root_path){
-
-			$path['data'] = [];
-			$bag = new BagIt( $root_path . $path['path'] );
-
-			if( (bool)$bag->isValid() ){
-
-				$data_path = $root_path . $path['path'] . "/data/";
-				$data_filesystem = $this->getFileSystem($data_path);
-				$data_contents = $data_filesystem->listContents("", true);
-			
-				foreach ($data_contents as $key => $_file) {
-					array_push($path['data'], file_get_contents($data_path . $_file['path']));
-				}
-
-			}else{
-
-				array_push($path['data'], file_get_contents($root_path . $path['path']));
-				
-			}
-
-			return $path;
-
+		$contents->map(function($path) use ($client, $database) {
+			return $this->buildRecordFromPath( $path, $client, $database );
 		});
 
 		return $contents;
+	}
+
+	/**
+	 * This method retrieve the root path of a specific client/database
+	 * 
+	 * @param String $client
+	 * @param String $database
+	 * @return String
+	 */
+	private function getRootPath( $client, $database ){
+		return getcwd() . '/data/client_' . $client . '/' . $database . '/';
+	}
+
+	/**
+	 * This method build the records according to the path
+	 * 
+	 * @param String $path
+	 * @param Int $client
+	 * @return Array
+	 */
+	public function buildRecordFromPath( $path, $client, $database ){
+		$root_path = $this->getRootPath($client, $database);
+
+		$record_instance = new \Models\Record;
+
+        $bag = new BagIt( $root_path . $path );
+
+        $record_instance->loadRowStructureSimpleDir( $root_path, $path );
+
+        if( (bool)$bag->isValid() ){
+
+            $data_path = $root_path . $path . "/data/";
+            $data_filesystem = $this->getFileSystem($data_path);
+            $data_contents = $data_filesystem->listContents("", true);
+        
+            foreach ($data_contents as $key => $_file)
+                $record_instance->setFileContent( json_decode(file_get_contents($data_path . $_file['path'])) );
+
+        }else{
+
+            $record_instance->setFileContent( json_decode(file_get_contents($root_path . $path)) );
+            
+        }
+
+		return $record_instance;
 	}
 
 	/**
@@ -181,10 +205,12 @@ class CacheHelper
 	 * @param String $database
 	 * @return $this
 	 */
-	public function getAllRecords( $client, $database ){
-		$records = $this->getAllPhysicalRecords( $client, $database );
+	public function getAllRecords( $client, $database, $database_full_address = '' ){
+		$records = $this->getAllPhysicalRecords( $client, $database, $database_full_address );
 		
 		$this->setData($records);
+
+		return $this;
 	}
 
 	/**
@@ -210,6 +236,18 @@ class CacheHelper
 			$filesystem->createDir($cache_dir);
 
     	$filesystem->put( $cache_dir . "/all", serialize($this->data) );
+    }
+
+    /**
+     * This method merge the new record with the current data
+     * 
+     * @param \Models\Record $new_record
+     * @return mix (current data after merge || false)
+     */
+    public function merge( \Models\Record $new_record ){
+        // var_dump($this->data);exit;
+        $this->data->push($new_record);
+        return $this->data;
     }
 
 }
