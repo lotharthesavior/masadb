@@ -37,7 +37,7 @@ class MasaDBController extends Abstraction\MasaController
 	 * @param Array $args
 	 */
 	public function getFullCollection(ServerRequestInterface $request, ResponseInterface $response, $args){
-		$this->oauthBefore();
+		// $this->oauthBefore();
 
 		$generic_model = new Generic(
 			// \Models\Interfaces\FileSystemInterface 
