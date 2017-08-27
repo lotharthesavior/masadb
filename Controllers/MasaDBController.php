@@ -48,9 +48,7 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 		);
 
-	 	if( !empty($request->getHeader("ClientId")) ){
-			$generic_model->setClientId( $request->getHeader("ClientId") );
-		}
+	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
 	 	$generic_model->setDatabase($args["database"]);
 
@@ -80,9 +78,7 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 	 	);
 
-	 	if( !empty($request->getHeader("ClientId")) ){
-			$generic_model->setClientId( $request->getHeader("ClientId") );
-		}
+	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
         $generic_model->setDatabase( $args['database'] );
 
@@ -125,9 +121,7 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 	 	);
 
-	 	if( !empty($request->getHeader("ClientId")) ){
-			$generic_model->setClientId( $request->getHeader("ClientId") );
-		}
+	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
         $generic_model->setDatabase( $args['database'] );
 
@@ -163,16 +157,12 @@ class MasaDBController extends Abstraction\MasaController
 		 	unset($post_data['logic']);
 		}
 
-		$client_id_header = $request->getHeader("ClientId");
-	 	if( !empty($client_id_header) ){
-			$generic_model->setClientId( $client_id_header );
-		}
+		$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
 		$generic_model->setDatabase( $args['database'] );
 
 		// JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector]
         $records_found = $generic_model->searchRecord(  $post_data, $logic );
-        // var_dump($records_found);exit;
 
         $response->getBody()->write( $records_found );
 
@@ -203,17 +193,41 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 	 	);
 
-	 	if( !empty($request->getHeader("ClientId")) ){
-			$generic_model->setClientId( $request->getHeader("ClientId") );
-		}
+	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
         $generic_model->setDatabase( $args['database'] );
+        // var_dump($generic_model);exit;
 
 	 	$result = $this->saveRecord($request, $response, $args, $generic_model);
 
 	 	return $response->withStatus(200)
                  ->withHeader('Content-Type', 'application/json')
                  ->write( $result );
+
+	}
+
+	/**
+	 * This method specify the client Id from a Header parameter.
+	 * 
+	 * This header is validated in the OAuth2 lib.
+	 * 
+	 * @param mix $client_id
+	 * @return Generic $generic_model
+	 */
+	private function setClient( $client_id, Generic $generic_model ){
+		
+		if( !empty($client_id) ){
+
+	 		$client_id = $client_id;
+
+	 		if( is_array($client_id) )
+	 			$client_id = $client_id[0];
+
+			$generic_model->setClientId( $client_id );
+			
+		}
+
+		return $generic_model;
 
 	}
 
@@ -231,9 +245,7 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 	 	);
 
-	 	if( !empty($request->getHeader("ClientId")) ){
-			$generic_model->setClientId( $request->getHeader("ClientId") );
-		}
+		$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
 	 	$generic_model->setDatabase( $args['database'] );
 
@@ -289,9 +301,7 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
         );
 
-        if( !empty($request->getHeader("ClientId")) ){
-            $generic_model->setClientId( $request->getHeader("ClientId") );
-        }
+        $generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
         $generic_model->setDatabase( $request_body['database'] );
 
@@ -325,9 +335,7 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
         );
 
-        if( !empty($request->getHeader("ClientId")) ){
-            $generic_model->setClientId( $request->getHeader("ClientId") );
-        }
+        $generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
         $generic_model->setDatabase( $request_body['database'] );
 
