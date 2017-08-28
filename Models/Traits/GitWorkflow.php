@@ -41,9 +41,12 @@ trait GitWorkflow
 	}
 
 	/**
-	 * 
+     * This method save records version in the cache.
+     * 
+	 * @param Int $item
+     * @param bool $is_delete - is marks if the operation is to remove the item
 	 */
-	public function saveRecordVersion( $item = null ){
+	public function saveRecordVersion( $item = null, $is_delete = false ){
         // get the filesystem for the current database
         $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
         $filesystem = $this->filesystem->getFileSystemAbstraction( $local_address );
@@ -55,11 +58,16 @@ trait GitWorkflow
 
         // Update cache by loading it and placing the new record
         if( 
-        	!isset($this->no_cache) 
-        	|| (isset($this->no_cache) && $this->no_cache == false)
+            !isset($this->no_cache) 
+            || (isset($this->no_cache) && $this->no_cache == false)
         ){
-        	$this->addItemToCache( $item );
-        	// var_dump($item);exit;
+            if( $is_delete ){
+                $this->removeItemFromCache( $item );
+            }else{
+                if( $filesystem->has($item) )
+                    $this->removeItemFromCache( $item );
+                $this->addItemToCache( $item );
+            }
         }
 
         return true;

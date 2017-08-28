@@ -248,7 +248,12 @@ class Record implements \JsonSerializable {
 			$full_database_address = $full_database_address . "/";
 
 		$records_address = $full_database_address . $records_row;
-		
+
+		// avoid existent bag records_row to get inside the object attribute "id"
+		$records_row_exploded = explode("/", $records_row);
+		if( count($records_row_exploded) > 1 )
+			$records_row = $records_row_exploded[0];
+
 		$permissions = substr(sprintf('%o', fileperms($records_address)), -4);
 		$this->setId($records_row);
 		$this->setPermissions( $permissions );

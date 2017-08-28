@@ -159,19 +159,38 @@ class CacheHelper
 	 * @return Array
 	 */
 	public function buildRecordFromPath( $path, $client, $database ){
+		// var_dump($path);exit;
 		$root_path = $this->getRootPath($client, $database);
 
 		$record_instance = new \Models\Record;
 
-        $bag = new BagIt( $root_path . $path );
+		// avoid 2 bars together
+		if( 
+			$root_path[strlen($root_path) - 1] == "/" 
+			&& $path[0] == "/"
+		)
+			$path = substr($path, 1);
+
+        $data_path = $root_path . $path . "/data/";
+        // var_dump($data_path);exit;
+
+		// avoid file inside an existent bag
+		$path_for_bag = $path;
+		if( file_exists($root_path . $path) ){
+			// get the id - the first element after the database name
+			$path_for_bag = explode($path_for_bag, $data_path)[0] . $path_for_bag;
+		}
+
+        $bag = new BagIt( $path_for_bag );
 
         $record_instance->loadRowStructureSimpleDir( $root_path, $path );
 
         if( (bool)$bag->isValid() ){
 
-            $data_path = $root_path . $path . "/data/";
+            // var_dump($data_path);exit;
             $data_filesystem = $this->getFileSystem($data_path);
             $data_contents = $data_filesystem->listContents("", true);
+            // exit("test7");
         
             foreach ($data_contents as $key => $_file)
                 $record_instance->setFileContent( json_decode(file_get_contents($data_path . $_file['path'])) );

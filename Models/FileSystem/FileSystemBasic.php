@@ -85,6 +85,7 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 	/**
 	 * List Records in the working directory
 	 * 
+	 * @todo not functional right now
 	 * @param String $database  - format expected: "{string}/"
 	 * @return \Ds\Deque
 	 */
@@ -104,7 +105,7 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
         // parse resutls
         $result_deque = $records->map(function( $records_row ) use ($is_db, $is_bag, $database){
 			$new_record = new \Models\Record;
-			$new_record->loadRowStructureSimpleDir( $database, $records_row, $is_db );
+			$new_record->loadRowStructureSimpleDir( $database, $records_row ); // TODO: this method has changed!
 			$new_record = $this->getFileContent( $new_record, $is_bag, "" );
 			return $new_record;
 		});

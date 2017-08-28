@@ -211,14 +211,19 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	}
 
     /**
+     * Persist record
+     * 
      * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]
      */
     public function save( Array $client_data ){
+    	// exit("test");
+    	// var_dump($client_data);exit;
     	$client_data = (object) $client_data;
 
         $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
         
         // League\Flysystem\Filesystem
+        // var_dump($local_address);//exit;
         $filesystem = $this->filesystem->getFileSystemAbstraction( $local_address );
 
         $content = json_encode($client_data->content, JSON_PRETTY_PRINT);
@@ -231,6 +236,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
             !isset($client_data->id)
             || is_null($client_data->id) 
         ){
+        	// var_dump("test");exit;
             $id = $this->_nextIdFilesystem();
 
             $item_address = $id . '.json';
@@ -247,24 +253,31 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
             $this->last_inserted_id = $id;
 
-        }else{
+	        $result = $this->saveRecordVersion( $item_address );
 
-            $id = $client_data->id;
-
-            $item_address = $this->bag->locationOfBag( $id, $this->isBag() ) . '.json';
-
-            if( $filesystem->has( $item_address ) )
-            	$this->saveRecordVersion( $item_address );
-
-            $filesystem->update( $item_address, $content);
+	        return $id;
 
         }
-        // var_dump($this->_getDatabaseLocation());exit;
+
+        $id = $client_data->id;
+
+        // $item_address = $this->_getDatabaseLocation() . $this->bag->locationOfBag( $id, $this->isBag() );
+        $item_address = $this->bag->locationOfBag( $id, $this->isBag() );
+        $item_address .= '.json';
         // var_dump($item_address);exit;
 
-        $result = $this->saveRecordVersion( $item_address );
+        if( !$filesystem->has( $item_address ) )
+        	$this->saveRecordVersion( $id );
+
+        // var_dump($this->bag->locationOfBag( $id, $this->isBag() ) . ".json");exit;
+        $result = $filesystem->update( $this->bag->locationOfBag( $id, $this->isBag() ) . ".json", $content);
+        // var_dump($result);exit;
+
+        // var_dump($item_address);exit;
+	    $result = $this->saveRecordVersion( $id );
 
         return $id;
+
     }
 
     /**
@@ -311,6 +324,32 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     }
 
     /**
+     * This method adds a new filesystem record to the cache 
+     * 
+     * @param int - item id
+     * @return void
+     */
+    public function removeItemFromCache( $item ){
+        $cache_helper = new \Helpers\CacheHelper;
+
+        $cache_helper->getCacheData( 
+            $this->client_id,
+            $this->database, 
+            'all', 
+            true
+        );
+
+        // var_dump($cache_helper);exit;
+        $cache_data = $cache_helper->getData();
+        $cache_data->filter(function($record) use ($item) {
+        	return $record->getId() != $item;
+        });
+        $cache_helper->setData($cache_data);
+
+        $cache_helper->persistCache( $this->_getDatabaseLocation() );
+    }
+
+    /**
      * 
      */
     public function stageAndCommitAll(){
@@ -344,7 +383,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
 		}
 
-        $result = $this->saveRecordVersion( $id );
+        $result = $this->saveRecordVersion( $id, true );
 		// $result = $this->saveVersion();
 
 		return $result;
@@ -398,6 +437,9 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         $records = $records->map(function( $dir ){
             return (int) $dir;
         });
+
+        if( $records->count() === 0 )
+        	return 1;
 
         $records->sort();
 
