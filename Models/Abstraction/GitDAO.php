@@ -58,11 +58,8 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 	public function find( $id ){
 		$address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $this->bag->locationOfBag( $id, $this->isBag() ) . ".json";
 		
-		if( !file_exists($address) ){
-
+		if( !file_exists($address) )
 			throw new \Exception("Inexistent Record.");
-
-		}
 
 		$result = file_get_contents( $address );
 

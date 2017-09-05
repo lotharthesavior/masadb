@@ -202,6 +202,8 @@ class MasaDBController extends Abstraction\MasaController
 
 	 	$result = $this->saveRecord($request, $response, $args, $generic_model);
 
+	 	// place record address in the result
+
 	 	return $response->withStatus(200)
                  ->withHeader('Content-Type', 'application/json')
                  ->write( $result );

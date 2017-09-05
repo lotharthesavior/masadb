@@ -193,11 +193,11 @@ class CacheHelper
             // exit("test7");
         
             foreach ($data_contents as $key => $_file)
-                $record_instance->setFileContent( json_decode(file_get_contents($data_path . $_file['path'])) );
+                $record_instance->setFileContent( (array) json_decode(file_get_contents($data_path . $_file['path'])) );
 
         }else{
 
-            $record_instance->setFileContent( json_decode(file_get_contents($root_path . $path)) );
+            $record_instance->setFileContent( (array) json_decode(file_get_contents($root_path . $path)) );
             
         }
 
