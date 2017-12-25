@@ -44,7 +44,7 @@ trait commonController
 		try {
 
 			$client_data = array_merge(["id" => $id, "content" => $request_body]);
-			
+
 			$message = $model->save( $client_data );
 			
 			$result = [

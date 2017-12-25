@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * FileSyste Basic
+ * 
+ * @author Savio Resende <savio@savioresende.com.br>
+ */
+
 namespace Models\FileSystem;
 
 use League\Flysystem\Filesystem;
@@ -111,5 +117,18 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 		});
 
 		return $result_deque;
+	}
+
+	/**
+	 * Create the Directory to serve as Database
+	 * 
+	 * @param string $base_location
+	 * @param string $database
+	 * 
+	 * @return boolean
+	 */
+	public function createDatabaseDirectory(string $base_location, string $database) {
+		$filesystem = $this->getFileSystemAbstraction( $base_location );
+		return $filesystem->createDir($database);
 	}
 }

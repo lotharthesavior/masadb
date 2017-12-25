@@ -47,7 +47,6 @@ class CacheHelper
 
         $config_json = file_get_contents("config.json");
         $config = json_decode($config_json, true);
-        // var_dump($config);exit;
 
         // get the database tiemstamp ---
             $filesystem2 = $this->getFileSystem( $root_path_database );
@@ -159,7 +158,6 @@ class CacheHelper
 	 * @return Array
 	 */
 	public function buildRecordFromPath( $path, $client, $database ){
-		// var_dump($path);exit;
 		$root_path = $this->getRootPath($client, $database);
 
 		$record_instance = new \Models\Record;
@@ -171,17 +169,20 @@ class CacheHelper
 		)
 			$path = substr($path, 1);
 
-        $data_path = $root_path . $path . "/data/";
-        // var_dump($data_path);exit;
+		$data_path = $root_path . $path . "/data/";
 
 		// avoid file inside an existent bag
 		$path_for_bag = $path;
 		if( file_exists($root_path . $path) ){
 			// get the id - the first element after the database name
-			$path_for_bag = explode($path_for_bag, $data_path)[0] . $path_for_bag;
+
+			// TODO: check this case, it was removed because it was creating a bag from the root of the database directory
+			// $path_for_bag = explode($path_for_bag, $data_path)[0] . $path_for_bag;
+			
+			$path_for_bag = $root_path . $path;
 		}
 
-        $bag = new BagIt( $path_for_bag );
+        $bag = new BagIt($path_for_bag);
 
         $record_instance->loadRowStructureSimpleDir( $root_path, $path );
 
@@ -216,6 +217,10 @@ class CacheHelper
 	 * @return \Ds\Deque
 	 */
 	public function getData(){
+		if ($this->data === null) {
+			$this->data = new \Ds\Deque();
+		}
+
 		return $this->data;
 	}
 
@@ -264,7 +269,6 @@ class CacheHelper
      * @return mix (current data after merge || false)
      */
     public function merge( \Models\Record $new_record ){
-        // var_dump($this->data);exit;
         $this->data->push($new_record);
         return $this->data;
     }

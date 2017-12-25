@@ -14,12 +14,12 @@ trait BagUtilities
 	protected function createBagForRecord( $id ){
 
 		$record_path = $this->config['database-address'] . '/' . $this->_getDatabaseLocation() . '/' . $id;
-
+		
 	 	$bag = new BagIt( $record_path );
 
 	 	$bag->addFile( $record_path . '.json', $id . '.json' );
 
-		$bag->update();
+	 	$bag->update();
 
 		unlink( $record_path . '.json' );
 

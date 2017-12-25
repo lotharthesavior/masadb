@@ -7,10 +7,10 @@ interface GenericInterface
 	/**
 	 * Set the database
 	 * 
-	 * @param String $database
+	 * @param string $database
 	 * @return void
 	 */
-	public function setDatabase( $database );
+	public function setDatabase(string $database);
 
 	/**
 	 * Get the database
@@ -22,10 +22,10 @@ interface GenericInterface
 	/**
 	 * Set the Client ID
 	 * 
-	 * @param String $client_id
+	 * @param string $client_id
 	 * @return void
 	 */
-	public function setClientId( $client_id );
+	public function setClientId(string $client_id);
 
 	/**
 	 * Get the Client ID

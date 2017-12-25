@@ -13,6 +13,8 @@ use League\Flysystem\Plugin\ListPaths;
 use League\Flysystem\Plugin\ListWith;
 use League\Flysystem\Plugin\GetWithMetadata;
 
+use \Models\Exceptions\NotExistentDatabaseException;
+
 class MasaDBController extends Abstraction\MasaController
 {
 	
@@ -50,7 +52,17 @@ class MasaDBController extends Abstraction\MasaController
 
 	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
-	 	$generic_model->setDatabase($args["database"]);
+	 	try {
+
+            $generic_model->setDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
 
 	 	$generic_model->sortType = "creation_DESC";
 
@@ -80,7 +92,17 @@ class MasaDBController extends Abstraction\MasaController
 
 	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
-        $generic_model->setDatabase( $args['database'] );
+	 	try {
+
+            $generic_model->setDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
 
         try {
         	
@@ -123,7 +145,17 @@ class MasaDBController extends Abstraction\MasaController
 
 	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
-        $generic_model->setDatabase( $args['database'] );
+        try {
+
+            $generic_model->setDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
 
         $records_found = $generic_model->search( $args['key'], $args['value'] );
         
@@ -161,7 +193,17 @@ class MasaDBController extends Abstraction\MasaController
 
 		$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
-		$generic_model->setDatabase( $args['database'] );
+		try {
+
+            $generic_model->setDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
 
 		// JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
         $records_found = $generic_model->searchRecord(  $post_data, $logic );
@@ -196,12 +238,26 @@ class MasaDBController extends Abstraction\MasaController
 	 	);
 
 	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
+        $generic_model->no_cache = false;
 
-        $generic_model->setDatabase( $args['database'] );
-        // var_dump($generic_model);exit;
+        try {
 
-	 	$result = $this->saveRecord($request, $response, $args, $generic_model);
+            $generic_model->setDatabase($args['database']);
 
+        } catch (NotExistentDatabaseException $e) {
+
+            $generic_model->createDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
+
+        $result = $this->saveRecord($request, $response, $args, $generic_model);
+        
 	 	// place record address in the result
 
 	 	return $response->withStatus(200)
@@ -251,7 +307,17 @@ class MasaDBController extends Abstraction\MasaController
 
 		$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
-	 	$generic_model->setDatabase( $args['database'] );
+        try {
+
+            $generic_model->setDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
 
 	 	try {
 
@@ -307,7 +373,17 @@ class MasaDBController extends Abstraction\MasaController
 
         $generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
-        $generic_model->setDatabase( $request_body['database'] );
+        try {
+
+            $generic_model->setDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
 
         $result = $generic_model->stageAndCommitAll();
 
@@ -341,7 +417,17 @@ class MasaDBController extends Abstraction\MasaController
 
         $generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
-        $generic_model->setDatabase( $request_body['database'] );
+        try {
+
+            $generic_model->setDatabase($request_body['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
 
         $cache_helper = new \Helpers\CacheHelper;
         $result = $generic_model->getGitData( $cache_helper );

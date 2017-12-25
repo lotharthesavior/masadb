@@ -115,9 +115,9 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	public function stageChanges( $item = null ){
 
 		if( !is_null($item) )
-			$this->repo->add($item);
+			$result = $this->repo->add($item);
 		else
-			$this->repo->add();
+			$result = $this->repo->add();
 
 		return true;
 
@@ -198,5 +198,16 @@ class GitBasic implements \Models\Interfaces\GitInterface
 		$metadata->last_id = ((object) $filesystem_report->last())->filename;
 
 		return json_encode($metadata);
+	}
+
+	/**
+	 * Init the Repository
+	 * 
+	 * @param string $repository_address
+	 * 
+	 * @return void
+	 */
+	public function initRepository(string $repository_address){
+		$this->repo = \Coyl\Git\GitRepo::create($repository_address);
 	}
 }
