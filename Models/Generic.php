@@ -26,7 +26,7 @@ class Generic extends \Models\Abstraction\GitDAO implements \Models\Interfaces\G
     /**
      * Set the database
      *
-     * @param String $database
+     * @param string $database
      * @return void
      */
     public function setDatabase(string $database)

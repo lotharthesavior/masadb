@@ -188,12 +188,11 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     /**
      * Search that works with multiple params
      *
-     * @param Array $params
+     * @param array $params
      * @return JSON | ["results": \Ds\Vector, "pages": \Ds\Vector]
      */
     public function searchRecord($params, $logic = [])
     {
-
         $result_complete = $this->getAllRecords();
 
         $search_params = $this->filterPaginationParams($params);
@@ -217,9 +216,9 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     /**
      * Persist record
      *
-     * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]
+     * @param array $client_data | eg.: ["id" => {int}, "content" => {array}]
      */
-    public function save(Array $client_data)
+    public function save(array $client_data)
     {
         $client_data = (object)$client_data;
 
@@ -362,7 +361,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      *
      * @internal simple registers can be simple json files, but
      *           any other type of file, have to be a BagIt.
-     * @param Int $id
+     * @param int $id
      */
     public function delete($id)
     {
@@ -454,7 +453,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      * Analyze the presence of client_id and add it to the database
      * folder to keep data into the client scope
      *
-     * @return String $database_location
+     * @return string $database_location
      */
     protected function _getDatabaseLocation()
     {
@@ -474,7 +473,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      * @internal this method analyze the trait. For a more
      *           reliable use a BagIt Instance.
      *
-     * @return Boolean
+     * @return boolean
      */
     public function isBag()
     {
@@ -496,7 +495,8 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      *
      * @todo this function will encapsulate the sorting functions
      * @todo validate $this->sortType
-     * @param Array $collection
+     *
+     * @param array $collection
      */
     private function _sortResult($collection)
     {
@@ -533,7 +533,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     /**
      * Sort Ascending
      *
-     * @param Array $collection
+     * @param array $collection
      */
     private function _sortAscendingOrder($collection)
     {
@@ -549,7 +549,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     /**
      * Sort Ascending
      *
-     * @param Array $collection
+     * @param array $collection
      */
     private function _sortCreationDescendingOrder($collection)
     {

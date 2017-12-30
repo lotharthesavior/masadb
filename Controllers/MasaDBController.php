@@ -36,41 +36,12 @@ class MasaDBController extends Abstraction\MasaController
 	 * 
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
-	 * @param Array $args
+     *
+	 * @param array $args
 	 */
-	public function getFullCollection(ServerRequestInterface $request, ResponseInterface $response, $args){
-		// $this->oauthBefore();
-
-		$generic_model = new Generic(
-			// \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
-            // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
-            // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
-		);
-
-	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
-
-	 	try {
-
-            $generic_model->setDatabase($args['database']);
-
-        } catch (\Exception $e) { // TODO: specialize this
-
-            return $response->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
-
-        }
-
-	 	$generic_model->sortType = "creation_DESC";
-
-		$result = $generic_model->findAll();
-
-		$response->getBody()->write( json_encode($result) );
-
-    	return $response;
+	public function getFullCollection (ServerRequestInterface $request, ResponseInterface $response, $args)
+    {
+        return $this->searchRecords($request, $response, $args);
 	}
 
 	/**
@@ -78,52 +49,17 @@ class MasaDBController extends Abstraction\MasaController
 	 * 
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
-	 * @param Array $args
+     *
+	 * @param array $args
 	 */
-	public function getGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
-	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
-            // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
-            // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
-	 	);
+	public function getGeneric (ServerRequestInterface $request, ResponseInterface $response, array $args)
+    {
+	    $args['key']   = 'id';
+	    $args['value'] = $args['id'];
 
-	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
+	    unset($args['id']);
 
-	 	try {
-
-            $generic_model->setDatabase($args['database']);
-
-        } catch (\Exception $e) { // TODO: specialize this
-
-            return $response->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
-
-        }
-
-        try {
-        	
-			$record = $generic_model->find( $args['id'] );
-
-        } catch (\Exception $e) {
-
-        	$return_message = [
-	 			"status" => "error",
-	 			"message" => $e->getMessage()
-	 		];
-
-	 		return $response->withStatus(200)
-                     ->withHeader('Content-Type', 'application/json')
-                     ->write( json_encode( $return_message ) );
-        	
-        }
-
-		$response->getBody()->write( $record );
-
-    	return $response;
+	 	return $this->searchRecords($request, $response, $args);
 	}
 
 	/**
@@ -131,9 +67,12 @@ class MasaDBController extends Abstraction\MasaController
 	 * 
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
-	 * @param Array $args | ['field' => string, 'value' => string]
+	 * @param array $args | ['field' => string, 'value' => string]
 	 */
-	public function searchRecords(ServerRequestInterface $request, ResponseInterface $response, array $args){
+	public function searchRecords (ServerRequestInterface $request, ResponseInterface $response, array $args)
+    {
+        $logic = [];
+
 	 	$generic_model = new Generic(
 	 		// \Models\Interfaces\FileSystemInterface 
             new \Models\FileSystem\FileSystemBasic,
@@ -142,6 +81,18 @@ class MasaDBController extends Abstraction\MasaController
             // \Models\Interfaces\BagInterface
             new \Models\Bag\BagBasic
 	 	);
+
+        // this part is to be improved, right now the simple 
+        // presence will change all comparisons to OR
+        $post_data = [];
+        if (isset($args['key']) && isset($args['value'])) {
+            $post_data[$args['key']] = $args['value'];
+        }
+
+        if (isset($post_data['logic'])) {
+            $logic = $post_data['logic'];
+            unset($post_data['logic']);
+        }
 
 	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
 
@@ -157,11 +108,10 @@ class MasaDBController extends Abstraction\MasaController
 
         }
 
-        $records_found = $generic_model->search( $args['key'], $args['value'] );
-        
-        $result = json_encode($records_found->jsonSerialize());
+        // JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
+        $records_found = $generic_model->searchRecord(  $post_data, $logic );
 		
-		$response->getBody()->write( $result );
+		$response->getBody()->write($records_found);
 
         return $response;
 	}
@@ -169,7 +119,7 @@ class MasaDBController extends Abstraction\MasaController
 	/**
 	 * Search Records Post
 	 * 
-	 * @param Array $args
+	 * @param array $args
 	 */
 	public function searchRecordsPost(ServerRequestInterface $request, ResponseInterface $response, array $args){
 		$logic = [];
@@ -206,7 +156,7 @@ class MasaDBController extends Abstraction\MasaController
         }
 
 		// JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
-        $records_found = $generic_model->searchRecord(  $post_data, $logic );
+        $records_found = $generic_model->searchRecord($post_data, $logic);
 
         $response->getBody()->write( $records_found );
 

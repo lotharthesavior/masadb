@@ -133,18 +133,18 @@ class Record implements \JsonSerializable {
 	 * @todo implement the logic (OR, AND, ...)
 	 * @todo the OR is not complete
 	 */
-	public function multipleParamsMatch( $params, $logic = [] ){
-
+	public function multipleParamsMatch ($params, $logic = [])
+    {
 		// --------------------------------------------------------
 		// AND for all logics -------------------------------------
 		// --------------------------------------------------------
 		if( empty($logic) ){
 			foreach ($params as $key => $attribute) {
-				if( 
+			    if (
 					(
 						isset($this->file_content->{$key}) && (
 							(
-								$this->file_content->{$key} == "id"
+								$this->file_content->{$key} === "id"
 								&& $this->valueEqual( $key, $attribute )
 							) || $this->stringMatch( $key, $attribute )
 						)
@@ -152,10 +152,11 @@ class Record implements \JsonSerializable {
 						isset($this->{$key})
 						&& $this->{$key} == $attribute
 					)
-				) 
-					continue;
-				else
-					return false;
+				) {
+                    continue;
+                } else {
+                    return false;
+                }
 				
 			}
 		}
