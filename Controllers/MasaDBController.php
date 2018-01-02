@@ -104,7 +104,7 @@ class MasaDBController extends Abstraction\MasaController
 
             return $response->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
+                ->write( json_encode(['results' => []]) );
 
         }
 
@@ -151,7 +151,7 @@ class MasaDBController extends Abstraction\MasaController
 
             return $response->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
+                ->write( json_encode(['results' => []]) );
 
         }
 
