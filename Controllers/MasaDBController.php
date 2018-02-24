@@ -94,8 +94,13 @@ class MasaDBController extends Abstraction\MasaController
             unset($post_data['logic']);
         }
 
-	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
+        $current_client_id = $request->getHeader("ClientId");
+        if (!empty($request->getHeader("CurrentClientId"))) {
+            $current_client_id = $request->getHeader("CurrentClientId");
+        }
 
+	 	$generic_model = $this->setClient($current_client_id, $generic_model);
+        
         try {
 
             $generic_model->setDatabase($args['database']);
@@ -141,7 +146,12 @@ class MasaDBController extends Abstraction\MasaController
 		 	unset($post_data['logic']);
 		}
 
-		$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
+        $current_client_id = $request->getHeader("ClientId");
+        if (!empty($request->getHeader("CurrentClientId"))) {
+            $current_client_id = $request->getHeader("CurrentClientId");
+        }
+
+        $generic_model = $this->setClient($current_client_id, $generic_model);
 
 		try {
 
@@ -187,7 +197,13 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 	 	);
 
-	 	$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
+	 	$current_client_id = $request->getHeader("ClientId");
+        if (!empty($request->getHeader("CurrentClientId"))) {
+            $current_client_id = $request->getHeader("CurrentClientId");
+        }
+
+        $generic_model = $this->setClient($current_client_id, $generic_model);
+
         $generic_model->no_cache = false;
 
         try {
@@ -255,7 +271,12 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 	 	);
 
-		$generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
+		$current_client_id = $request->getHeader("ClientId");
+        if (!empty($request->getHeader("CurrentClientId"))) {
+            $current_client_id = $request->getHeader("CurrentClientId");
+        }
+
+        $generic_model = $this->setClient($current_client_id, $generic_model);
 
         try {
 
@@ -321,7 +342,12 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
         );
 
-        $generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
+        $current_client_id = $request->getHeader("ClientId");
+        if (!empty($request->getHeader("CurrentClientId"))) {
+            $current_client_id = $request->getHeader("CurrentClientId");
+        }
+
+        $generic_model = $this->setClient($current_client_id, $generic_model);
 
         try {
 
@@ -365,7 +391,12 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
         );
 
-        $generic_model = $this->setClient($request->getHeader("ClientId"), $generic_model);
+        $current_client_id = $request->getHeader("ClientId");
+        if (!empty($request->getHeader("CurrentClientId"))) {
+            $current_client_id = $request->getHeader("CurrentClientId");
+        }
+
+        $generic_model = $this->setClient($current_client_id, $generic_model);
 
         try {
 

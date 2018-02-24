@@ -34,7 +34,7 @@ class Generic extends \Models\Abstraction\GitDAO implements \Models\Interfaces\G
         $this->database = $database;
 
         $database_physical_location = $this->config['database-address'] . "/" . $this->_getDatabaseLocation();
-
+        
         if (!file_exists($database_physical_location)) {
             throw new NotExistentDatabaseException("Database Doesn't Exist.");
         }

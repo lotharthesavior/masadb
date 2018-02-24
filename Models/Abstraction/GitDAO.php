@@ -91,7 +91,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         $cache_helper = new \Helpers\CacheHelper;
 
         // var_dump($this->database);
-        $cache_result = $cache_helper->getCacheData(1, $this->database);
+        $cache_result = $cache_helper->getCacheData($this->getClientId(), $this->database);
         if ($cache_result !== false) {
             return $cache_result;
         }
