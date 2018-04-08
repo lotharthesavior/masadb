@@ -114,7 +114,7 @@ class MasaDBController extends Abstraction\MasaController
         }
 
         // JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
-        $records_found = $generic_model->searchRecord(  $post_data, $logic );
+        $records_found = $generic_model->searchRecord($post_data, $logic);
 		
 		$response->getBody()->write($records_found);
 
@@ -140,7 +140,7 @@ class MasaDBController extends Abstraction\MasaController
 
 	 	// this part is to be improved, right now the simple 
 	 	// presence will change all comparisons to OR
-		$post_data = $request->getParsedBody();
+		$post_data = ($request->getParsedBody() === null)? [] : $request->getParsedBody();
 		if( isset($post_data['logic']) ){
 		 	$logic = $post_data['logic'];
 		 	unset($post_data['logic']);
@@ -211,7 +211,7 @@ class MasaDBController extends Abstraction\MasaController
             $generic_model->setDatabase($args['database']);
 
         } catch (NotExistentDatabaseException $e) {
-
+            
             $generic_model->createDatabase($args['database']);
 
         } catch (\Exception $e) { // TODO: specialize this

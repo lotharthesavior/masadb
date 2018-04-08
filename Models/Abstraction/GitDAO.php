@@ -205,8 +205,9 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
             return (int)$a->getId() > (int)$b->getId();
         });
 
-        if (!$this->_isPaginated($params))
+        if (!$this->_isPaginated($params)) {
             return json_encode(["results" => $result_complete]);
+        }
 
         $result_page = $this->_getPage($result_complete, $params);
 

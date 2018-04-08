@@ -21,10 +21,12 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * @internal this method is necessary because the instance is 
 	 *           created before the address is available. This is
 	 *           happens for the possibility of Polymorphism.
-	 * @param String $database_address
+	 * 
+	 * @param string $database_address
+	 * 
 	 * @return void
 	 */
-	public function setRepo( $database_address ){
+	public function setRepo( string $database_address ){
 		try {
 			$this->repo = \Coyl\Git\Git::open( $database_address );
 		} catch (GitException $e) {
@@ -34,10 +36,16 @@ class GitBasic implements \Models\Interfaces\GitInterface
 
 	/**
 	 * @internal depends on $this->repo
-	 * @param String $database  - format expected: "{string}/"
+	 * 
+	 * @param string $database  - format expected: "{string}/"
+	 * @param \Models\Interfaces\FileSystemInterface $filesystem
+	 * @param bool $is_bag
+	 * @param string $database_address
+	 * 
 	 * @return \Ds\Deque
 	 */
-	public function lsTreeHead( $database = '', \Models\Interfaces\FileSystemInterface $filesystem, $is_bag, $database_address ){
+	public function lsTreeHead( string $database = '', \Models\Interfaces\FileSystemInterface $filesystem, bool $is_bag, string $database_address )
+	{
 		$this->checkRepo();
 		// var_dump($database_address);exit;
 
@@ -56,15 +64,17 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * 
 	 * @internal the $cli_result param "row" is expected to be like this: 
 	 *               structure1: "100644 blob 0672e3d1ca4498ea4f6de663764e28f712468b03	oauth/access_token/1.json"
-	 * @param String $cli_result
-	 * @param Bool $is_db - here is decided if the parsing will fill id 
+	 * @param string $cli_result
+	 * @param bool $is_db - here is decided if the parsing will fill id 
 	 *                      attribute or not
 	 * @param \Models\Interfaces\FileSystemInterface $filesystem
-	 * @param Bool $is_bag
+	 * @param bool $is_bag
+	 * @param string $database_address
+	 * 
 	 * @return \Ds\Deque
 	 */
-	public function parseLsTree( $cli_result, $is_db = false, \Models\Interfaces\FileSystemInterface $filesystem, $is_bag, $database_address ){
-
+	public function parseLsTree( string $cli_result, $is_db = false, \Models\Interfaces\FileSystemInterface $filesystem, bool $is_bag, string $database_address )
+	{
 		$result_array = \Helpers\AppHelper::splitByLine($cli_result);
 		$result_array = array_filter($result_array);
 
@@ -84,11 +94,13 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * Wrapper for git show command
 	 * 
 	 * @internal depends on $this->repo
-	 * @param String $file
-	 * @param String $branch
+	 * 
+	 * @param string $file
+	 * @param string $branch
+	 * 
 	 * @return String - command line result
 	 */
-	public function showFile( $file, $branch = "master" ){
+	public function showFile( string $file, string $branch = "master" ){
 		$this->checkRepo();
 
 		$result = $this->repo->show( $branch . ':' . $file );
@@ -100,7 +112,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	/**
 	 * Check if the Repository is started.
 	 * 
-	 * @return void
+	 * @return void|throw
 	 */
 	private function checkRepo(){
 		if( !isset($this->repo) || empty($this->repo) )
@@ -111,22 +123,26 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * Execute git cli add
 	 * 
 	 * @todo analyze the result
+	 * 
+	 * @param string $item
+	 * 
+	 * @return bool
 	 */
-	public function stageChanges( $item = null ){
-
+	public function stageChanges(string $item = null)
+	{
 		if( !is_null($item) )
 			$result = $this->repo->add($item);
 		else
 			$result = $this->repo->add();
 
 		return true;
-
 	}
 
 	/**
 	 * Execute git cli commit
 	 * 
 	 * @todo analyze the result
+	 * 
 	 * @return bool
 	 */
 	public function commitChanges(){
@@ -209,5 +225,37 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 */
 	public function initRepository(string $repository_address){
 		$this->repo = \Coyl\Git\GitRepo::create($repository_address);
+	}
+
+	/**
+	 * @param string $config_key
+	 */
+	public function getGitConfig(string $config_key) 
+	{
+		$command = 'config --get ' . $config_key;
+		
+		try {
+			$result = $this->repo->run( $command );
+		} catch (\Exception $e) {
+			$return = $e->getMessage();
+		}
+
+		return $return;
+	}
+
+	/**
+	 * @param string $config_key
+	 */
+	public function setGitConfig(string $config_key, string $value) 
+	{
+		$command = 'config ' . $config_key . ' "' . $value . '"';
+		
+		try {
+			$result = $this->repo->run( $command );
+		} catch (\Exception $e) {
+			$return = $e->getMessage();
+		}
+
+		return $return;
 	}
 }

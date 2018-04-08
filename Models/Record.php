@@ -132,13 +132,16 @@ class Record implements \JsonSerializable {
 	/**
 	 * @todo implement the logic (OR, AND, ...)
 	 * @todo the OR is not complete
+     *
+     * @param array $params
+     * @param array $logic
 	 */
 	public function multipleParamsMatch ($params, $logic = [])
     {
 		// --------------------------------------------------------
 		// AND for all logics -------------------------------------
 		// --------------------------------------------------------
-		if( empty($logic) ){
+		if (empty($logic)) {
 			foreach ($params as $key => $attribute) {
 			    if (
 					(

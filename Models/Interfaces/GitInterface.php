@@ -13,15 +13,16 @@ interface GitInterface
 	 * @internal this method is necessary because the instance is 
 	 *           created before the address is available. This is
 	 *           happens for the possibility of Polymorphism.
-	 * @param String $database_address
+	 * @param string $database_address
+	 * 
 	 * @return void
 	 */
-	public function setRepo( $database_address );
+	public function setRepo(string $database_address);
 
 	/**
-	 * @param String $database  - format expected: "{string}/"
+	 * @param string $database  - format expected: "{string}/"
 	 */
-	public function lsTreeHead( $database = '', \Models\Interfaces\FileSystemInterface $file_system, $is_bag, $database_address );
+	public function lsTreeHead(string $database = '', \Models\Interfaces\FileSystemInterface $file_system, bool $is_bag, string $database_address);
 
 	/**
 	 * Turn the git ls-tree command into Array with
@@ -29,21 +30,39 @@ interface GitInterface
 	 * 
 	 * @internal the $cli_result param "row" is expected to be like this: 
 	 *               structure1: "100644 blob 0672e3d1ca4498ea4f6de663764e28f712468b03	oauth/access_token/1.json"
-	 * @param String $cli_result
+	 * 
+	 * @param string $cli_result
 	 * @param Bool $is_db - here is decided if the parsing will fill id 
 	 *                      attribute or not
 	 * @param \Models\Interfaces\FileSystemInterface $file_system
+	 * @param bool $is_bag
+	 * @param string $database_address
+	 * 
 	 * @return \Ds\Deque
 	 */
-	public function parseLsTree( $cli_result, $is_db = false, \Models\Interfaces\FileSystemInterface $file_system, $is_bag, $database_address );
+	public function parseLsTree(string $cli_result, bool $is_db = false, \Models\Interfaces\FileSystemInterface $file_system, bool $is_bag, string $database_address);
 
 	/**
 	 * Wrapper for git show command
 	 * 
-	 * @param String $file
-	 * @param String $branch
-	 * @return String - command line result
+	 * @param string $file
+	 * @param string $branch
+	 * 
+	 * @return string - command line result
 	 */
-	public function showFile( $file, $branch = "master" );
+	public function showFile(string $file, string $branch = "master");
 
+	/**
+	 * Execute git cli add
+	 * 
+	 * @param string $item
+	 */
+	public function stageChanges(string $item = null);
+
+	/**
+	 * Execute git cli commit
+	 * 
+	 * @return bool
+	 */
+	public function commitChanges();
 }

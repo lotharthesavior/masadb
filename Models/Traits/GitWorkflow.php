@@ -18,7 +18,13 @@ trait GitWorkflow
 {
 
     /**
-     *
+     * Central place to save the version
+     * 
+     * @internal it happens asyncronously when the request is not the 
+     *           first commit of the repository
+     * 
+     * @internal if happens syncronously when the request is the first
+     *           commit of the repository
      */
     public function saveVersion()
     {
@@ -37,7 +43,6 @@ trait GitWorkflow
         $this->updateCache();
 
         return $result_stage && $result_commit;
-
     }
 
     /**
