@@ -16,6 +16,17 @@ use GuzzleHttp\Exception\RequestException;
  */
 trait GitWorkflow
 {
+    /**
+     * 
+     */
+    protected function checkGitUser() 
+    {
+        // TODO: get from config
+        $this->git->setGitConfig('user.email', 'savio@savioresende.com.br');
+        $this->git->setGitConfig('user.name', 'Savio Resende');
+        $user_email = $this->git->getGitConfig('user.email');
+        echo $user_email;
+    }
 
     /**
      * Central place to save the version
@@ -28,6 +39,8 @@ trait GitWorkflow
      */
     public function saveVersion()
     {
+        $this->checkGitUser();
+//        exit('test...');
 
         // TODO: these 2 steps are taking far too long!!!!
         $result_stage = $this->git->stageChanges();

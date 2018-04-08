@@ -48,8 +48,8 @@ class CacheHelper
         $config_json = file_get_contents("config.json");
         $config = json_decode($config_json, true);
 
-        // get the database tiemstamp ---
-            $filesystem2 = $this->getFileSystem( $root_path_database );
+        // get the database timestamp ---
+            // $filesystem2 = $this->getFileSystem( $root_path_database );
 
             // this is commented as its validation in a few lines because the validation has to be able
             // to happen through git

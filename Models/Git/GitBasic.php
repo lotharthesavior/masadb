@@ -47,11 +47,13 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	public function lsTreeHead( string $database = '', \Models\Interfaces\FileSystemInterface $filesystem, bool $is_bag, string $database_address )
 	{
 		$this->checkRepo();
-		// var_dump($database_address);exit;
 
-		$command = 'ls-tree HEAD ' . $database;
+        $result = '';
+        if (!$this->isEmptyRepository()) {
+		    $command = 'ls-tree HEAD ' . $database;
 
-		$result = $this->repo->run( $command );
+            $result = $this->repo->run( $command );
+        }
 
 		$is_db = $database != '';
 
@@ -119,6 +121,24 @@ class GitBasic implements \Models\Interfaces\GitInterface
 			throw new Exception("No Repository started.");
 	}
 
+    /**
+     * Check if Repository is empty
+     *
+     * @return bool
+     */
+	private function isEmptyRepository(){
+        $command = 'log -1';
+
+        try {
+            $this->repo->run($command);
+        } catch (\Exception $e) { // TODO: handle the error as a new type of exception: 'does not have any commits yet'
+            $no_commits_yet = strstr($e->getMessage(), 'does not have any commits yet');
+            return $no_commits_yet !== false;
+        }
+
+        return false;
+    }
+
 	/**
 	 * Execute git cli add
 	 * 
@@ -157,7 +177,11 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * Get the last version timestamp for cache purpose
 	 */
 	public function getLastVersionTimestamp(){
-		return $this->repo->logFormatted("%at", "", "1");
+        if ($this->isEmptyRepository()) {
+            return 0;
+        }
+
+        return $this->repo->logFormatted("%at", "", "1");
 	}
 
 	/**
