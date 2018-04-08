@@ -73,7 +73,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
 	 * 
 	 * @return \Ds\Deque
 	 */
-	public function parseLsTree( string $cli_result, $is_db = false, \Models\Interfaces\FileSystemInterface $filesystem, bool $is_bag, string $database_address )
+	public function parseLsTree( string $cli_result, bool $is_db = false, \Models\Interfaces\FileSystemInterface $filesystem, bool $is_bag, string $database_address )
 	{
 		$result_array = \Helpers\AppHelper::splitByLine($cli_result);
 		$result_array = array_filter($result_array);
