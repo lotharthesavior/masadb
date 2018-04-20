@@ -22,10 +22,13 @@ class Record implements \JsonSerializable {
 
 	protected $file_content;
 
+    protected $case_sensitive;
+
 	public function __construct(){
+	    global $config_json;
 
 		$this->file_content = new \stdClass;
-
+        $this->case_sensitive = $config_json['case_sensitive'];
 	}
 
 	// TODO: this can be a specific trait for custom toString
@@ -146,14 +149,12 @@ class Record implements \JsonSerializable {
 			    if (
 					(
 						isset($this->file_content->{$key}) && (
-							(
-								$this->file_content->{$key} === "id"
-								&& $this->valueEqual( $key, $attribute )
-							) || $this->stringMatch( $key, $attribute )
-						)
+						(
+                            $this->file_content->{$key} === "id"
+                            && $this->valueEqual( $key, $attribute )
+                        ) || $this->stringMatch( $this->file_content->{$key}, $attribute ))
 					) || (
-						isset($this->{$key})
-						&& $this->{$key} == $attribute
+                        $this->stringMatch( $this->{$key}, $attribute )
 					)
 				) {
                     continue;
@@ -166,17 +167,17 @@ class Record implements \JsonSerializable {
 		// --------------------------------------------------------
 
 		// --------------------------------------------------------
-		// OR for all logics -------------------------------------
+		// OR for all logics --------------------------------------
 		// --------------------------------------------------------
 		if( !empty($logic) ){
 			$resultant = array_filter($params, function($attribute, $key) use ($params) {
 				return isset($this->file_content->{$key}) && (
 					(
 						$this->file_content->{$key} == "id"
-						&& $this->valueEqual( $key, $attribute )
+						&& $this->valueEqual($key, $attribute)
 					) || (
 						$this->file_content->{$key} != "id"
-						&& $this->stringMatch( $key, $attribute )
+						&& $this->stringMatch($this->file_content->{$key}, $attribute)
 					)
 				);
 			}, ARRAY_FILTER_USE_BOTH);
@@ -186,17 +187,19 @@ class Record implements \JsonSerializable {
 		// --------------------------------------------------------
 
 		return true;
-
 	}
 
     /**
      * 
      */
     public function stringMatch( $param, $value ){
-    	return (
-    		isset($this->file_content->{$param})
-        	&& strstr($this->file_content->{$param}, $value) !== false
-        );
+        if ($this->case_sensitive) {
+            $match_string = strstr($param, $value) !== false;
+        } else {
+            $match_string = strstr(strtolower($param), strtolower($value)) !== false;
+        }
+
+    	return isset($param) && $match_string;
     }
 
     /**
@@ -223,11 +226,13 @@ class Record implements \JsonSerializable {
 
 		$records_row = array_filter($records_row);
 		
-		if( empty($records_row) )
-			return $this;
+		if( empty($records_row) ) {
+            return $this;
+        }
 
-		if( $is_db )
-			$this->setId( $this->getIdOfAsset($records_row[3]) );
+		if( $is_db ) {
+            $this->setId($this->getIdOfAsset($records_row[3]));
+        }
 
 		$this->setPermissions( $records_row[0] );
 		$this->setType( $records_row[1] );
@@ -248,15 +253,17 @@ class Record implements \JsonSerializable {
 		if( empty($records_row) )
 			return $this;
 
-		if( $full_database_address[strlen($full_database_address) - 1] != "/" )
-			$full_database_address = $full_database_address . "/";
+		if( $full_database_address[strlen($full_database_address) - 1] != "/" ) {
+            $full_database_address = $full_database_address . "/";
+        }
 
 		$records_address = $full_database_address . $records_row;
 
 		// avoid existent bag records_row to get inside the object attribute "id"
 		$records_row_exploded = explode("/", $records_row);
-		if( count($records_row_exploded) > 1 )
-			$records_row = $records_row_exploded[0];
+		if( count($records_row_exploded) > 1 ) {
+            $records_row = $records_row_exploded[0];
+        }
 
 		$permissions = substr(sprintf('%o', fileperms($records_address)), -4);
 		$this->setId($records_row);
