@@ -152,9 +152,13 @@ class Record implements \JsonSerializable {
 						(
                             $this->file_content->{$key} === "id"
                             && $this->valueEqual( $key, $attribute )
-                        ) || $this->stringMatch( $this->file_content->{$key}, $attribute ))
+                        ) || (
+                            isset($this->file_content->{$param})
+                            && $this->stringMatch( $this->file_content->{$key}, $attribute ))
+                        )
 					) || (
-                        $this->stringMatch( $this->{$key}, $attribute )
+                        isset($this->{$key})
+                        && $this->stringMatch( $this->{$key}, $attribute )
 					)
 				) {
                     continue;
@@ -206,10 +210,7 @@ class Record implements \JsonSerializable {
      * 
      */
     public function valueEqual( $param, $value ){
-    	return (
-        	isset($this->file_content->{$param})
-            && $this->file_content->{$param} != $value
-        );
+    	return $this->file_content->{$param} != $value;
     }
 
 	/**
