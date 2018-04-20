@@ -27,8 +27,10 @@ class Record implements \JsonSerializable {
 	public function __construct(){
 	    global $config_json;
 
+	    $parsed_config = json_decode($config_json, true);
+
 		$this->file_content = new \stdClass;
-        $this->case_sensitive = $config_json['case_sensitive'];
+        $this->case_sensitive = $parsed_config['case_sensitive'];
 	}
 
 	// TODO: this can be a specific trait for custom toString
