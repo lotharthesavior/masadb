@@ -82,7 +82,7 @@ class MasaDBController extends Abstraction\MasaController
             new \Models\Bag\BagBasic
 	 	);
 
-        // this part is to be improved, right now the simple 
+        // this part is to be improved, right now the simple
         // presence will change all comparisons to OR
         $post_data = [];
         if (isset($args['key']) && isset($args['value'])) {
@@ -100,7 +100,7 @@ class MasaDBController extends Abstraction\MasaController
         }
 
 	 	$generic_model = $this->setClient($current_client_id, $generic_model);
-        
+
         try {
 
             $generic_model->setDatabase($args['database']);

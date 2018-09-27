@@ -3,6 +3,7 @@
 	"domain": "masadb.test",
     "displayErrorDetails": true,
     "case_sensitive": false,
-	"private_key": "/var/www/html/privateKey.key",
-	"public_key": "/var/www/html/publicKey.key"
+	"private_key": "/var/www/masadb/key.pem",
+	"public_key": "/var/www/masadb/key.pub",
+	"public_key_pass": "test123"
 }

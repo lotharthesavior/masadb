@@ -43,8 +43,8 @@ class OAuthController
 	public function accessToken(ServerRequestInterface $request, ResponseInterface $response){
 
 		// Path to public and private keys
-		$privateKey = $this->container->get('settings')['private_key'];
-		// $privateKey = new \League\OAuth2\Server\CryptKey('/var/www/masadb/private_key.pem', 'lothar5'); // if private key has a pass phrase
+//		$privateKey = $this->container->get('settings')['private_key'];
+		 $privateKey = new \League\OAuth2\Server\CryptKey($this->container->get('settings')['private_key'], $this->container->get('settings')['public_key_pass']); // if private key has a pass phrase
 		$publicKey = $this->container->get('settings')['public_key'];
 
 		$client_repository = new \Repositories\ClientRepository;
