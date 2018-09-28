@@ -7,7 +7,6 @@ data
 
 private.key
 public.key
-cert.pem
 public.pub
 masadb.crt
 masadb.key
