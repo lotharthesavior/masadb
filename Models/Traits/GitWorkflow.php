@@ -88,8 +88,9 @@ trait GitWorkflow
             if ($is_delete) {
                 $this->removeItemFromCache($item);
             } else {
-                if ($filesystem->has($item))
+                if ($filesystem->has($item)) {
                     $this->removeItemFromCache($item);
+                }
                 $this->addItemToCache($item);
             }
         }

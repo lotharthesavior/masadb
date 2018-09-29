@@ -182,16 +182,16 @@ class CacheHelper
 			$path_for_bag = $root_path . $path;
 		}
 
-        $bag = new BagIt($path_for_bag);
-
         $record_instance->loadRowStructureSimpleDir( $root_path, $path );
 
-        if( (bool)$bag->isValid() ){
+        if (file_exists($data_path)) {
+            $bag = new BagIt($path_for_bag);
+        }
 
-            // var_dump($data_path);exit;
+        if( isset($bag) && (bool)$bag->isValid() ){
+
             $data_filesystem = $this->getFileSystem($data_path);
             $data_contents = $data_filesystem->listContents("", true);
-            // exit("test7");
         
             foreach ($data_contents as $key => $_file)
                 $record_instance->setFileContent( (array) json_decode(file_get_contents($data_path . $_file['path'])) );

@@ -1,0 +1,9 @@
+{
+    "old_password": "8027b5a353c1b29be76d291b3c8a2e40",
+    "id": "1",
+    "name": "Savio Resende",
+    "email": "savio@savioresende.com.br",
+    "password": "cc03e747a6afbbcbf8be7668acfebee5",
+    "user_type": "administrator",
+    "user_databases": "[\"notes\",\"tickets\",\"users\",\"donnations\",\"projects\",\"todos\"]"
+}

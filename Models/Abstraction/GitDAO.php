@@ -244,13 +244,15 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
             // this will register the generic version 
             // for this file to avoid problem
-            if ($filesystem->has($item_address))
+            if ($filesystem->has($item_address)) {
                 $this->saveVersion();
+            }
 
             $filesystem->write($item_address, $content);
 
-            if ($this->isBag())
+            if ($this->isBag()) {
                 $item_address = $this->createBagForRecord($id);
+            }
 
             $this->last_inserted_id = $id;
 
