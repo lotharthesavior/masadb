@@ -4,6 +4,7 @@ config.lock
 vendor
 
 data
+!data.sample/client_1/users/1/data
 
 private.key
 public.key
