@@ -1,9 +1,10 @@
 {
-	"database-address": "data",
-	"domain": "masadb.test",
+    "database-address": "/var/www/html/data",
+    "domain": "localhost",
+    "protocol": "http",
     "displayErrorDetails": true,
     "case_sensitive": false,
-	"private_key": "/var/www/masadb/key.pem",
-	"public_key": "/var/www/masadb/key.pub",
-	"public_key_pass": "test123"
+    "private_key": "/var/www/masadb/key.pem",
+    "public_key": "/var/www/masadb/key.pub",
+    "public_key_pass": "test123"
 }

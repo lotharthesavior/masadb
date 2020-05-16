@@ -286,7 +286,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      */
     public function updateCache()
     {
-        $url = "https" . '://' . $this->config['domain'] . "/update-cache-async";
+        $url = $this->config['protocol'] . '://' . $this->config['domain'] . "/update-cache-async";
 
         $body = [
             'database' => $this->_getDatabaseLocation()

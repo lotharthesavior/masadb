@@ -74,7 +74,7 @@ class CacheHelper
             
             // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
             \Helpers\AppHelper::curlPostAsync(
-                "https" . '://' . $config['domain'] . "/git-async", 
+                $config['protocol'] . '://' . $config['domain'] . "/git-async", 
                 [ 'database' => $full_database_address ]
             );
         }

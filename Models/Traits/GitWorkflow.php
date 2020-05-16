@@ -109,7 +109,7 @@ trait GitWorkflow
      */
     private function localAsyncRequest($body)
     {
-        $url = "https" . '://' . $this->config['domain'] . "/git-async";
+        $url = $this->config['protocol'] . '://' . $this->config['domain'] . "/git-async";
 
         // $header = [
         // 'ClientId' => $_SERVER['HTTP_CLIENTID'],

@@ -40,8 +40,8 @@ class OAuthController
 	 * @param ResponseInterface $response
 	 * @return ResponseInterface
 	 */
-	public function accessToken(ServerRequestInterface $request, ResponseInterface $response){
-
+	public function accessToken(ServerRequestInterface $request, ResponseInterface $response)
+	{
 		// Path to public and private keys
 //		$privateKey = $this->container->get('settings')['private_key'];
 		 $privateKey = new \League\OAuth2\Server\CryptKey($this->container->get('settings')['private_key'], $this->container->get('settings')['public_key_pass']); // if private key has a pass phrase
