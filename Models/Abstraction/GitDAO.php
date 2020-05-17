@@ -6,6 +6,8 @@ use \Git\Coyl\Git;
 use \Models\Traits\Pagination;
 use \Helpers\CacheHelper;
 
+use \Ds\Deque;
+
 /**
  *
  * Abstraction for the Model that keeps the data with Git
@@ -93,11 +95,10 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     {
         $cache_helper = new CacheHelper;
 
-        // var_dump($this->database);
-        $cache_result = $cache_helper->getCacheData($this->getClientId(), $this->database);
-        if ($cache_result !== false) {
-            return $cache_result;
-        }
+        // $cache_result = $cache_helper->getCacheData($this->getClientId(), $this->database);
+        // if ($cache_result !== false) {
+        //     return $cache_result;
+        // }
 
         return $this->getGitData($cache_helper);
     }
@@ -128,8 +129,8 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
             return $a->getId() > $b->getId();
         });
 
-        $cache_helper->setData($results);
-        $cache_helper->persistCache($this->_getDatabaseLocation());
+        // $cache_helper->setData($results);
+        // $cache_helper->persistCache($this->_getDatabaseLocation());
 
         return $results;
     }
@@ -224,11 +225,11 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      */
     public function save(array $client_data)
     {
-        $client_data = (object)$client_data;
+        $client_data = (object) $client_data;
 
         $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
 
-        // League\Flysystem\Filesystem
+        // @var League\Flysystem\Filesystem
         $filesystem = $this->filesystem->getFileSystemAbstraction($local_address);
 
         $content = json_encode($client_data->content, JSON_PRETTY_PRINT);
@@ -245,12 +246,6 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
             $item_address = $id . '.json';
 
-            // this will register the generic version 
-            // for this file to avoid problem
-            if ($filesystem->has($item_address)) {
-                $this->saveVersion();
-            }
-
             $filesystem->write($item_address, $content);
 
             if ($this->isBag()) {
@@ -259,6 +254,10 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
             $this->last_inserted_id = $id;
 
+            // this will register the generic version 
+            // for this file to avoid problem
+            $this->saveVersion();
+
             $result = $this->saveRecordVersion($item_address);
 
             return $id;
@@ -266,18 +265,13 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
         $id = $client_data->id;
 
-        // $item_address = $this->_getDatabaseLocation() . $this->bag->locationOfBag( $id, $this->isBag() );
         $item_address = $this->bag->locationOfBag($id, $this->isBag());
         $item_address .= '.json';
 
-        if (!$filesystem->has($item_address))
-            $this->saveRecordVersion($id);
-
-        // var_dump($this->bag->locationOfBag( $id, $this->isBag() ) . ".json");exit;
         $result = $filesystem->update($this->bag->locationOfBag($id, $this->isBag()) . ".json", $content);
-        // var_dump($result);exit;
 
-        // var_dump($item_address);exit;
+        $this->saveVersion();
+
         $result = $this->saveRecordVersion($id);
 
         return $id;
@@ -296,14 +290,14 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         ];
 
         // This is commented because it doesn't perform in the necessary
-        // speed. The alternative is to updae the cache "manually".
+        // speed. The alternative is to update the cache "manually".
         // $header = [
         //     'ClientId' => $_SERVER['HTTP_CLIENTID'],
         //     'Authorization' => $_SERVER['HTTP_AUTHORIZATION'],
         //     'Content-Type' => $_SERVER['HTTP_CONTENT_TYPE']
         // ];
         // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
-        \Helpers\AppHelper::curlPostAsync($url, $body);
+        // \Helpers\AppHelper::curlPostAsync($url, $body);
     }
 
     /**
@@ -458,7 +452,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     {
         $database = $this->config['database-address'] . "/" . $this->_getDatabaseLocation();
 
-        $records = new \Ds\Deque(scandir($database));
+        $records = new Deque(scandir($database));
 
         $records = $records->filter(function ($dir) {
             return $dir != "."
@@ -467,7 +461,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         });
 
         $records = $records->map(function ($dir) {
-            return (int)$dir;
+            return (int) $dir;
         });
 
         if ($records->count() === 0)
@@ -475,7 +469,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
         $records->sort();
 
-        return $records->last() + 1;
+        return (int) $records->last() + 1;
     }
 
     /**
@@ -488,8 +482,9 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     {
         $database_location = "";
 
-        if (isset($this->client_id) && !empty($this->client_id))
+        if (isset($this->client_id) && !empty($this->client_id)) {
             $database_location .= "client_" . $this->client_id[0] . '/';
+        }
 
         $database_location .= $this->database;
 

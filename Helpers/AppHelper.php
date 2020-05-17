@@ -58,7 +58,7 @@ class AppHelper
         if( isset($header['Content-Type']) )
             $output .= "Content-Type: " . $header['Content-Type'] . "\r\n";
         else
-            $output .= "Content-Type: application/x-www-form-urlencoded\r\n";
+            $output .= "Content-Type: application/json\r\n";
 
         $output .= "Content-Length: " . strlen($post_string) . "\r\n";
         $output .= "Connection: Close\r\n\r\n";

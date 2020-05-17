@@ -15,6 +15,7 @@ use League\Flysystem\Plugin\ListPaths;
 use League\Flysystem\Plugin\ListWith;
 use League\Flysystem\Plugin\GetWithMetadata;
 
+use Models\Record;
 use \Ds\Deque;
 
 class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
@@ -36,7 +37,7 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
      * 
      * @param Record $record
      */
-    public function getFileContent( \Models\Record $record, $is_bag, $database_address = "." ){
+    public function getFileContent( Record $record, $is_bag, $database_address = "." ){
         $location = $record->getAddress();
 
         if( $is_bag ){
@@ -112,7 +113,7 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 
         // parse resutls
         $result_deque = $records->map(function( $records_row ) use ($is_db, $is_bag, $database){
-            $new_record = new \Models\Record;
+            $new_record = new Record;
             $new_record->loadRowStructureSimpleDir( $database, $records_row ); // TODO: this method has changed!
             $new_record = $this->getFileContent( $new_record, $is_bag, "" );
             return $new_record;

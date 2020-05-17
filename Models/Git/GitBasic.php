@@ -102,7 +102,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
 
         $result_deque = new Deque($result_array);
         
-        $result_deque = $result_deque->map(function( $records_row ) use ($is_db, $filesystem, $is_bag, $database_address){
+        $result_deque = $result_deque->map(function( $records_row ) use ($is_db, $filesystem, $is_bag, $database_address)
+        {
             $new_record = new \Models\Record;
             $new_record->loadRowStructure1( $records_row, $is_db );
             $new_record = $filesystem->getFileContent( $new_record, $is_bag, $database_address );
@@ -122,7 +123,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
      * 
      * @return String - command line result
      */
-    public function showFile( string $file, string $branch = "master" ){
+    public function showFile( string $file, string $branch = "master" )
+    {
         $this->checkRepo();
 
         $result = $this->repo->show( $branch . ':' . $file );
@@ -136,7 +138,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
      * 
      * @return void|throw
      */
-    private function checkRepo(){
+    private function checkRepo()
+    {
         if( !isset($this->repo) || empty($this->repo) )
             throw new Exception("No Repository started.");
     }
@@ -146,7 +149,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
      *
      * @return bool
      */
-    private function isEmptyRepository(){
+    private function isEmptyRepository()
+    {
         $command = 'log -1';
 
         try {
@@ -185,7 +189,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
      * 
      * @return bool
      */
-    public function commitChanges(){
+    public function commitChanges()
+    {
         $message = "Commit from Masa - " . date("Y-d-m H:i:s") . ".";
 
         $this->repo->commit( $message );
@@ -193,10 +198,16 @@ class GitBasic implements \Models\Interfaces\GitInterface
         return true;
     }
 
+    public function getStatus()
+    {
+        return $this->repo->runCommand('status');
+    }
+
     /**
      * Get the last version timestamp for cache purpose
      */
-    public function getLastVersionTimestamp(){
+    public function getLastVersionTimestamp()
+    {
         if ($this->isEmptyRepository()) {
             return 0;
         }
@@ -207,7 +218,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
     /**
      * @internal for metadata spec, see @prepareMetadata method.
      */
-    public function placeMetadata($database, Filesystem $filesystem){
+    public function placeMetadata($database, Filesystem $filesystem)
+    {
         $note_message = "";
 
         $metadata_json = $this->prepareMetadata($database, $filesystem);
@@ -218,7 +230,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
     /**
      * 
      */
-    public function getMetadata(){
+    public function getMetadata()
+    {
         try {
             $return = $this->repo->run("notes show");
         } catch (\Exception $e) {
@@ -233,7 +246,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
      * 1. total number of records
      * 2. last ID
      */
-    public function prepareMetadata($database, Filesystem $filesystem){
+    public function prepareMetadata($database, Filesystem $filesystem)
+    {
         $current_metadata = $this->getMetadata();
         
         if( strpos($current_metadata, "error") != -1 )
@@ -245,12 +259,14 @@ class GitBasic implements \Models\Interfaces\GitInterface
     /**
      * @internal for metadata spec, see @prepareMetadata method.
      */
-    public function generateMetadata($database, Filesystem $filesystem){
+    public function generateMetadata($database, Filesystem $filesystem)
+    {
         $metadata = new \stdClass;
 
         $filesystem_report = new Deque($filesystem->listContents("/"));
 
-        $filesystem_report->sort(function($a, $b){
+        $filesystem_report->sort(function($a, $b)
+        {
             return (int) $a['filename'] > (int) $b['filename'];
         });
 
@@ -267,7 +283,8 @@ class GitBasic implements \Models\Interfaces\GitInterface
      * 
      * @return void
      */
-    public function initRepository(string $repository_address){
+    public function initRepository(string $repository_address)
+    {
         $this->repo = GitRepo::create($repository_address);
     }
 

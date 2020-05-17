@@ -62,6 +62,7 @@ class CacheHelper
         $this->data = $cache_deque;
 
         // -- async call --
+        // TODO: rebuild this part
         if( 
             $cache_filestamp < $git_filestamp 
             && $create_cache
@@ -73,10 +74,10 @@ class CacheHelper
             // ];
             
             // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
-            \Helpers\AppHelper::curlPostAsync(
-                $config['protocol'] . '://' . $config['domain'] . "/git-async", 
-                [ 'database' => $full_database_address ]
-            );
+            // \Helpers\AppHelper::curlPostAsync(
+            //     $config['protocol'] . '://' . $config['domain'] . "/git-async", 
+            //     [ 'database' => $full_database_address ]
+            // );
         }
         // --
 

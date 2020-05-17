@@ -40,11 +40,12 @@ trait GitWorkflow
     public function saveVersion()
     {
         $this->checkGitUser();
-//        exit('test...');
 
+        // if ($this->_getDatabaseLocation() !== 'oauth/access_token') dd($this->git->getStatus());
+        // if ($this->_getDatabaseLocation() !== 'oauth/access_token') dd($this->git->getStatus());
+        
         // TODO: these 2 steps are taking far too long!!!!
         $result_stage = $this->git->stageChanges();
-
         $result_commit = $this->git->commitChanges();
 
         // get the filesystem for the current database
@@ -53,7 +54,7 @@ trait GitWorkflow
 
         $this->git->placeMetadata($this->database, $filesystem);
 
-        $this->updateCache();
+        // $this->updateCache();
 
         return $result_stage && $result_commit;
     }
@@ -64,7 +65,7 @@ trait GitWorkflow
      * @param int $item
      * @param bool $is_delete - is marks if the operation is to remove the item
      */
-    public function saveRecordVersion($item = null, $is_delete = false)
+    public function saveRecordVersion($item = null, bool $is_delete = false)
     {
         // get the filesystem for the current database
         $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();

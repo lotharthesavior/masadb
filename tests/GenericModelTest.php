@@ -7,6 +7,12 @@ use PHPUnit\Framework\TestCase;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Adapter\Local;
 
+use Models\FileSystem\FileSystemBasic;
+use Models\Git\GitBasic;
+use Models\Bag\BagBasic;
+
+use Models\Exceptions\NotExistentDatabaseException;
+
 /**
  * @covers GenericModel
  */
@@ -18,25 +24,35 @@ final class GenericModelTest extends TestCase
     /**
      *
      */
-    public function setUp(){
+    public function setUp()
+    {
+        $database = "test";
+        $clientId = "1";
+
         $this->generic = new \Models\Generic(
             // \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
+            new FileSystemBasic,
             // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
+            new GitBasic,
             // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new BagBasic
         );
 
-        $this->generic->setClientId("1");
+        $this->generic->setClientId($clientId);
 
-        $this->generic->setDatabase("test");
+        try {     
+            $this->generic->setDatabase($database);
+        } catch (NotExistentDatabaseException $e) {
+            $this->generic->createDatabase($database);
+            $this->generic->setDatabase($database);
+        }
     }
 
     /**
      * 
      */
-    private function createDummyRecord(){
+    private function createDummyRecord()
+    {
         return $this->generic->save([
             "content" => [
                 "title" => "Lorem Ipsum",
