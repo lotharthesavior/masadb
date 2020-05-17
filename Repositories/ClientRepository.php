@@ -31,7 +31,7 @@ class ClientRepository implements ClientRepositoryInterface
      * @return ClientEntityInterface
      */
     public function getClientEntity($clientIdentifier, $grantType, $clientSecret = null, $mustValidateSecret = true){
-
+        
         $client_model = new Clients(
             // \Models\Interfaces\FileSystemInterface 
             new \Models\FileSystem\FileSystemBasic,

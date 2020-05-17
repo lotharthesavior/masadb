@@ -10,7 +10,13 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\ClientTrait;
 
+use \Models\Interfaces\FileSystemInterface;
+use \Models\Interfaces\GitInterface;
+use \Models\Interfaces\BagInterface;
 use \Models\GitDAO;
+
+use \Models\Abstraction\GitDAO as AbstractGitDAO;
+use \Models\Traits\GitWorkflow;
 
 /**
  * Format of data:
@@ -20,46 +26,46 @@ use \Models\GitDAO;
  *     "redirect_uri": string
  * }
  */
-class Clients extends \Models\Abstraction\GitDAO implements ClientEntityInterface
+class Clients extends AbstractGitDAO implements ClientEntityInterface
 {
 
-	use EntityTrait;
-	use ClientTrait;
+    use EntityTrait;
+    use ClientTrait;
 
-	use \Models\Traits\GitWorkflow;
+    use GitWorkflow;
 
-	protected $database = "oauth/clients";
+    protected $database = "oauth/clients";
 
-	protected $repo;
+    protected $repo;
 
-	public function __construct(
-		\Models\Interfaces\FileSystemInterface $filesystem,
-		\Models\Interfaces\GitInterface $git,
-		\Models\Interfaces\BagInterface $bag
-	){
-		parent::__construct($filesystem, $git, $bag);
+    public function __construct(
+        FileSystemInterface $filesystem,
+        GitInterface $git,
+        BagInterface $bag
+    ) {
+        parent::__construct($filesystem, $git, $bag);
 
-		// this is necessary to acomplish with specific 
-		// models what is being done on the generic
-		if( isset($this->git) )
-			$this->git->setRepo( $this->config['database-address'] . '/' . $this->database );
-	}
+        // this is necessary to acomplish with specific 
+        // models what is being done on the generic
+        if( isset($this->git) ) {
+            $this->git->setRepo( $this->config['database-address'] . '/' . $this->database );
+        }
+    }
 
-	/**
-	 * 
-	 */
-	public function find( $id ){
+    /**
+     * 
+     */
+    public function find( $id )
+    {
+        $client_loaded = parent::find( $id );
 
-		$client_loaded = parent::find( $id );
+        $result_parsed = json_decode( $client_loaded, true );
 
-		$result_parsed = json_decode( $client_loaded, true );
+        $this->file_content = $this->filesystem->loadFileObject( $result_parsed );
 
-		$this->file_content = $this->filesystem->loadFileObject( $result_parsed );
+        $this->setIdentifier( $id );
 
-		$this->setIdentifier( $id );
-
-		return $this;
-
-	}
+        return $this;
+    }
 
 }

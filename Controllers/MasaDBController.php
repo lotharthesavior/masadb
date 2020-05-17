@@ -118,7 +118,9 @@ class MasaDBController extends Abstraction\MasaController
 		
 		$response->getBody()->write($records_found);
 
-        return $response;
+        $response = $response->withHeader('Content-Type', 'application/json');
+
+        return $response->withStatus(200);
 	}
 
 	/**
@@ -170,7 +172,9 @@ class MasaDBController extends Abstraction\MasaController
 
         $response->getBody()->write( $records_found );
 
-        return $response;
+        $response = $response->withHeader('Content-Type', 'application/json');
+
+        return $response->withStatus(200);
 	}
 
 	/**

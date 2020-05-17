@@ -5,8 +5,6 @@
  * @todo 2. create navigation itself though the repository
  */
 
-date_default_timezone_set("America/Vancouver");
-
 if( !file_exists("config.json") ){
 	header("Location: install.php");
 }
@@ -19,6 +17,8 @@ use \Psr\Http\Message\ResponseInterface as Response;
 // Load configuration
 $config_json = file_get_contents("config.json");
 $config['settings'] = json_decode($config_json, true);
+
+date_default_timezone_set($config['settings']['timezone']);
 
 $app = new \Slim\App($config);
 

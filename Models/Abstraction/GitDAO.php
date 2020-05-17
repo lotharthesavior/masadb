@@ -3,6 +3,8 @@
 namespace Models\Abstraction;
 
 use \Git\Coyl\Git;
+use \Models\Traits\Pagination;
+use \Helpers\CacheHelper;
 
 /**
  *
@@ -13,7 +15,7 @@ use \Git\Coyl\Git;
  */
 abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 {
-    use \Models\Traits\Pagination;
+    use Pagination;
 
     // Core instance for FileSystem interaction
     // proteced filesystem;
@@ -53,14 +55,15 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      * Search for a Single Record by the id
      *
      * @param int $id
-     * @return Array
+     * @return array
      */
-    public function find($id)
+    public function find(int $id)
     {
         $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $this->bag->locationOfBag($id, $this->isBag()) . ".json";
-
-        if (!file_exists($address))
+        
+        if (!file_exists($address)) {
             throw new \Exception("Inexistent Record.");
+        }
 
         $result = file_get_contents($address);
 
@@ -88,7 +91,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      */
     private function getAllRecords()
     {
-        $cache_helper = new \Helpers\CacheHelper;
+        $cache_helper = new CacheHelper;
 
         // var_dump($this->database);
         $cache_result = $cache_helper->getCacheData($this->getClientId(), $this->database);
@@ -104,9 +107,9 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      *
      * @internal used to update cache
      * @internal used to search when there is no cache
-     * @param \Helpers\CacheHelper $cache_helper
+     * @param CacheHelper $cache_helper
      */
-    public function getGitData(\Helpers\CacheHelper $cache_helper)
+    public function getGitData(CacheHelper $cache_helper)
     {
         // $date1 = new \DateTime();
 
@@ -140,9 +143,9 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      *
      * @internal used to update cache
      * @internal used to search when there is no cache
-     * @param \Helpers\CacheHelper $cache_helper
+     * @ $cache_helper
      */
-    public function getFilesystemData(\Helpers\CacheHelper $cache_helper)
+    public function getFilesystemData(CacheHelper $cache_helper)
     {
         // $date1 = new \DateTime();
 
@@ -170,8 +173,8 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      *
      * @internal Any param with field name 'logic', will be considered
      *           logic condition for the search
-     * @param String $param || Array $param
-     * @param String $value || Array $value
+     * @param string $param || array $param
+     * @param string $value || array $value
      */
     public function search($param, $value)
     {
@@ -191,7 +194,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      * @param array $params
      * @return JSON | ["results": \Ds\Vector, "pages": \Ds\Vector]
      */
-    public function searchRecord($params, $logic = [])
+    public function searchRecord(array $params, $logic = [])
     {
         $result_complete = $this->getAllRecords();
 
@@ -306,12 +309,12 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     /**
      * This method adds a new filesystem record to the cache
      *
-     * @param int - item id
+     * @param int $item
      * @return void
      */
-    public function addItemToCache($item)
+    public function addItemToCache(int $item)
     {
-        $cache_helper = new \Helpers\CacheHelper;
+        $cache_helper = new CacheHelper;
 
         $cache_helper->getCacheData(
             $this->client_id,
@@ -328,13 +331,13 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     /**
      * This method adds a new filesystem record to the cache
      *
-     * @param int - item id
+     * @param int $item
      *
      * @return void
      */
-    public function removeItemFromCache($item)
+    public function removeItemFromCache(int $item)
     {
-        $cache_helper = new \Helpers\CacheHelper;
+        $cache_helper = new CacheHelper;
 
         $cache_helper->getCacheData(
             $this->client_id,
@@ -366,7 +369,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      *           any other type of file, have to be a BagIt.
      * @param int $id
      */
-    public function delete($id)
+    public function delete(int $id)
     {
 
         $database_url = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
@@ -391,6 +394,29 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         $result = $this->saveRecordVersion($id, true);
 
         return $result;
+
+    }
+
+    /**
+     * Verify if the current model is compatible with Bagit
+     *
+     * @internal this method analyze the trait. For a more
+     *           reliable use a BagIt Instance.
+     *
+     * @return boolean
+     */
+    public function isBag()
+    {
+
+        $is_bag = false;
+
+        if (method_exists($this, 'createBagForRecord')) {
+
+            $is_bag = true;
+
+        }
+
+        return $is_bag;
 
     }
 
@@ -468,29 +494,6 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         $database_location .= $this->database;
 
         return $database_location;
-    }
-
-    /**
-     * Verify if the current model is compatible with Bagit
-     *
-     * @internal this method analyze the trait. For a more
-     *           reliable use a BagIt Instance.
-     *
-     * @return boolean
-     */
-    public function isBag()
-    {
-
-        $is_bag = false;
-
-        if (method_exists($this, 'createBagForRecord')) {
-
-            $is_bag = true;
-
-        }
-
-        return $is_bag;
-
     }
 
     /**

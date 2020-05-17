@@ -36,7 +36,7 @@ interface GitDAOInterface
 	 * @param int $id
 	 * @return Array
 	 */
-	public function find( $id );
+	public function find( int $id );
 
 	/**
 	 * @todo find a solution for search
@@ -57,27 +57,27 @@ interface GitDAOInterface
 	/**
 	 * Search that works with multiple params
 	 * 
-	 * @param Array $params
+	 * @param array $params
 	 */
-	public function searchRecord( $params, $logic = [] );
+	public function searchRecord( array $params, $logic = [] );
 
     /**
-     * @param Array $client_data | eg.: ["id" => {int}, "content" => {array}]
+     * @param array $client_data | eg.: ["id" => {int}, "content" => {array}]
      */
-    public function save( Array $client_data );
+    public function save( array $client_data );
 
 	/**
 	 * 
 	 * @internal simple registers can be simple json files, but 
 	 *           any other type of file, have to be a BagIt.
-	 * @param Int $id
+	 * @param int $id
 	 */
-	public function delete( $id );
+	public function delete( int $id );
 
 	/**
 	 * Verify if the current model is compatible with Bagit
 	 * 
-	 * @return Boolean
+	 * @return bool
 	 */
 	public function isBag();
 }
