@@ -12,7 +12,7 @@ use GuzzleHttp\Exception\RequestException;
  * The purpose of this code is to organize the Workflow tasks
  * of Git in the Data Storage.
  *
- * @author Savio Resende
+ * @author Savio Resende <savio@savioresende.com.br>
  */
 trait GitWorkflow
 {

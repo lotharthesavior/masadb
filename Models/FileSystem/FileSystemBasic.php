@@ -15,120 +15,122 @@ use League\Flysystem\Plugin\ListPaths;
 use League\Flysystem\Plugin\ListWith;
 use League\Flysystem\Plugin\GetWithMetadata;
 
+use \Ds\Deque;
+
 class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
 {
-	/**
-	 * @param $local_address
-	 * @return League\Flysystem\Filesystem
-	 */
-	public function getFileSystemAbstraction( $local_address ){
-		$adapter = new Local( $local_address );
+    /**
+     * @param $local_address
+     * @return Filesystem
+     */
+    public function getFileSystemAbstraction( $local_address ){
+        $adapter = new Local( $local_address );
 
         return new Filesystem($adapter, new Config([
-		    'disable_asserts' => true,
-		]));
-	}
+            'disable_asserts' => true,
+        ]));
+    }
 
-	/**
-	 * Get file content of the record
-	 * 
-	 * @param Record $record
-	 */
-	public function getFileContent( \Models\Record $record, $is_bag, $database_address = "." ){
-		$location = $record->getAddress();
+    /**
+     * Get file content of the record
+     * 
+     * @param Record $record
+     */
+    public function getFileContent( \Models\Record $record, $is_bag, $database_address = "." ){
+        $location = $record->getAddress();
 
-		if( $is_bag ){
+        if( $is_bag ){
 
-			$id = $record->getIdOfAsset( $record->getAddress() );
-			
-			$location = $record->getAddress() . '/data/' . $id . '.json';
+            $id = $record->getIdOfAsset( $record->getAddress() );
+            
+            $location = $record->getAddress() . '/data/' . $id . '.json';
 
-		}
-		// var_dump($location);exit;
+        }
+        // var_dump($location);exit;
 
-		$full_record_addess = $location;
-		if( !empty($database_address) )
-			$full_record_addess = $database_address . "/" . $location;
-		// var_dump($full_record_addess);exit;
+        $full_record_addess = $location;
+        if( !empty($database_address) )
+            $full_record_addess = $database_address . "/" . $location;
+        // var_dump($full_record_addess);exit;
 
-		$content_temp = file_get_contents( $full_record_addess );
+        $content_temp = file_get_contents( $full_record_addess );
 
-		$record->setFileContent((object) json_decode($content_temp));
-		// var_dump($content_temp);exit;
+        $record->setFileContent((object) json_decode($content_temp));
+        // var_dump($content_temp);exit;
 
-		// get timestamp of file
+        // get timestamp of file
 
-			$timestamp = filemtime( $full_record_addess );
+            $timestamp = filemtime( $full_record_addess );
 
-			$record->setFileTimestamp( $timestamp );
+            $record->setFileTimestamp( $timestamp );
 
-			$record->setFileUpdatedAt( gmdate("Y-m-d H:i:s", $timestamp) );
+            $record->setFileUpdatedAt( gmdate("Y-m-d H:i:s", $timestamp) );
 
-		// / get timestamp of file
+        // / get timestamp of file
 
-		return $record;
+        return $record;
 
-	}
+    }
 
-	/**
-	 * This will load the resultant object into file_content attribute
-	 * 
-	 * @param Array $data_loaded
-	 * @return stdClass
-	 */
-	public function loadFileObject( Array $data_loaded ){
-		$file_content = new \stdClass;
+    /**
+     * This will load the resultant object into file_content attribute
+     * 
+     * @param Array $data_loaded
+     * @return stdClass
+     */
+    public function loadFileObject( Array $data_loaded ){
+        $file_content = new \stdClass;
 
-		foreach ($data_loaded as $key => $record) {
-			
-			$file_content->{$key} = $record;
+        foreach ($data_loaded as $key => $record) {
+            
+            $file_content->{$key} = $record;
 
-		}
+        }
 
-		return $file_content;
-	}
+        return $file_content;
+    }
 
-	/**
-	 * List Records in the working directory
-	 * 
-	 * @todo not functional right now
-	 * @param String $database  - format expected: "{string}/"
-	 * @return \Ds\Deque
-	 */
-	public function listWorkingDirectory( $database = '', $is_bag ){
-		$is_db = $database != '';
+    /**
+     * List Records in the working directory
+     * 
+     * @todo not functional right now
+     * @param String $database  - format expected: "{string}/"
+     * @return Deque
+     */
+    public function listWorkingDirectory( $database = '', $is_bag ){
+        $is_db = $database != '';
 
-		if( !$is_db )
-			return new \Ds\Deque([]);
+        if( !$is_db )
+            return new Deque([]);
 
-		$records = new \Ds\Deque(scandir($database));
+        $records = new Deque(scandir($database));
         $records = $records->filter(function( $dir ){
-        	return $dir != "."
-        		   && $dir != ".."
-        		   && $dir != ".git";
+            return $dir != "."
+                   && $dir != ".."
+                   && $dir != ".git";
         });
 
         // parse resutls
         $result_deque = $records->map(function( $records_row ) use ($is_db, $is_bag, $database){
-			$new_record = new \Models\Record;
-			$new_record->loadRowStructureSimpleDir( $database, $records_row ); // TODO: this method has changed!
-			$new_record = $this->getFileContent( $new_record, $is_bag, "" );
-			return $new_record;
-		});
+            $new_record = new \Models\Record;
+            $new_record->loadRowStructureSimpleDir( $database, $records_row ); // TODO: this method has changed!
+            $new_record = $this->getFileContent( $new_record, $is_bag, "" );
+            return $new_record;
+        });
 
-		return $result_deque;
-	}
+        return $result_deque;
+    }
 
-	/**
-	 * Create the Directory to serve as Database
-	 * 
-	 * @param string $base_location
-	 * @param string $database
-	 * 
-	 * @return boolean
-	 */
-	public function createDatabaseDirectory(string $base_location, string $database) {
-		$filesystem = $this->getFileSystemAbstraction( $base_location );
-		return $filesystem->createDir($database);
-	}
+    /**
+     * Create the Directory to serve as Database
+     * 
+     * @param string $base_location
+     * @param string $database
+     * 
+     * @return boolean
+     */
+    public function createDatabaseDirectory(string $base_location, string $database) {
+        $filesystem = $this->getFileSystemAbstraction( $base_location );
+        return $filesystem->createDir($database);
+    }
 }

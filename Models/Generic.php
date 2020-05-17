@@ -2,8 +2,12 @@
 
 namespace Models;
 
-use \Git\Coyl\Git;
-use \Models\Exceptions\NotExistentDatabaseException;
+use Git\Coyl\Git;
+use Models\Exceptions\NotExistentDatabaseException;
+use Models\Abstraction\GitDAO;
+use Models\Interfaces\GenericInterface;
+use Models\Traits\GitWorkflow;
+use Models\Traits\BagUtilities;
 
 /**
  * Class for Generic Model.
@@ -12,12 +16,10 @@ use \Models\Exceptions\NotExistentDatabaseException;
  *
  * @author Savio Resende <savio@savioresende.com.br>
  */
-class Generic extends \Models\Abstraction\GitDAO implements \Models\Interfaces\GenericInterface
+class Generic extends GitDAO implements GenericInterface
 {
-    use Traits\GitWorkflow;
+    use GitWorkflow, BagUtilities;
 
-    // add this to make the GitModel knows where to find the record
-    // use Traits\BagUtilities;
     protected $repo;
 
     protected $database = '';

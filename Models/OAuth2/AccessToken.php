@@ -4,6 +4,7 @@ namespace Models\OAuth2;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Models\Abstraction\GitDAO;
 
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 
@@ -11,34 +12,34 @@ use League\OAuth2\Server\Entities\Traits\AccessTokenTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
 
-use \Models\Traits\GitWorkflow;
+use Models\Traits\GitWorkflow;
 
-class AccessToken extends \Models\Abstraction\GitDAO implements AccessTokenEntityInterface
+use Models\Interfaces\FileSystemInterface;
+use Models\Interfaces\GitInterface;
+use Models\Interfaces\BagInterface;
+
+class AccessToken extends GitDAO implements AccessTokenEntityInterface
 {
 
-	use AccessTokenTrait;
-	use EntityTrait;
-	use TokenEntityTrait;
+    use AccessTokenTrait, EntityTrait, TokenEntityTrait, GitWorkflow;
 
-	use GitWorkflow;
+    protected $repo;
 
-	protected $repo;
+    protected $database = 'oauth/access_token';
 
-	protected $database = 'oauth/access_token';
+    protected $no_cache = true;
 
-	protected $no_cache = true;
+    public function __construct(
+        FileSystemInterface $filesystem,
+        GitInterface $git,
+        BagInterface $bag
+    ){
+        parent::__construct($filesystem, $git, $bag);
 
-	public function __construct(
-		\Models\Interfaces\FileSystemInterface $filesystem,
-		\Models\Interfaces\GitInterface $git,
-		\Models\Interfaces\BagInterface $bag
-	){
-		parent::__construct($filesystem, $git, $bag);
-
-		// this is necessary to acomplish with specific 
-		// models what is being done on the generic
-		if( isset($this->git) )
-			$this->git->setRepo( $this->config['database-address'] . '/' . $this->database );
-	}
+        // this is necessary to acomplish with specific 
+        // models what is being done on the generic
+        if( isset($this->git) )
+            $this->git->setRepo( $this->config['database-address'] . '/' . $this->database );
+    }
 
 }

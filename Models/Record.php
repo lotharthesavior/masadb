@@ -267,7 +267,7 @@ class Record implements \JsonSerializable {
             $records_row = $records_row_exploded[0];
         }
 
-		$permissions = substr(sprintf('%o', fileperms($records_address)), -4);
+        $permissions = substr(sprintf('%o', fileperms($records_address)), -4);
 		$this->setId($records_row);
 		$this->setPermissions( $permissions );
 		$this->setAddress( $records_address );
