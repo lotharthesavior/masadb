@@ -2,7 +2,7 @@
 
 namespace Models\Abstraction;
 
-use \Git\Coyl\Git;
+use \Git\Git;
 use \Models\Traits\Pagination;
 use \Helpers\CacheHelper;
 
@@ -94,7 +94,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     private function getAllRecords()
     {
         $cache_helper = new CacheHelper;
-
+        
         // $cache_result = $cache_helper->getCacheData($this->getClientId(), $this->database);
         // if ($cache_result !== false) {
         //     return $cache_result;
@@ -182,8 +182,13 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         $result_complete = $this->getAllRecords();
 
         $result_complete = $result_complete->filter(function ($record) use ($param, $value) {
-            if ($param != "id") return $record->stringMatch($param, $value);
-            if ($param == "id" && $record->valueEqual($param, $value)) return false;
+            if ($param !== 'id') {
+                return $record->multipleParamsMatch([$param => $value]);
+            }
+
+            if ($param === 'id' && $record->valueEqual($param, $value)) {
+                return false;
+            }
         });
 
         return $result_complete;
@@ -254,8 +259,6 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
 
             $this->last_inserted_id = $id;
 
-            // this will register the generic version 
-            // for this file to avoid problem
             $this->saveVersion();
 
             $result = $this->saveRecordVersion($item_address);
@@ -384,6 +387,8 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
             throw new \Exception("Record not found!", 1);
 
         }
+
+        $this->saveVersion();
 
         $result = $this->saveRecordVersion($id, true);
 

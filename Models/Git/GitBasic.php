@@ -4,22 +4,28 @@ namespace Models\Git;
 
 use \Ds\Deque;
 
-use \Coyl\Git\Git;
-use \Coyl\Git\GitRepo;
+use Git\Git;
+use Git\Console;
+use Git\GitRepo;
 use League\Flysystem\Filesystem;
 
 use \Models\Interfaces\FileSystemInterface;
 
 class GitBasic implements \Models\Interfaces\GitInterface
 {
-    // keep the Git instance for interactions
+    /** @var GitRepo */
     protected $repo;
+
+    /** @var Console */
+    protected $console;
 
     /**
      * @param Git $repo
      */
     public function __constructor( $database_address = null )
     {
+        $this->console = new Console;
+
         if( $database_address ) {
             $this->setRepo($database_address);
         }
@@ -38,10 +44,19 @@ class GitBasic implements \Models\Interfaces\GitInterface
      */
     public function setRepo( string $database_address )
     {
+        if (!$this->console) {
+            $this->console = new Console;
+        }
+
         try {
-            $this->repo = Git::open( $database_address );
+            $this->repo = Git::open( $this->console, $database_address );
         } catch (GitException $e) {
             throw $e;
+        }
+
+        if ($this->isStatusDirty()) {
+            $this->stageChanges();
+            $this->commitChanges();
         }
     }
 
@@ -65,9 +80,9 @@ class GitBasic implements \Models\Interfaces\GitInterface
 
         $result = '';
         if (!$this->isEmptyRepository()) {
-            $command = 'ls-tree HEAD ' . $database;
+            $command = ' ls-tree HEAD ' . $database;
 
-            $result = $this->repo->run( $command );
+            $result = $this->console->runCommand(Git::getBin() . $command );
         }
 
         $is_db = $database != '';
@@ -101,7 +116,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
         $result_array = array_filter($result_array);
 
         $result_deque = new Deque($result_array);
-        
+
         $result_deque = $result_deque->map(function( $records_row ) use ($is_db, $filesystem, $is_bag, $database_address)
         {
             $new_record = new \Models\Record;
@@ -141,7 +156,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
     private function checkRepo()
     {
         if( !isset($this->repo) || empty($this->repo) )
-            throw new Exception("No Repository started.");
+            throw new \Exception("No Repository started.");
     }
 
     /**
@@ -151,10 +166,10 @@ class GitBasic implements \Models\Interfaces\GitInterface
      */
     private function isEmptyRepository()
     {
-        $command = 'log -1';
+        $command = ' log -1';
 
         try {
-            $this->repo->run($command);
+            $this->console->runCommand(Git::getBin() . $command);
         } catch (\Exception $e) { // TODO: handle the error as a new type of exception: 'does not have any commits yet'
             $no_commits_yet = strstr($e->getMessage(), 'does not have any commits yet');
             return $no_commits_yet !== false;
@@ -189,7 +204,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
      * 
      * @return bool
      */
-    public function commitChanges()
+    public function commitChanges(): bool
     {
         $message = "Commit from Masa - " . date("Y-d-m H:i:s") . ".";
 
@@ -198,9 +213,14 @@ class GitBasic implements \Models\Interfaces\GitInterface
         return true;
     }
 
-    public function getStatus()
+    public function getStatus(): string
     {
-        return $this->repo->runCommand('status');
+        return $this->console->runCommand(Git::getBin() . ' status');
+    }
+
+    public function isStatusDirty(): bool
+    {
+        return strstr($this->getStatus(), 'Changes not staged for commit') !== false;
     }
 
     /**
@@ -224,7 +244,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
 
         $metadata_json = $this->prepareMetadata($database, $filesystem);
 
-        return $this->repo->run("notes add -f -m '" . $metadata_json . "'");
+        return $this->console->runCommand(Git::getBin() . " notes add -f -m '" . $metadata_json . "'");
     }
 
     /**
@@ -233,7 +253,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
     public function getMetadata()
     {
         try {
-            $return = $this->repo->run("notes show");
+            $return = $this->console->runCommand(Git::getBin() . " notes show");
         } catch (\Exception $e) {
             $return = $e->getMessage();
         }
@@ -293,10 +313,10 @@ class GitBasic implements \Models\Interfaces\GitInterface
      */
     public function getGitConfig(string $config_key) 
     {
-        $command = 'config --get ' . $config_key;
+        $command = ' config --get ' . $config_key;
         
         try {
-            $result = $this->repo->run( $command );
+            $result = $this->console->runCommand( Git::getBin() . $command );
         } catch (\Exception $e) {
             $return = $e->getMessage();
         }
@@ -310,10 +330,10 @@ class GitBasic implements \Models\Interfaces\GitInterface
      */
     public function setGitConfig(string $config_key, string $value) 
     {
-        $command = 'config ' . $config_key . ' "' . $value . '"';
+        $command = ' config ' . $config_key . ' "' . $value . '"';
         
         try {
-            $result = $this->repo->run( $command );
+            $result = $this->console->runCommand( Git::getBin() . $command );
         } catch (\Exception $e) {
             $return = $e->getMessage();
         }

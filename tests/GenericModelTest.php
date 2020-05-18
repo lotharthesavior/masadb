@@ -10,6 +10,7 @@ use League\Flysystem\Adapter\Local;
 use Models\FileSystem\FileSystemBasic;
 use Models\Git\GitBasic;
 use Models\Bag\BagBasic;
+use Models\Generic;
 
 use Models\Exceptions\NotExistentDatabaseException;
 
@@ -26,10 +27,17 @@ final class GenericModelTest extends TestCase
      */
     public function setUp()
     {
+        $this->getGeneric();
+    }
+
+    private function getGeneric()
+    {
+        if ($this->generic !== null) return;
+
         $database = "test";
         $clientId = "1";
 
-        $this->generic = new \Models\Generic(
+        $this->generic = new Generic(
             // \Models\Interfaces\FileSystemInterface 
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
@@ -46,6 +54,26 @@ final class GenericModelTest extends TestCase
             $this->generic->createDatabase($database);
             $this->generic->setDatabase($database);
         }
+    }
+
+    /**
+     * @before
+     */
+    public function prepareData()
+    {
+        $this->clearDatabase();
+        $this->createDummyRecord();
+    }
+
+    public function clearDatabase()
+    {
+        $this->getGeneric();
+
+        $results = $this->generic->findAll();
+
+        $results->map(function($item){
+            $this->generic->delete((int) $item->getId());
+        });
     }
 
     /**
@@ -69,7 +97,13 @@ final class GenericModelTest extends TestCase
 
         $filesystem = new Filesystem($adapter);
 
-        return $filesystem->listContents(__DIR__ . "/../data/client_1/test");
+        $list = $filesystem->listContents(__DIR__ . "/../data/client_1/test");
+
+        $list = array_filter($list, function($item){
+            return $item['basename'] !== '.git';
+        });
+
+        return $list;
     }
 
     /**
@@ -141,9 +175,12 @@ final class GenericModelTest extends TestCase
         $this->assertEquals(count($list), $results->count());
     }
 
+    /**
+     * 
+     */
     public function testSearch(){
         $results = $this->generic->search("title", "Lorem Ipsum");
-
+        
         $list = $this->getPhysicalNumberOrRecords();
 
         $this->assertEquals(count($list), $results->count());

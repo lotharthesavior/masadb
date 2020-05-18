@@ -50,15 +50,14 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
         // var_dump($location);exit;
 
         $full_record_addess = $location;
-        if( !empty($database_address) )
+        if( !empty($database_address) ) {
             $full_record_addess = $database_address . "/" . $location;
-        // var_dump($full_record_addess);exit;
+        }
 
         $content_temp = file_get_contents( $full_record_addess );
 
         $record->setFileContent((object) json_decode($content_temp));
-        // var_dump($content_temp);exit;
-
+        
         // get timestamp of file
 
             $timestamp = filemtime( $full_record_addess );

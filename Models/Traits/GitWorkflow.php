@@ -41,9 +41,6 @@ trait GitWorkflow
     {
         $this->checkGitUser();
 
-        // if ($this->_getDatabaseLocation() !== 'oauth/access_token') dd($this->git->getStatus());
-        // if ($this->_getDatabaseLocation() !== 'oauth/access_token') dd($this->git->getStatus());
-        
         // TODO: these 2 steps are taking far too long!!!!
         $result_stage = $this->git->stageChanges();
         $result_commit = $this->git->commitChanges();
@@ -119,7 +116,7 @@ trait GitWorkflow
         // ];
 
         // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
-        \Helpers\AppHelper::curlPostAsync($url, $body);
+        // \Helpers\AppHelper::curlPostAsync($url, $body);
     }
 
 }

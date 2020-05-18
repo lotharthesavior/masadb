@@ -1,16 +1,11 @@
 <?php
 
-echo "test";
-echo exec('whoami;');
-echo exec('export HOME=/var/www');
-echo exec('echo $HOME');
-exit;
 require __DIR__ . "/vendor/autoload.php";
-var_dump(new \Git\Coyl\Git);
-exit("test");
+
 use PHPUnit\Framework\TestCase;
 
-use \Git\Coyl\Git;
+use Git\Git;
+use Git\Console;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Adapter\Local;
 
@@ -34,7 +29,7 @@ final class GenericModelTest extends TestCase
      * @after
      */
     public function tearDownTestData(){
-        $repo = \Git\Coyl\Git::open(__DIR__ . '/../data');  // -or- Git::create('/path/to/repo')
+        $repo = Git::open(new Console, __DIR__ . '/../data');  // -or- Git::create('/path/to/repo')
 
         $adapter = new Local(__DIR__.'/../data');
         $filesystem = new Filesystem($adapter);

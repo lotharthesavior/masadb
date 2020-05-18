@@ -2,7 +2,7 @@
 
 namespace Models;
 
-use Git\Coyl\Git;
+use Git\Git;
 use Models\Exceptions\NotExistentDatabaseException;
 use Models\Abstraction\GitDAO;
 use Models\Interfaces\GenericInterface;
