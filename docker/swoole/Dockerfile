@@ -27,7 +27,10 @@ RUN apt-get install git -y \
 RUN git config --global user.email "savio@savioresende.com.br" \
 	&& git config --global user.name "MasaDB"
 
+RUN chmod +x /entrypoint.sh
+RUN chmod +x /usr/local/boot/sample.sh
+
 ENTRYPOINT ["/entrypoint.sh"]
-CMD []
+# CMD []
 
 WORKDIR "/var/www/html"

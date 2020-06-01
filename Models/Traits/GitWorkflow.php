@@ -25,7 +25,10 @@ trait GitWorkflow
         $this->git->setGitConfig('user.email', 'savio@savioresende.com.br');
         $this->git->setGitConfig('user.name', 'Savio Resende');
         $user_email = $this->git->getGitConfig('user.email');
-        echo $user_email;
+        
+        if (empty($user_email)) {
+            throw new \Exception('User not set for Git environment.');
+        }
     }
 
     /**
