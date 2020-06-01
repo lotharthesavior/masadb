@@ -318,10 +318,10 @@ class GitBasic implements \Models\Interfaces\GitInterface
         try {
             $result = $this->console->runCommand( Git::getBin() . $command );
         } catch (\Exception $e) {
-            $return = $e->getMessage();
+            $result = $e->getMessage();
         }
 
-        return $return;
+        return $result;
     }
 
     /**
@@ -335,9 +335,9 @@ class GitBasic implements \Models\Interfaces\GitInterface
         try {
             $result = $this->console->runCommand( Git::getBin() . $command );
         } catch (\Exception $e) {
-            $return = $e->getMessage();
+            $result = $e->getMessage();
         }
 
-        return $return;
+        return $result;
     }
 }
