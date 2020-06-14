@@ -26,15 +26,11 @@ $app = new \Slim\App($config);
 
 $container = $app->getContainer();
 
+// base
 include "app/oauth2.php";
-
 include "app/middlewares.php";
-
 include "app/controllers.php";
-
 include "routes.php";
-
-// $app->run();
 
 $bridgeManager = new BridgeManager($app);
 

@@ -8,10 +8,10 @@ use Git\Git;
 use Git\Console;
 use Git\GitRepo;
 use League\Flysystem\Filesystem;
-
+use \Models\Interfaces\GitInterface;
 use \Models\Interfaces\FileSystemInterface;
 
-class GitBasic implements \Models\Interfaces\GitInterface
+class GitBasic implements GitInterface
 {
     /** @var GitRepo */
     protected $repo;
@@ -305,7 +305,7 @@ class GitBasic implements \Models\Interfaces\GitInterface
      */
     public function initRepository(string $repository_address)
     {
-        $this->repo = GitRepo::create($repository_address);
+        $this->repo = Git::create($this->console, $repository_address);
     }
 
     /**
