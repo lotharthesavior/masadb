@@ -45,8 +45,7 @@ class CacheHelper
             $cache_filestamp = $this->getTimeOfFileSystem($filesystem, $database_cache_path);
         // ------------------------------------
 
-        $config_json = file_get_contents("config.json");
-        $config = json_decode($config_json, true);
+        $config = config();
 
         // get the database timestamp ---
             // $filesystem2 = $this->getFileSystem( $root_path_database );
@@ -164,11 +163,12 @@ class CacheHelper
 		$record_instance = new \Models\Record;
 
 		// avoid 2 bars together
-		if( 
+        if( 
 			$root_path[strlen($root_path) - 1] == "/" 
 			&& $path[0] == "/"
-		)
+		) {
 			$path = substr($path, 1);
+        }
 
 		$data_path = $root_path . $path . "/data/";
 

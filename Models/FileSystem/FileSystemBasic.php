@@ -127,9 +127,10 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
      * @param string $base_location
      * @param string $database
      * 
-     * @return boolean
+     * @return bool
      */
-    public function createDatabaseDirectory(string $base_location, string $database) {
+    public function createDatabaseDirectory(string $base_location, string $database): bool
+    {
         $filesystem = $this->getFileSystemAbstraction( $base_location );
         return $filesystem->createDir($database);
     }

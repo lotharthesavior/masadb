@@ -45,8 +45,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         \Models\Interfaces\BagInterface $bag
     )
     {
-        $config_json = file_get_contents("config.json");
-        $this->config = json_decode($config_json, true);
+        $this->config = config()['settings'];
 
         $this->filesystem = $filesystem;
         $this->git = $git;
@@ -232,7 +231,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     {
         $client_data = (object) $client_data;
 
-        $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
+        $local_address = $this->_getDatabaseFullPathLocation();
 
         // @var League\Flysystem\Filesystem
         $filesystem = $this->filesystem->getFileSystemAbstraction($local_address);
@@ -320,7 +319,8 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
             true
         );
 
-        $new_record = $cache_helper->buildRecordFromPath($item, $this->client_id, $this->database);
+        $item_path = (string) $item;
+        $new_record = $cache_helper->buildRecordFromPath($item_path, $this->client_id, $this->database);
         $cache_helper->merge($new_record);
         $cache_helper->persistCache($this->_getDatabaseLocation());
     }
@@ -369,7 +369,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     public function delete(int $id)
     {
 
-        $database_url = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
+        $database_url = $this->_getDatabaseFullPathLocation();
 
         // League\Flysystem\Filesystem
         $filesystem = $this->filesystem->getFileSystemAbstraction($database_url);
@@ -483,7 +483,7 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      *
      * @return string $database_location
      */
-    protected function _getDatabaseLocation()
+    protected function _getDatabaseLocation(): string
     {
         $database_location = "";
 
@@ -494,6 +494,15 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         $database_location .= $this->database;
 
         return $database_location;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    protected function _getDatabaseFullPathLocation(): string
+    {
+        return $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
     }
 
     /**

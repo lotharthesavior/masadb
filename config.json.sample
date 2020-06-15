@@ -1,4 +1,5 @@
 {
+    "env": "develop",
     "database-address": "/var/www/html/data",
     "domain": "localhost",
     "domain-fallback": "nginx",

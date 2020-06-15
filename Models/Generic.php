@@ -3,6 +3,7 @@
 namespace Models;
 
 use Git\Git;
+use Git\GitRepo;
 use Models\Exceptions\NotExistentDatabaseException;
 use Models\Abstraction\GitDAO;
 use Models\Interfaces\GenericInterface;
@@ -20,8 +21,10 @@ class Generic extends GitDAO implements GenericInterface
 {
     use GitWorkflow, BagUtilities;
 
+    /** @var GitRepo */
     protected $repo;
 
+    /** @var string */
     protected $database = '';
 
     /**
@@ -30,7 +33,7 @@ class Generic extends GitDAO implements GenericInterface
      * @param string $database
      * @return void
      */
-    public function setDatabase(string $database)
+    public function setDatabase(string $database): void
     {
         $this->database = $database;
 
@@ -54,7 +57,7 @@ class Generic extends GitDAO implements GenericInterface
      *
      * @return string
      */
-    public function getDatabase()
+    public function getDatabase(): string
     {
         return $this->database;
     }
@@ -65,7 +68,7 @@ class Generic extends GitDAO implements GenericInterface
      * @param string $client_id
      * @return void
      */
-    public function setClientId(string $client_id)
+    public function setClientId(string $client_id): void
     {
         $this->client_id = $client_id;
     }
@@ -75,7 +78,7 @@ class Generic extends GitDAO implements GenericInterface
      *
      * @return string
      */
-    public function getClientId()
+    public function getClientId(): string
     {
         return $this->client_id;
     }
@@ -87,7 +90,7 @@ class Generic extends GitDAO implements GenericInterface
      *
      * @return void
      */
-    public function createDatabase(string $database)
+    public function createDatabase(string $database): void
     {
         $this->database = $database;
 

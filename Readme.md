@@ -137,3 +137,7 @@ It might be required to give the permission manually too:
 ```sh
 sudo chown -R www-data /home/vagrant/Code/masadb
 ```
+
+##### Cofiguration Customization
+
+Is possible to use different configuration items accoridng to environment. for that, set the `env` of the config file to develop, as an example, and create a file named `config.json-develop` with the same items of the `config.json`, but with the settings for that environment. The ones present there will overwrite the original ones at the `config.json` file when that file points to that env.

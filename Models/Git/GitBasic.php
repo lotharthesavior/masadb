@@ -305,6 +305,11 @@ class GitBasic implements GitInterface
      */
     public function initRepository(string $repository_address)
     {
+        if (!$this->console) {
+            $this->console = new Console;
+        }
+
+        // TODO: first record for a directory is resulting in issue hwre
         $this->repo = Git::create($this->console, $repository_address);
     }
 
