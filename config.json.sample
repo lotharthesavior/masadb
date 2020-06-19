@@ -9,5 +9,6 @@
     "private_key": "/var/www/masadb/key.pem",
     "public_key": "/var/www/masadb/key.pub",
     "public_key_pass": "test123",
-    "timezone": "America/Toronto"
+    "timezone": "America/Toronto",
+    "swoole": true
 }

@@ -62,10 +62,6 @@ The previous data is this:
 1. Generate Certificate with:
 
 ```ssh
-ssh-keygen -t rsa -b 4096
-```
-
-```ssh
 openssl req -new -newkey rsa:2048 -nodes -keyout server_name.key -out server_name.csr
 ```
 

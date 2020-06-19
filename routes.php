@@ -2,7 +2,6 @@
 
 use \League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 
-
 $app->get('/', 'HomeController:home');
 
 

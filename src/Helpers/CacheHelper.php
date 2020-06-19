@@ -2,12 +2,13 @@
 
 namespace Helpers;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 use League\Flysystem\Filesystem;
 use League\Flysystem\Adapter\Local;
-
 use \Lotharthesavior\BagItPHP\BagIt;
+use \Ds\Deque;
+use \Models\Record;
 
 /**
  * 
@@ -36,11 +37,13 @@ class CacheHelper
 			$filesystem = $this->getFileSystem( $root_path_cache );
 			
 			$database_cache_path = $database;
-			if( $search == "all" )
+			if( $search == "all" ) {
 				$database_cache_path .= "/all";
+			}
 
-			if( !$filesystem->has($database_cache_path) )
+			if( !$filesystem->has($database_cache_path) ) {
                 return false;
+			}
             
             $cache_filestamp = $this->getTimeOfFileSystem($filesystem, $database_cache_path);
         // ------------------------------------
@@ -56,28 +59,27 @@ class CacheHelper
             $git_filestamp = $this->getTimeOfGitVersion( $full_database_address );
         // ------------------------------------
 		
-        $cache_deque = unserialize($filesystem->read($database_cache_path));
+		$cache_deque = unserialize($filesystem->read($database_cache_path));
 
         $this->data = $cache_deque;
 
         // -- async call --
         // TODO: rebuild this part
-        if( 
-            $cache_filestamp < $git_filestamp 
-            && $create_cache
-        ){
-            // $header = [
-                // 'ClientId' => $_SERVER['HTTP_CLIENTID'],
-                // 'Authorization' => $_SERVER['HTTP_AUTHORIZATION'],
-                // 'Content-Type' => $_SERVER['HTTP_CONTENT_TYPE']
-            // ];
-            
-            // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
-            // \Helpers\AppHelper::curlPostAsync(
-            //     $config['protocol'] . '://' . $config['domain'] . "/git-async", 
-            //     [ 'database' => $full_database_address ]
-            // );
-        }
+        // if( 
+        //     $cache_filestamp < $git_filestamp 
+        //     && $create_cache
+        // ){
+        //     $header = [
+        //         'ClientId' => $_SERVER['HTTP_CLIENTID'],
+        //         'Authorization' => $_SERVER['HTTP_AUTHORIZATION'],
+        //         'Content-Type' => $_SERVER['HTTP_CONTENT_TYPE']
+        //     ];
+        //     \Helpers\AppHelper::curlPostAsync($url, $body, $header);
+        //     \Helpers\AppHelper::curlPostAsync(
+        //         $config['protocol'] . '://' . $config['domain'] . "/git-async", 
+        //         [ 'database' => $full_database_address ]
+        //     );
+        // }
         // --
 
 		return $cache_deque;
@@ -88,11 +90,11 @@ class CacheHelper
 	 * and, in the future replace this to something that is 
 	 * more reliable in case the UNIX timestamp is replaced
 	 * 
-	 * @param \League\Flysystem\Filesystem $filesystem
+	 * @param Filesystem $filesystem
 	 * @param String $path
 	 * @return Int (UNIX Timestamp)
 	 */
-	private function getTimeOfFileSystem( \League\Flysystem\Filesystem $filesystem, $path ){
+	private function getTimeOfFileSystem( Filesystem $filesystem, $path ){
 		return $filesystem->getTimestamp($path);
 	}
 
@@ -125,7 +127,7 @@ class CacheHelper
 	 * @return Array $contents
 	 */
 	private function getAllPhysicalRecords( $client, $database, $database_full_address = '' ){
-		$contents = new \Ds\Deque(scandir($database_full_address));
+		$contents = new Deque(scandir($database_full_address));
 		$contents = $contents->filter(function( $dir ){
             return $dir != "."
                 && $dir != ".."
@@ -160,7 +162,7 @@ class CacheHelper
 	public function buildRecordFromPath( $path, $client, $database ){
 		$root_path = $this->getRootPath($client, $database);
 
-		$record_instance = new \Models\Record;
+		$record_instance = new Record;
 
 		// avoid 2 bars together
         if( 
@@ -251,7 +253,7 @@ class CacheHelper
      * @return void
      */
     public function persistCache( $database ){
-    	$filesystem = $this->getFileSystem(__DIR__.'/../');
+    	$filesystem = $this->getFileSystem(__DIR__ . '/../../');
 
     	if( !$filesystem->has("cache") )
 			$filesystem->createDir("cache");
@@ -266,18 +268,12 @@ class CacheHelper
     /**
      * This method merge the new record with the current data
      * 
-     * @param \Models\Record $new_record
+     * @param Record $new_record
      * @return mix (current data after merge || false)
      */
-    public function merge( \Models\Record $new_record ){
-        $this->data->push($new_record);
+    public function merge( Record $new_record ){
+    	$this->data->push($new_record);
         return $this->data;
     }
 
 }
-
-// $cache_control = new CacheControl;
-// $cache_control->getAllRecords(1, 'test');
-// var_dump(json_encode($cache_control));exit;
-// $cache_control->persistCache();
-// var_dump(json_encode($cache_control));exit;
