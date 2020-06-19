@@ -26,8 +26,11 @@ return function () use ($required_settings) {
     }
 
     if (count($errors) > 0) {
-        return $errors;
+        $imploded_errors = implode("\n- ", $errors);
+        echo <<<OUTPUT
+\nConfiguration file (config.json) has some missing items:\n
+- {$imploded_errors}\n\n
+OUTPUT;
+        die;
     }
-
-    return false;
 };
