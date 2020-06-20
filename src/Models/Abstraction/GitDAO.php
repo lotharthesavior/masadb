@@ -5,7 +5,6 @@ namespace Models\Abstraction;
 use \Git\Git;
 use \Models\Traits\Pagination;
 use \Helpers\CacheHelper;
-
 use \Ds\Deque;
 
 /**
@@ -34,6 +33,8 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     // attribute to specify the sorting type: ASC | DESC
     // protected $sortType;
 
+    protected $no_cache = true;
+
     /**
      * @param \Models\Interfaces\FileSystemInterface $filesystem
      * @param \Models\Interfaces\GitInterface $git
@@ -47,9 +48,18 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
     {
         $this->config = config()['settings'];
 
+        $this->resolveCacheCondition();
+
         $this->filesystem = $filesystem;
         $this->git = $git;
         $this->bag = $bag;
+    }
+
+    protected function resolveCacheCondition()
+    {
+        if (isset($this->config['no_cache'])) {
+            $this->no_cache = $this->config['no_cache'];
+        }
     }
 
     /**

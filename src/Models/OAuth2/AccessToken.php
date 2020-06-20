@@ -27,8 +27,6 @@ class AccessToken extends GitDAO implements AccessTokenEntityInterface
 
     protected $database = 'oauth/access_token';
 
-    protected $no_cache = true;
-
     public function __construct(
         FileSystemInterface $filesystem,
         GitInterface $git,
@@ -40,6 +38,14 @@ class AccessToken extends GitDAO implements AccessTokenEntityInterface
         // models what is being done on the generic
         if( isset($this->git) )
             $this->git->setRepo( $this->config['database-address'] . '/' . $this->database );
+    }
+
+    /**
+     * We will never keep cache for this db
+     */
+    protected function resolveCacheCondition()
+    {
+        // --
     }
 
 }

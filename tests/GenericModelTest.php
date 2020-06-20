@@ -2,16 +2,15 @@
 
 require __DIR__ . "/../vendor/autoload.php";
 
-use PHPUnit\Framework\TestCase;
+include_once __DIR__ . "/fakes/helpers.php";
 
+use PHPUnit\Framework\TestCase;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Adapter\Local;
-
 use Models\FileSystem\FileSystemBasic;
 use Models\Git\GitBasic;
 use Models\Bag\BagBasic;
 use Models\Generic;
-
 use Models\Exceptions\NotExistentDatabaseException;
 
 /**
@@ -19,23 +18,90 @@ use Models\Exceptions\NotExistentDatabaseException;
  */
 final class GenericModelTest extends TestCase
 {
-
+    /** @var Generic */
     protected $generic;
+
+    /** @var Filesystem */
+    protected $filesystem;
+
+    /** @var array */
+    protected $config;
+
+    /** @var string */
+    protected $client_id = '1';
+
+    /** @var string */
+    protected $client_dir = 'client_1';
     
     /**
      *
      */
-    public function setUp()
+    protected function setUp() : void
     {
+        $this->checkPermissions();
+        $this->config = config();
+        $this->setFilesystem();
+        $this->clearDatabase();
+        $this->createDatabase();
         $this->getGeneric();
+    }
+
+    /**
+     *
+     */
+    protected function tearDown() : void
+    {
+        $this->clearDatabase();
+    }
+
+    /**
+     *
+     */
+    private function checkPermissions()
+    {
+        dd(substr(sprintf('%o', fileperms('/tmp')), -4));
+    }
+
+    private function setFilesystem()
+    {
+        $path_to_db = strstr(
+            $this->config['settings']['database-address'],
+            $this->config['settings']['test-database-dir-name'], 
+            true
+        );
+
+        $adapter = new Local($path_to_db);
+        $this->filesystem = new Filesystem($adapter);
+    }
+
+    private function clearDatabase()
+    {
+        if ($this->filesystem->has($this->config['settings']['test-database-dir-name'], false)) {
+            $this->filesystem->deleteDir($this->config['settings']['test-database-dir-name']);
+        }
+    }
+
+    private function createDatabase()
+    {
+        $database_dir = $this->config['settings']['test-database-dir-name'];
+        $client_dir = $database_dir . '/' . $this->client_dir;
+
+        if (!$this->filesystem->has($database_dir, false)) {
+            $this->filesystem->createDir($database_dir);
+        }
+
+        if (!$this->filesystem->has($client_dir, false)) {
+            $this->filesystem->createDir($client_dir);
+        }
     }
 
     private function getGeneric()
     {
-        if ($this->generic !== null) return;
+        if ($this->generic !== null) {
+            return;
+        }
 
         $database = "test";
-        $clientId = "1";
 
         $this->generic = new Generic(
             // \Models\Interfaces\FileSystemInterface 
@@ -46,7 +112,7 @@ final class GenericModelTest extends TestCase
             new BagBasic
         );
 
-        $this->generic->setClientId($clientId);
+        $this->generic->setClientId($this->client_id);
 
         try {     
             $this->generic->setDatabase($database);
@@ -54,26 +120,6 @@ final class GenericModelTest extends TestCase
             $this->generic->createDatabase($database);
             $this->generic->setDatabase($database);
         }
-    }
-
-    /**
-     * @before
-     */
-    public function prepareData()
-    {
-        $this->clearDatabase();
-        $this->createDummyRecord();
-    }
-
-    public function clearDatabase()
-    {
-        $this->getGeneric();
-
-        $results = $this->generic->findAll();
-
-        $results->map(function($item){
-            $this->generic->delete((int) $item->getId());
-        });
     }
 
     /**
@@ -97,7 +143,7 @@ final class GenericModelTest extends TestCase
 
         $filesystem = new Filesystem($adapter);
 
-        $list = $filesystem->listContents(__DIR__ . "/../data/client_1/test");
+        $list = $this->filesystem->listContents($this->config['settings']['test-database-dir-name']);
 
         $list = array_filter($list, function($item){
             return $item['basename'] !== '.git';
@@ -167,6 +213,8 @@ final class GenericModelTest extends TestCase
      *        but the search
      */
     public function testFindAll(){
+        $this->createDummyRecord();
+
         $results = $this->generic->findAll();
 
         $list = $this->getPhysicalNumberOrRecords();
@@ -179,6 +227,8 @@ final class GenericModelTest extends TestCase
      * 
      */
     public function testSearch(){
+        $this->createDummyRecord();
+
         $results = $this->generic->search("title", "Lorem Ipsum");
         
         $list = $this->getPhysicalNumberOrRecords();
@@ -187,6 +237,8 @@ final class GenericModelTest extends TestCase
     }
 
     public function testSearchRecord(){
+        $this->createDummyRecord();
+
         $results = $this->generic->searchRecord([
             "title" => "Lorem Ipsum"
         ]);
@@ -198,6 +250,8 @@ final class GenericModelTest extends TestCase
     }
 
     public function testSearchRecordSearchParam(){
+        $this->createDummyRecord();
+
         $results = $this->generic->searchRecord([
             "title" => "Lorem Ipsum",
             "content" => "Lorem Ipsum"
@@ -210,6 +264,8 @@ final class GenericModelTest extends TestCase
     }
 
     public function testSearchRecordSearchParamAND(){
+        $this->createDummyRecord();
+
         $results = $this->generic->searchRecord([
             "title" => "Lorem Ipsum",
             "content" => "Lorem Ipsum"
@@ -222,6 +278,8 @@ final class GenericModelTest extends TestCase
     }
 
     public function testSave(){
+        $this->createDummyRecord();
+
         $results = $this->generic->searchRecord([
             "title" => "Lorem Ipsum"
         ]);
