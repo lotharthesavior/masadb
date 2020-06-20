@@ -10,3 +10,4 @@ git_async_result
 updatecache_async_result
 server.key
 server.pub
+server.csr
