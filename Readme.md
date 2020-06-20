@@ -72,7 +72,7 @@ openssl rsa -in mykey.pem -pubout > mykey.pub
 ```
 Reference: https://stackoverflow.com/questions/5244129/use-rsa-private-key-to-generate-public-key#5246045
 
-Self Signed Certificate:
+Alternative - Self Signed Certificate:
 ```sh
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server_name.key -out server_name.crt
 ```
@@ -80,22 +80,24 @@ Reference: https://www.digitalocean.com/community/tutorials/how-to-create-a-self
 
 2. Create the "data" directory using the server user, so you avoid problem with permissions:
 
-```sh
-sudo -u www-data mkdir data
-```
+Is using swoole:
 
 ```sh
-cd data
+cp data.sample data
 ```
 
+If using webservers like nginx or apache:
+
 ```sh
-sudo -u www-data git init
+cp data.sample data && sudo chown -R www-data data
 ```
 
 3. Configure Apache server
 
 The www-data must have enough permission to access the data through git.
-To do that, you can edit the envvars of apache with this:
+To do that, you can edit the envvars of apache with this (I didn't test 
+using nginx yet, let me know if you try it out):
+
 ```sh
 sudo vim /etc/apache2/envvars
 ```
@@ -116,22 +118,27 @@ sudo services apache2 restart
 sudo chown -R www-data {directory of the project}
 ```
 
-###### OR Run https://{domain}/install.php and the steps 1, 3 and 4.
-
-4. Configure Nginx server (laravel homestead vm)
-
-In this environment, there is the necessity to configure the permission of the synced folder. To do this you can insert this in the Vagrantfile:
+5. Copy `config.json.sample` file to `config.json` and customize the file.
 
 ```sh
-config.vm.synced_folder "./shared", "/home/vagrant/Code", :owner => "www-data", :group => "www-data"
+cp config.json.sample config.json
 ```
 
-This will give permission to www-data to change the files inside the necessary folder.
+Notice that:
 
-It might be required to give the permission manually too:
+- the `database-address` key must be a a full path to the data directory.
+- the `private_key` and `public_key` keys must be full paths to the actual keys generated in the Step 1.
+- possible values for `env` are (can be found in the file `src/constants.php`):
+  - develop
+  - staging
+  - production
+
+6. Start your Swoole Server
+
+Make sure that the key `swoole` at your `config.json` is set to `true` to be able to run the Swoole Server.
 
 ```sh
-sudo chown -R www-data /home/vagrant/Code/masadb
+php index.php
 ```
 
 ##### Cofiguration Customization

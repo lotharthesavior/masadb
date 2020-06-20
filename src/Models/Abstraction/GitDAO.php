@@ -6,6 +6,7 @@ use \Git\Git;
 use \Models\Traits\Pagination;
 use \Helpers\CacheHelper;
 use \Ds\Deque;
+use \Models\Interfaces\GitDAOInterface;
 
 /**
  *
@@ -14,7 +15,7 @@ use \Ds\Deque;
  * @author Savio Resende <savio@savioresende.com.br>
  *
  */
-abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
+abstract class GitDAO implements GitDAOInterface
 {
     use Pagination;
 
@@ -416,7 +417,6 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
      */
     public function isBag()
     {
-
         $is_bag = false;
 
         if (method_exists($this, 'createBagForRecord')) {
@@ -426,7 +426,23 @@ abstract class GitDAO implements \Models\Interfaces\GitDAOInterface
         }
 
         return $is_bag;
+    }
 
+    /**
+     * @param bool $no_cache
+     * @return void
+     */
+    public function setNoCache(bool $no_cache) : void
+    {
+        $this->no_cache = $no_cache;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getNoCache() : bool
+    {
+        return $this->no_cache;
     }
 
     /**

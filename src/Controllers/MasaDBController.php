@@ -208,7 +208,7 @@ class MasaDBController extends Abstraction\MasaController
 
         $generic_model = $this->setClient($current_client_id, $generic_model);
 
-        $generic_model->no_cache = false;
+        $generic_model->setNoCache(false);
 
         try {
 

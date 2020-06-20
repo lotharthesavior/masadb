@@ -8,6 +8,5 @@ config.json
 cache
 git_async_result
 updatecache_async_result
-masadb.csr
-masadb.key
-masadb.pub
+server.key
+server.pub
