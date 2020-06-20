@@ -141,6 +141,8 @@ Make sure that the key `swoole` at your `config.json` is set to `true` to be abl
 php index.php
 ```
 
+7. Copy the `config.json.tests.sample` to `config.json.tests` for the fields that you want to customize in order to run properly the tests in your machine.
+
 ##### Cofiguration Customization
 
 Is possible to use different configuration items accoridng to environment. for that, set the `env` of the config file to develop, as an example, and create a file named `config.json-develop` with the same items of the `config.json`, but with the settings for that environment. The ones present there will overwrite the original ones at the `config.json` file when that file points to that env.

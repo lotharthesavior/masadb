@@ -4,8 +4,15 @@
  * Start Application Configurations
  */
 function config() : array  {
+    $test_config_address = __DIR__ . "/../../config.json.test";
+    
+    $test_config = [];
+    if (file_exists($test_config_address)) {
+        $test_config = json_decode(file_get_contents($test_config_address), true);
+    }
+
 	return [
-        "settings" => [
+        "settings" => array_merge([
             "env" => "develop",
             "database-address" => "/home/savio/Code/Playground/masadb/data-test",
             "test-database-dir-name" => "data-test", // this is test
@@ -19,6 +26,6 @@ function config() : array  {
             "timezone" => "America/Toronto",
             "no_cache" => true,
             "swoole" => true,
-        ]
+        ], $test_config),
     ];
 }
