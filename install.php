@@ -6,7 +6,7 @@
  * @todo build a reset function
  */
 
-// phpinfo();exit;
+die('deprecated!');
 
 session_start();
 

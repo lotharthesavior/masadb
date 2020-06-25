@@ -1,0 +1,5 @@
+{
+    "database-address": "/var/www/html/data-test",
+    "private_key": "/var/www/masadb/server.key",
+    "public_key": "/var/www/masadb/server.pub"
+}
