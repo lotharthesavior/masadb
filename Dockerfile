@@ -1,6 +1,6 @@
 FROM phpswoole/swoole
 
-COPY ./rootfilesystem/ /
+COPY ./docker/swoole/rootfilesystem/ /
 
 RUN apt-get update
 
