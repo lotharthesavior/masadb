@@ -1,6 +1,6 @@
 {
     "name": "client1",
     "user_id": 1,
-    "redirectUri": "masadb.dev\/server_response",
+    "redirectUri": "localhost\/server_response",
     "secret_key": "e776dbd85f227b0f6851d10eb76cdb04903b9632"
 }
