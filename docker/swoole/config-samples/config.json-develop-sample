@@ -1,0 +1,5 @@
+{
+    "env": "develop",
+    "protocol": "http",
+    "raw_files": RAW_FILES
+}

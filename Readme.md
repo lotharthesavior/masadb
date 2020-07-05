@@ -18,7 +18,12 @@ Reference: https://oauth2.thephpleague.com/
 
 Reference: https://flysystem.thephpleague.com/
 
-##### Clients Credential Workflow
+### API Reference
+
+(this still to be published)
+https://savioresende.postman.co/collections/2828959-075664e1-21d6-983c-eea1-c01f021d5b43?version=latest&workspace=698ac165-0810-4a72-8447-f48b0ca7edf9#05ac60ce-9cd7-4d49-82f0-304aa95c93d0
+
+#### Clients Credential Workflow
 
 Reference: https://tools.ietf.org/html/rfc6749#section-4.4
 
@@ -59,24 +64,19 @@ The previous data is this:
  
 **Step-by-Step**
 
-1. Generate Certificate with:
+1. Generate Certificate with (self signed):
 
-```ssh
-openssl req -new -newkey rsa:2048 -nodes -keyout server_name.key -out server_name.csr
+```shell
+openssl req -new -x509 -sha256 -newkey rsa:2048 -nodes -keyout masadb.key -days 365 -out masadb.csr -subj '/CN=localhost'
 ```
 
-Obs.: to generaste a pub from the private, do as follow:
+(for productoin certificates you can use letsencrypt)
 
-```sh
-openssl rsa -in mykey.pem -pubout > mykey.pub
-```
-Reference: https://stackoverflow.com/questions/5244129/use-rsa-private-key-to-generate-public-key#5246045
+for public key:
 
-Alternative - Self Signed Certificate:
-```sh
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server_name.key -out server_name.crt
+```shell
+openssl rsa -in masadb.key -pubout > masadb.pub
 ```
-Reference: https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04
 
 2. Create the "data" directory using the server user, so you avoid problem with permissions:
 
@@ -146,3 +146,31 @@ php index.php
 ##### Cofiguration Customization
 
 Is possible to use different configuration items accoridng to environment. for that, set the `env` of the config file to develop, as an example, and create a file named `config.json-develop` with the same items of the `config.json`, but with the settings for that environment. The ones present there will overwrite the original ones at the `config.json` file when that file points to that env.
+
+### Docker
+
+An image can be prepared with this command:
+
+```shell
+docker build --build-arg ENVIRONMENT_NAME='production' --build-arg RAW_FILES='true' .
+```
+
+To run after that, run this:
+
+```shell
+docker run -p 443:443 {image-id}
+```
+
+#### Parameters to customize:
+
+ENVIRONMENT_NAME
+
+Defines the environment, and can be either 'develop' or 'production'.
+
+RAW_FILES
+
+Defines the usage of raw files, and can be either true or false.
+
+Raw files instead of [Bagit](http://www.digitalpreservation.gov/multimedia/videos/bagit0609.html) files. the raw files are useful for "normal" repos. the other side of it are records kept with the Bagit format intending to long term preservation.
+
+

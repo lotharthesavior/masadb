@@ -1,9 +1,32 @@
-FROM phpswoole/swoole
+FROM php:7.4.2-cli
+
+ARG ENVIRONMENT_NAME
+ARG RAW_FILES
 
 COPY ./docker/swoole/rootfilesystem/ /
 COPY ./ /var/www/html
+RUN cp /var/www/html/config.json.sample /var/www/html/config.json
+RUN sed "s/RAW_FILES/${RAW_FILES}/g" /var/www/html/docker/swoole/config-samples/config.json-${ENVIRONMENT_NAME}-sample > /var/www/html/config.json-${ENVIRONMENT_NAME}
 
-RUN apt-get update
+RUN apt-get update && apt-get install vim -y && \
+    apt-get install openssl -y && \
+    apt-get install libssl-dev -y && \
+    apt-get install wget -y && \
+    apt-get install git -y && \
+    apt-get install procps -y && \
+    apt-get install htop -y && \
+    apt-get install -y supervisor
+
+# install swoole
+RUN cd /tmp && git clone https://github.com/swoole/swoole-src.git && \
+    cd swoole-src && \
+    git checkout v4.5.2 && \
+    phpize  && \
+    ./configure  --enable-openssl --enable-http2 && \
+    make && make install
+
+RUN touch /usr/local/etc/php/conf.d/swoole.ini && \
+    echo 'extension=swoole.so' > /usr/local/etc/php/conf.d/swoole.ini
 
 # Install PDO and PGSQL Drivers
 RUN apt-get install -y libpq-dev libpng-dev
@@ -15,18 +38,22 @@ RUN docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd \
   && docker-php-ext-install json \
   && docker-php-ext-install gd
 
-#install some base extensions
+# install some base extensions
 RUN apt-get install -y libzip-dev zip \
-  && docker-php-ext-install zip
+ && docker-php-ext-install zip
 
-# Install debug dependencies
+# Install extra dependencies
 RUN apt-get install git -y \
     && apt-get install vim -y \
     && apt-get install curl -y \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN git config --global user.email "savio@savioresende.com.br" \
-	&& git config --global user.name "MasaDB"
+    && git config --global user.name "MasaDB"
+
+# RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
+# RUN chmod +x /usr/local/bin/dumb-init
+# RUN apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 RUN chmod +x /entrypoint.sh
 RUN chmod +x /usr/local/boot/sample.sh

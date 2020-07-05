@@ -44,7 +44,6 @@ trait GitWorkflow
     {
         $this->checkGitUser();
 
-        // TODO: these 2 steps are taking far too long!!!!
         $result_stage = $this->git->stageChanges();
         $result_commit = $this->git->commitChanges();
 
@@ -71,55 +70,21 @@ trait GitWorkflow
         $local_address = $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
         $filesystem = $this->filesystem->getFileSystemAbstraction($local_address);
 
-        // if this is the first register of the database
-        if ($item === 1) {
-            $this->saveVersion();
-        } else {
-            // git stage & commit launching by an async request
-            $this->localAsyncRequest([
-                'database' => $this->_getDatabaseLocation()
-            ]);
-        }
+        $this->saveVersion();
 
         // Update cache by loading it and placing the new record
-        if (
-            !isset($this->no_cache)
-            || (isset($this->no_cache) && $this->no_cache === false)
-        ) {
-            if ($is_delete) {
-                $this->removeItemFromCache($item);
-            } else {
-                if ($filesystem->has($item)) {
-                    $this->removeItemFromCache($item);
-                }
-                $this->addItemToCache($item);
-            }
-        }
+        // if ($this->getNoCache() === false) {
+        //     if ($is_delete) {
+        //         $this->removeItemFromCache($item);
+        //     } else {
+        //         if ($filesystem->has($item)) {
+        //             $this->removeItemFromCache($item);
+        //         }
+        //         $this->addItemToCache($item);
+        //     }
+        // }
 
         return true;
-    }
-
-    /**
-     * Make async request
-     *
-     * TODO: this method hes to be changed to inside the
-     *       oauth wall
-     *
-     * @param array $body
-     * @return void
-     */
-    private function localAsyncRequest($body)
-    {
-        $url = $this->config['protocol'] . '://' . $this->config['domain'] . "/git-async";
-
-        // $header = [
-        // 'ClientId' => $_SERVER['HTTP_CLIENTID'],
-        // 'Authorization' => $_SERVER['HTTP_AUTHORIZATION'],
-        // 'Content-Type' => $_SERVER['HTTP_CONTENT_TYPE']
-        // ];
-
-        // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
-        // \Helpers\AppHelper::curlPostAsync($url, $body);
     }
 
 }

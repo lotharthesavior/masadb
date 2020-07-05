@@ -2,6 +2,8 @@
 
 namespace Models;
 
+use \Exception;
+
 /**
  * Record Object Hashable for Collections of the database
  * 
@@ -87,7 +89,7 @@ class Record implements \JsonSerializable
 
     public function setAddress( $address )
     {
-        $this->address = $address;
+        $this->address = trim($address);
     }
 
     public function getAddress()
@@ -151,11 +153,15 @@ class Record implements \JsonSerializable
     }
 
     /**
+     * This match is for JSON assets
+     *
      * @todo implement the logic (OR, AND, ...)
      * @todo the OR is not complete
      *
      * @param array $params
      * @param array $logic
+     *
+     * @return bool
      */
     public function multipleParamsMatch ($params, $logic = [])
     {
@@ -212,6 +218,37 @@ class Record implements \JsonSerializable
     }
 
     /**
+     * @param array $params
+     *
+     * @return bool
+     */
+    public function titleContentMatch(array $params) : bool
+    {
+        $match = true;
+
+        if (isset($params['id'])) {
+            $match = $match && $this->getAddress() === $params['id'];
+            unset($params['id']);
+        }
+
+        if (isset($params['address'])) {
+            $match = $match && $this->getAddress() === $params['address'];
+            unset($params['address']);
+        }
+
+        if (isset($params['content'])) {
+            $match = $match && $this->stringMatch($params['content'], $this->getFileContent()->content);
+            unset($params['content']);
+        }
+
+        if (count($params) > 0) {
+            throw new Exception('Fields not known to this type of record: ' . implode(', ', array_keys($params)) . '.');
+        }
+
+        return $match;
+    }
+
+    /**
      * 
      */
     public function stringMatch( $param, $value )
@@ -234,11 +271,10 @@ class Record implements \JsonSerializable
     }
 
     /**
-     * This method loads the Structure 1. This structure is 
-     * the structure that the Coyl/Git returns in the line,
-     * which is the same as running the git CLI.
+     * This method loads the Structure 1 (as a line result of `git ls-tree` 
+     * command).
      * 
-     * @param String $records_row
+     * @param string $records_row
      * @param Bool $is_db
      * @return $this
      */
@@ -260,6 +296,34 @@ class Record implements \JsonSerializable
         $this->setType( $records_row[1] );
         $this->setRevisionHash( $records_row[2] );
         $this->setAddress( $records_row[3] );
+
+        return $this;
+    }
+
+    /**
+     * This method loads the Structure 1 (as a line result of `git ls-files` 
+     * command).
+     * 
+     * @param string $records_row
+     * @param Bool $is_db
+     *
+     * @return $this
+     */
+    public function loadRowStructure2( string $records_row, bool $is_db )
+    {
+        $records_row_exploded = explode('/', $records_row);
+
+        $records_row_exploded = end($records_row_exploded);
+        
+        if(empty($records_row_exploded)) {
+            return $this;
+        }
+
+        if( $is_db ) {
+            $this->setId($this->getIdOfAsset($records_row_exploded));
+        }
+
+        $this->setAddress( $records_row );
 
         return $this;
     }

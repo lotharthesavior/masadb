@@ -1,14 +1,15 @@
 {
-    "env": "develop",
+    "env": "production",
     "database-address": "/var/www/html/data",
     "domain": "localhost",
-    "domain-fallback": "nginx",
+    "domain-fallback": "localhost",
     "protocol": "http",
-    "displayErrorDetails": true,
+    "displayErrorDetails": "true",
     "case_sensitive": false,
-    "private_key": "/var/www/masadb/key.pem",
-    "public_key": "/var/www/masadb/key.pub",
-    "public_key_pass": "test123",
+    "cert": "/var/www/html/certs/masadb.csr",
+    "private_key": "/var/www/html/certs/masadb.key",
+    "public_key": "/var/www/html/certs/masadb.pub",
     "timezone": "America/Toronto",
-    "swoole": true
+    "swoole": true,
+    "raw_files": false
 }

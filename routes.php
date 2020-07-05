@@ -27,7 +27,7 @@ $app->post('/generate_key', 'OAuthController:generateClientKey');
 
 // Generic Database ------------------------------------------------------------------------------------------
 
-$oauthMiddleware = function ($request, $response, $next) use ($config) {
+$oauthMiddleware = function ($request, $response, $next) use ($config, $server) {
     if ($config['settings']['env'] === APP_ENV_PROD) {
         return (new ResourceServerMiddleware($server))($request, $response, $next);
     }
@@ -38,7 +38,10 @@ $oauthMiddleware = function ($request, $response, $next) use ($config) {
 $app->get('/{database}', 'MasaDBController:getFullCollection')
     ->add($oauthMiddleware);
 
-$app->get('/{database}/{id}', 'MasaDBController:getGeneric')
+$app->get('/{database}/{id:[0-9]+}', 'MasaDBController:getGeneric')
+    ->add($oauthMiddleware);
+
+$app->get('/{database}/file', 'MasaDBController:getGenericFile')
     ->add($oauthMiddleware);
 
 $app->get('/{database}/{key}/{value}', 'MasaDBController:searchRecords')
@@ -50,10 +53,16 @@ $app->post('/{database}/search', 'MasaDBController:searchRecordsPost')
 $app->post('/{database}', 'MasaDBController:saveGeneric')
     ->add($oauthMiddleware);
 
-$app->put('/{database}/{id}', 'MasaDBController:saveGeneric')
+$app->put('/{database}/{id:[0-9]+}', 'MasaDBController:saveGeneric')
     ->add($oauthMiddleware);
 
-$app->delete('/{database}/{id}', 'MasaDBController:deleteGeneric')
+$app->put('/{database}/file', 'MasaDBController:saveGeneric')
+    ->add($oauthMiddleware);
+
+$app->delete('/{database}/{id:[0-9]+}', 'MasaDBController:deleteGeneric')
+    ->add($oauthMiddleware);
+
+$app->delete('/{database}/file', 'MasaDBController:deleteGenericFile')
     ->add($oauthMiddleware);
 
 // / Generic Database ------------------------------------------------------------------------------------------

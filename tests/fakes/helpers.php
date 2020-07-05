@@ -26,6 +26,7 @@ function config() : array  {
             "timezone" => "America/Toronto",
             "no_cache" => true,
             "swoole" => true,
+            "raw_files" => true
         ], $test_config),
     ];
 }

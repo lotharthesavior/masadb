@@ -1,8 +1,10 @@
 <?php
 
-require __DIR__ . "/../vendor/autoload.php";
+// require __DIR__ . "/../vendor/autoload.php";
+// include_once __DIR__ . "/fakes/helpers-raw.php";
 
-include_once __DIR__ . "/fakes/helpers.php";
+$raw_files = true;
+require __DIR__ . "/autoload.php";
 
 use PHPUnit\Framework\TestCase;
 use League\Flysystem\Filesystem;
@@ -16,7 +18,7 @@ use Models\Exceptions\NotExistentDatabaseException;
 /**
  * @covers GenericModel
  */
-final class GenericModelTest extends TestCase
+final class RawGenericModelTest extends TestCase
 {
     /** @var Generic */
     protected $generic;
@@ -40,6 +42,7 @@ final class GenericModelTest extends TestCase
     {
         $this->checkPermissions();
         $this->config = config();
+        $this->config['settings']['raw_files'] = true;
         $this->setFilesystem();
         $this->clearDatabase();
         $this->createDatabase();
@@ -124,15 +127,15 @@ final class GenericModelTest extends TestCase
     }
 
     /**
-     * 
+     * @param string $filename
      */
-    private function createDummyRecord()
+    private function createDummyRecord(string $filename = 'test.md')
     {
         return $this->generic->save([
             "content" => [
-                "title" => "Lorem Ipsum",
-                "content" => "Content Content ..."
-            ]
+                "address" => $filename,
+                "content" => "Content Content ...",
+            ],
         ]);
     }
     
@@ -190,13 +193,7 @@ final class GenericModelTest extends TestCase
 
         $result = $this->generic->find($id);
         
-        $this->assertEquals(
-            json_decode($result, true), 
-            [
-                "title" => "Lorem Ipsum",
-                "content" => "Content Content ..."
-            ]
-        );
+        $this->assertEquals($result, "Content Content ...");
 
         try {
             $results = $this->generic->find(242343232);
@@ -213,7 +210,8 @@ final class GenericModelTest extends TestCase
      *     2. the number of physical files is the same returned 
      *        but the search
      */
-    public function testFindAll(){
+    public function testFindAll()
+    {
         $this->createDummyRecord();
 
         $results = $this->generic->findAll();
@@ -230,7 +228,7 @@ final class GenericModelTest extends TestCase
     public function testSearch(){
         $this->createDummyRecord();
 
-        $results = $this->generic->search("title", "Lorem Ipsum");
+        $results = $this->generic->search("address", "test.md");
         
         $list = $this->getPhysicalNumberOrRecords();
 
@@ -241,7 +239,7 @@ final class GenericModelTest extends TestCase
         $this->createDummyRecord();
 
         $results = $this->generic->searchRecord([
-            "title" => "Lorem Ipsum"
+            "address" => "test.md",
         ]);
         $results = json_decode($results);
 
@@ -254,8 +252,7 @@ final class GenericModelTest extends TestCase
         $this->createDummyRecord();
 
         $results = $this->generic->searchRecord([
-            "title" => "Lorem Ipsum",
-            "content" => "Lorem Ipsum"
+            "content" => "Content Content ..."
         ], 1);
         $results = json_decode($results);
 
@@ -264,33 +261,20 @@ final class GenericModelTest extends TestCase
         $this->assertEquals(count($list), count($results->results));
     }
 
-    public function testSearchRecordSearchParamAND(){
-        $this->createDummyRecord();
-
-        $results = $this->generic->searchRecord([
-            "title" => "Lorem Ipsum",
-            "content" => "Lorem Ipsum"
-        ]);
-        $results = json_decode($results);
-
-        $list = $this->getPhysicalNumberOrRecords();
-
-        $this->assertTrue(count($list) != count($results->results));
-    }
-
     public function testSave(){
         $this->createDummyRecord();
 
+
         $results = $this->generic->searchRecord([
-            "title" => "Lorem Ipsum"
+            "content" => "Content Content ...",
         ]);
         $results = json_decode($results);
         $results_count_before = count($results->results);
 
-        $this->createDummyRecord();
+        $this->createDummyRecord('test2.md');
 
         $results = $this->generic->searchRecord([
-            "title" => "Lorem Ipsum"
+            "content" => "Content Content ...",
         ]);
         $results = json_decode($results);
         $results_count_after = count($results->results);
@@ -300,9 +284,6 @@ final class GenericModelTest extends TestCase
 
     public function testDelete(){
         $test_id = $this->createDummyRecord();
-        // var_dump((int)$test_id);exit;
-        
-        $this->assertTrue( (int)$test_id > 0 );
 
         $this->generic->delete($test_id);
 
@@ -311,7 +292,6 @@ final class GenericModelTest extends TestCase
         } catch (Exception $e) {
             $results = $e->getMessage();
         }
-        // var_dump($results);exit;
 
         $this->assertEquals($results, "Inexistent Record.");
 

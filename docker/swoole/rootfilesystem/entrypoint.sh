@@ -27,13 +27,13 @@ done
 #   UserWarning: Supervisord is running as root and it is searching for its configuration file in default locations...
 if [[ "SERVICE" == "${BOOT_MODE}" ]] ; then
     if [[ -n "$(ls /etc/supervisor/conf.d/*.conf 2>/dev/null)" ]] ; then
-        /usr/bin/supervisord -c /etc/supervisor/supervisord.conf -n
+        /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf -n
     else
         tail -f /dev/null
     fi
 else
     if [[ -n "$(ls /etc/supervisor/conf.d/*.conf 2>/dev/null)" ]] ; then
-        /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+        /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
     fi
 
     if [[ "${1}" =~ ^(ba|)sh$ ]] ; then

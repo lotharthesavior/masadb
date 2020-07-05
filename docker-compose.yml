@@ -8,7 +8,9 @@ services:
     working_dir: /var/www/html
     environment:
       DISABLE_DEFAULT_SERVER: 1
+      ENVIRONMENT_NAME: production
+      RAW_FILES: 1
     ports:
-      - 80:80
+      - 443:443
     volumes:
       - ${LOCAL_DIRECTORY}:${SERVER_DIRECTORY}

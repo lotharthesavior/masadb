@@ -25,7 +25,7 @@ function config() : array  {
 /**
  * Start Application Swoole Server
  */
-function start_server() : void {
+function start_server(array $config) : void {
 	global $app;
 
 	$bridgeManager = new BridgeManager($app);
@@ -33,7 +33,21 @@ function start_server() : void {
 	/**
 	 * We start the Swoole server
 	 */
-	$http = new swoole_http_server("0.0.0.0", 80);
+    if ($config['settings']['protocol'] === 'http') {
+        $http = new swoole_http_server("0.0.0.0", 80);
+    } else {
+        $http = new swoole_http_server("0.0.0.0", 443, SWOOLE_BASE, SWOOLE_SOCK_TCP | SWOOLE_SSL);
+        // $http = new swoole_http_server("0.0.0.0", 443);
+        $http->set([
+            'ssl_cert_file' => $config['settings']['cert'],
+            'ssl_key_file' => $config['settings']['private_key'],
+            // 'open_http2_protocol' => true,
+            // 'ssl_verify_peer' => true,
+            'ssl_allow_self_signed' => true,
+            // 'ssl_verify_depth' => 10,
+        ]);
+    }
+
 
 	/**
 	 * We register the on "start" event
@@ -50,7 +64,7 @@ function start_server() : void {
 	$http->on(
 	    "request",
 	    function (swoole_http_request $swooleRequest, swoole_http_response $swooleResponse) use ($bridgeManager) {
-	        $bridgeManager->process($swooleRequest, $swooleResponse)->end();
+            $bridgeManager->process($swooleRequest, $swooleResponse)->end();
 	    }
 	);
 

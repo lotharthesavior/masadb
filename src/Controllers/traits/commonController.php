@@ -4,6 +4,8 @@ namespace Controllers\traits;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use \Models\Abstraction\GitDAO;
+use \Psr\Http\Message\StreamInterface;
 
 trait commonController
 {
@@ -24,14 +26,20 @@ trait commonController
 	 * @return JSON String - {"error": 1, "errorMessage": string}
 	 *                       || {"success": 1, "successMessage": {inserted_id}}
 	 */
-	public function saveRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\Abstraction\GitDAO &$model){
-
+	public function saveRecord(
+        ServerRequestInterface $request, 
+        ResponseInterface $response, 
+        array $args, 
+        GitDAO &$model
+    ) {
         $request_body = $request->getParsedBody();
         
-		// handling put data
+		// try once more
 		if( is_null($request_body) ){
-			$rawData = file_get_contents('php://input');
-		 	$request_body = json_decode($rawData, 1);
+            /* @var StreamInterface */
+            $body = $request->getBody();
+            $body->rewind();
+            $request_body = json_decode($body->read($body->getSize()), true);
 		}
 
 		$id = null;
@@ -40,7 +48,6 @@ trait commonController
 		}
 
 		// model interation
-
 		try {
 
 			$client_data = array_merge(["id" => $id, "content" => $request_body]);
@@ -68,7 +75,12 @@ trait commonController
 	/**
 	 * 
 	 */
-	protected function deleteRecord(ServerRequestInterface $request, ResponseInterface $response, array $args, \Models\Abstraction\GitDAO $model){
+	protected function deleteRecord(
+        ServerRequestInterface $request, 
+        ResponseInterface $response, 
+        array $args, 
+        GitDAO $model
+    ){
 
 		try {
 

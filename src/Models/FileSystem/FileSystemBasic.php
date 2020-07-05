@@ -8,6 +8,10 @@
 
 namespace Models\FileSystem;
 
+use \SplFileInfo;
+
+use \Ds\Deque;
+
 use League\Flysystem\Filesystem;
 use League\Flysystem\Config;
 use League\Flysystem\Adapter\Local;
@@ -16,15 +20,16 @@ use League\Flysystem\Plugin\ListWith;
 use League\Flysystem\Plugin\GetWithMetadata;
 
 use Models\Record;
-use \Ds\Deque;
+use \Models\Interfaces\FileSystemInterface;
 
-class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
+class FileSystemBasic implements FileSystemInterface
 {
     /**
      * @param $local_address
      * @return Filesystem
      */
-    public function getFileSystemAbstraction( $local_address ){
+    public function getFileSystemAbstraction( $local_address ) : Filesystem
+    {
         $adapter = new Local( $local_address );
 
         return new Filesystem($adapter, new Config([
@@ -37,39 +42,62 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
      * 
      * @param Record $record
      */
-    public function getFileContent( Record $record, $is_bag, $database_address = "." ){
+    public function getFileContent( Record $record, $is_bag, $database_address = "." )
+    {
         $location = $record->getAddress();
-
-        if( $is_bag ){
-
-            $id = $record->getIdOfAsset( $record->getAddress() );
-            
-            $location = $record->getAddress() . '/data/' . $id . '.json';
-
-        }
-        // var_dump($location);exit;
+        $filesystem = $this->getFileSystemAbstraction($database_address);
 
         $full_record_addess = $location;
+        $relative_location = "/" . $location;
         if( !empty($database_address) ) {
-            $full_record_addess = $database_address . "/" . $location;
+            $full_record_addess = trim($database_address . $relative_location);
         }
 
-        $content_temp = file_get_contents( $full_record_addess );
+        $content_temp = $filesystem->read($relative_location);
+        $json_content = json_decode($content_temp, true);
 
-        $record->setFileContent((object) json_decode($content_temp));
+        if ($json_content === null) {
+            $record->setFileContent(['content' => $content_temp]);
+        } else {
+            $record->setFileContent($json_content);
+        }
         
-        // get timestamp of file
-
-            $timestamp = filemtime( $full_record_addess );
-
-            $record->setFileTimestamp( $timestamp );
-
-            $record->setFileUpdatedAt( gmdate("Y-m-d H:i:s", $timestamp) );
-
-        // / get timestamp of file
+        // TODO: move this to a specialized method
+        $timestamp = filemtime( $full_record_addess );
+        $record->setFileTimestamp( $timestamp );
+        $record->setFileUpdatedAt( gmdate("Y-m-d H:i:s", $timestamp) );
 
         return $record;
+    }
 
+    /**
+     * @param string $path
+     *
+     * @return SplFileInfo
+     */
+    public function getInfo(string $path): SplFileInfo
+    {
+        return new SplFileInfo($path);
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return bool
+     */
+    public function getExtension(string $path) : string
+    {
+        return $this->getInfo($path)->getExtension();
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return string
+     */
+    public function getType(string $path) : string
+    {
+        return $this->getInfo($path)->getType();
     }
 
     /**
@@ -78,7 +106,8 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
      * @param Array $data_loaded
      * @return stdClass
      */
-    public function loadFileObject( Array $data_loaded ){
+    public function loadFileObject( Array $data_loaded )
+    {
         $file_content = new \stdClass;
 
         foreach ($data_loaded as $key => $record) {
@@ -97,7 +126,8 @@ class FileSystemBasic implements \Models\Interfaces\FileSystemInterface
      * @param String $database  - format expected: "{string}/"
      * @return Deque
      */
-    public function listWorkingDirectory( $database = '', $is_bag ){
+    public function listWorkingDirectory( $database = '', $is_bag )
+    {
         $is_db = $database != '';
 
         if( !$is_db )

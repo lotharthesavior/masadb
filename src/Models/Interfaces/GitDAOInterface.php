@@ -2,6 +2,10 @@
 
 namespace Models\Interfaces;
 
+use \Models\Interfaces\FileSystemInterface;
+use \Models\Interfaces\GitInterface;
+use \Models\Interfaces\BagInterface;
+
 interface GitDAOInterface
 {
 	// Core instance for FileSystem interaction
@@ -20,14 +24,16 @@ interface GitDAOInterface
 	// protected $sortType;
 
 	/**
-	 * @param \Models\Interfaces\FileSystemInterface $filesystem
-	 * @param \Models\Interfaces\GitInterface $git
-	 * @param \Models\Interfaces\BagInterface $bag
+	 * @param FileSystemInterface $filesystem
+	 * @param GitInterface $git
+	 * @param BagInterface $bag
+     * @param array $config
 	 */
 	public function __construct( 
-		\Models\Interfaces\FileSystemInterface $filesystem,
-		\Models\Interfaces\GitInterface $git,
-		\Models\Interfaces\BagInterface $bag
+		FileSystemInterface $filesystem,
+		GitInterface $git,
+		BagInterface $bag,
+        array $config = []
 	);
 
 	/**
@@ -70,9 +76,9 @@ interface GitDAOInterface
 	 * 
 	 * @internal simple registers can be simple json files, but 
 	 *           any other type of file, have to be a BagIt.
-	 * @param int $id
+	 * @param int|string $id
 	 */
-	public function delete( int $id );
+	public function delete( $id );
 
 	/**
 	 * Verify if the current model is compatible with Bagit

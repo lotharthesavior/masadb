@@ -2,6 +2,8 @@
 
 namespace Repositories;
 
+use \Exception;
+
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -9,15 +11,12 @@ use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 
 use Models\OAuth2\Clients;
 
+use \Models\FileSystem\FileSystemBasic;
+use \Models\Git\GitBasic;
+use \Models\Bag\BagBasic;
+
 class ClientRepository implements ClientRepositoryInterface
 {
-
-	/**
-	 * 
-	 */
-	public function __construct(){
-
-	}
 
 	/**
      * Get a client.
@@ -30,22 +29,27 @@ class ClientRepository implements ClientRepositoryInterface
      *
      * @return ClientEntityInterface
      */
-    public function getClientEntity($clientIdentifier, $grantType, $clientSecret = null, $mustValidateSecret = true){
+    public function getClientEntity(
+        $clientIdentifier, 
+        $grantType, 
+        $clientSecret = null, 
+        $mustValidateSecret = true
+    ){
         
         $client_model = new Clients(
             // \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
+            new FileSystemBasic,
             // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
+            new GitBasic,
             // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new BagBasic
         );
 
         $client_model->find($clientIdentifier);
 
         if( $client_model->file_content->secret_key != $clientSecret ){
 
-            throw new \Exception("Key not valid!");
+            throw new Exception("Key not valid!");
 
         }
 

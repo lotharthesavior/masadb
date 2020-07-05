@@ -2,18 +2,21 @@
 
 namespace Controllers;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use \Psr\Container\ContainerInterface
+use \Psr\Http\Message\ResponseInterface;
+use \Psr\Http\Message\ServerRequestInterface;
 
-use Models\Generic;
-
-use League\Flysystem\Filesystem;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Plugin\ListPaths;
-use League\Flysystem\Plugin\ListWith;
-use League\Flysystem\Plugin\GetWithMetadata;
+use \League\Flysystem\Filesystem;
+use \League\Flysystem\Adapter\Local;
+use \League\Flysystem\Plugin\ListPaths;
+use \League\Flysystem\Plugin\ListWith;
+use \League\Flysystem\Plugin\GetWithMetadata;
 
 use \Models\Exceptions\NotExistentDatabaseException;
+use \Models\FileSystem\FileSystemBasic;
+use \Models\Git\GitBasic;
+use \Models\Bag\BagBasic;
+use \Models\Generic;
 
 class MasaDBController extends Abstraction\MasaController
 {
@@ -26,8 +29,10 @@ class MasaDBController extends Abstraction\MasaController
      * Start the controller instantiating the Slim Container
      * 
      * @todo move this to a controller parent class
+     *
+     * @param ContainerInterface $container
      */
-    public function __construct($container){
+    public function __construct(ContainerInterface $container){
         $this->container = $container;
     }
 
@@ -39,8 +44,11 @@ class MasaDBController extends Abstraction\MasaController
      *
 	 * @param array $args
 	 */
-	public function getFullCollection (ServerRequestInterface $request, ResponseInterface $response, $args)
-    {
+	public function getFullCollection (
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        $args
+    ) {
         return $this->searchRecords($request, $response, $args);
 	}
 
@@ -52,8 +60,11 @@ class MasaDBController extends Abstraction\MasaController
      *
 	 * @param array $args
 	 */
-	public function getGeneric (ServerRequestInterface $request, ResponseInterface $response, array $args)
-    {
+	public function getGeneric (
+        ServerRequestInterface $request, 
+        ResponseInterface $response, 
+        array $args
+    ) {
 	    $args['key']   = 'id';
 	    $args['value'] = $args['id'];
 
@@ -62,6 +73,27 @@ class MasaDBController extends Abstraction\MasaController
 	 	return $this->searchRecords($request, $response, $args);
 	}
 
+    /**
+     * Get a Single Record
+     * 
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     *
+     * @param array $args
+     */
+    public function getGenericFile (
+        ServerRequestInterface $request, 
+        ResponseInterface $response, 
+        array $args
+    ) {
+        $queryParams = $request->getQueryParams();
+
+        $args['key']   = 'id';
+        $args['value'] = $queryParams['address'];
+
+        return $this->searchRecords($request, $response, $args);
+    }
+
 	/**
 	 * Search Records
 	 * 
@@ -69,17 +101,20 @@ class MasaDBController extends Abstraction\MasaController
 	 * @param ResponseInterface $response
 	 * @param array $args | ['field' => string, 'value' => string]
 	 */
-	public function searchRecords (ServerRequestInterface $request, ResponseInterface $response, array $args)
-    {
+	public function searchRecords (
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ) {
         $logic = [];
 
 	 	$generic_model = new Generic(
 	 		// \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
+            new FileSystemBasic,
             // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
+            new GitBasic,
             // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new BagBasic
 	 	);
 
         // this part is to be improved, right now the simple
@@ -133,11 +168,11 @@ class MasaDBController extends Abstraction\MasaController
 
 	 	$generic_model = new Generic(
 	 		// \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
+            new FileSystemBasic,
             // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
+            new GitBasic,
             // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new BagBasic
 	 	);
 
 	 	// this part is to be improved, right now the simple 
@@ -194,11 +229,11 @@ class MasaDBController extends Abstraction\MasaController
 
 	 	$generic_model = new Generic(
 	 		// \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
+            new FileSystemBasic,
             // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
+            new GitBasic,
             // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new BagBasic
 	 	);
 
 	 	$current_client_id = $request->getHeader("ClientId");
@@ -264,15 +299,16 @@ class MasaDBController extends Abstraction\MasaController
 	/**
 	 * Deleted record
 	 */
-	public function deleteGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
+	public function deleteGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    {
 
 	 	$generic_model = new Generic(
 	 		// \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
+            new FileSystemBasic,
             // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
+            new GitBasic,
             // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new BagBasic
 	 	);
 
 		$current_client_id = $request->getHeader("ClientId");
@@ -322,6 +358,70 @@ class MasaDBController extends Abstraction\MasaController
 
 	}
 
+    /**
+     * Deleted record
+     */
+    public function deleteGenericFile(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    {
+        $queryParams = $request->getQueryParams();
+
+        $generic_model = new Generic(
+            // \Models\Interfaces\FileSystemInterface 
+            new FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new GitBasic,
+            // \Models\Interfaces\BagInterface
+            new BagBasic
+        );
+
+        $current_client_id = $request->getHeader("ClientId");
+        if (!empty($request->getHeader("CurrentClientId"))) {
+            $current_client_id = $request->getHeader("CurrentClientId");
+        }
+
+        $generic_model = $this->setClient($current_client_id, $generic_model);
+
+        try {
+
+            $generic_model->setDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write( json_encode([]) );
+
+        }
+
+        try {
+
+            $args['id'] = $queryParams['address'];
+            $result = $generic_model->delete($args['id']);
+
+        } catch (\Exception $e) {
+            
+            $return_message = [
+                "error" => 1,
+                "message" => $e->getMessage()
+            ];
+
+            return $response->withStatus(500)
+                     ->withHeader('Content-Type', 'application/json')
+                     ->write( json_encode( $return_message ) );
+
+        }
+
+        $return_message = [
+            "success" => 1,
+            "message" => "Record successfully removed!"
+        ];
+
+        return $response->withStatus(200)
+                 ->withHeader('Content-Type', 'application/json')
+                 ->write( json_encode( $return_message ) );
+
+    }
+
 	/**
 	 * This method is used to create a version after each change.
      * 
@@ -339,11 +439,11 @@ class MasaDBController extends Abstraction\MasaController
 
         $generic_model = new Generic(
             // \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
+            new FileSystemBasic,
             // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
+            new GitBasic,
             // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new BagBasic
         );
 
         $current_client_id = $request->getHeader("ClientId");
@@ -388,11 +488,11 @@ class MasaDBController extends Abstraction\MasaController
         
         $generic_model = new Generic(
             // \Models\Interfaces\FileSystemInterface 
-            new \Models\FileSystem\FileSystemBasic,
+            new FileSystemBasic,
             // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
+            new GitBasic,
             // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new BagBasic
         );
 
         $current_client_id = $request->getHeader("ClientId");

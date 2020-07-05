@@ -10,6 +10,8 @@ use Git\GitRepo;
 use League\Flysystem\Filesystem;
 use \Models\Interfaces\GitInterface;
 use \Models\Interfaces\FileSystemInterface;
+use \Models\Record;
+use \Helpers\AppHelper;
 
 class GitBasic implements GitInterface
 {
@@ -80,9 +82,9 @@ class GitBasic implements GitInterface
 
         $result = '';
         if (!$this->isEmptyRepository()) {
-            $command = ' ls-tree HEAD ' . $database;
+            $command = ' ls-files HEAD ' . $database;
 
-            $result = $this->console->runCommand(Git::getBin() . $command );
+            $result = $this->console->runCommand(Git::getBin() . $command);
         }
 
         $is_db = $database != '';
@@ -112,15 +114,21 @@ class GitBasic implements GitInterface
         bool $is_bag, 
         string $database_address 
     ) {
-        $result_array = \Helpers\AppHelper::splitByLine($cli_result);
+        $result_array = AppHelper::splitByLine($cli_result);
         $result_array = array_filter($result_array);
 
         $result_deque = new Deque($result_array);
 
+        if ($is_bag) {
+            $result_deque = $result_deque->filter(function($records_row){
+                return strstr($records_row, '/data/');
+            });
+        }
+        
         $result_deque = $result_deque->map(function( $records_row ) use ($is_db, $filesystem, $is_bag, $database_address)
         {
-            $new_record = new \Models\Record;
-            $new_record->loadRowStructure1( $records_row, $is_db );
+            $new_record = new Record;
+            $new_record->loadRowStructure2( $records_row, $is_db );
             $new_record = $filesystem->getFileContent( $new_record, $is_bag, $database_address );
             return $new_record;
         });

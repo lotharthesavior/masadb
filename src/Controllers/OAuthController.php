@@ -2,6 +2,9 @@
 
 namespace Controllers;
 
+use \DateInterval;
+use \Exception;
+
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -11,6 +14,14 @@ use \Models\OAuth2\Clients;
 use \Models\Users;
 
 use League\OAuth2\Server\AuthorizationServer;
+use \League\OAuth2\Server\CryptKey;
+use \League\OAuth2\Server\Grant\ClientCredentialsGrant;
+use \League\OAuth2\Server\Exception\OAuthServerException;
+use \Zend\Diactoros\Stream;
+
+use \Repositories\ClientRepository;
+use \Repositories\AccessTokenRepository;
+use \Repositories\ScopeRepository;
 
 class OAuthController
 {
@@ -44,17 +55,17 @@ class OAuthController
     public function accessToken(ServerRequestInterface $request, ResponseInterface $response)
     {
         // Path to public and private keys
-        $privateKey = new \League\OAuth2\Server\CryptKey(
+        $privateKey = new CryptKey(
             $this->container->get('settings')['private_key'], 
             $this->container->get('settings')['public_key_pass']
         ); // if private key has a pass phrase
         $publicKey = $this->container->get('settings')['public_key'];
 
-        $client_repository = new \Repositories\ClientRepository;
+        $client_repository = new ClientRepository;
 
-        $access_token_repository = new \Repositories\AccessTokenRepository;
+        $access_token_repository = new AccessTokenRepository;
 
-        $scope_repository = new \Repositories\ScopeRepository;
+        $scope_repository = new ScopeRepository;
 
         /* @var \League\OAuth2\Server\AuthorizationServer $server */
         // $server = AuthorizationServer::class;
@@ -69,8 +80,8 @@ class OAuthController
 
         // Enable the client credentials grant on the server
         $server->enableGrantType(
-            new \League\OAuth2\Server\Grant\ClientCredentialsGrant(),
-            new \DateInterval('PT1H') // access tokens will expire after 1 hour
+            new ClientCredentialsGrant(),
+            new DateInterval('PT1H') // access tokens will expire after 1 hour
         );
 
         try {
@@ -78,15 +89,15 @@ class OAuthController
             // Try to respond to the request
             return $server->respondToAccessTokenRequest($request, $response);
             
-        } catch (\League\OAuth2\Server\Exception\OAuthServerException $exception) {
+        } catch (OAuthServerException $exception) {
         
             // All instances of OAuthServerException can be formatted into a HTTP response
             return $exception->generateHttpResponse($response);
             
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
         
             // Unknown exception
-            $body = new \Zend\Diactoros\Stream('php://temp', 'r+');
+            $body = new Stream('php://temp', 'r+');
             $body->write($exception->getMessage());
             return $response->withStatus(500)->withBody($body);
             

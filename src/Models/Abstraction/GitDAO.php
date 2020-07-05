@@ -6,7 +6,12 @@ use \Git\Git;
 use \Models\Traits\Pagination;
 use \Helpers\CacheHelper;
 use \Ds\Deque;
+use League\Flysystem\Filesystem;
+
 use \Models\Interfaces\GitDAOInterface;
+use \Models\Interfaces\FileSystemInterface;
+use \Models\Interfaces\GitInterface;
+use \Models\Interfaces\BagInterface;
 
 /**
  *
@@ -37,17 +42,17 @@ abstract class GitDAO implements GitDAOInterface
     protected $no_cache = true;
 
     /**
-     * @param \Models\Interfaces\FileSystemInterface $filesystem
-     * @param \Models\Interfaces\GitInterface $git
-     * @param \Models\Interfaces\BagInterface $bag
+     * @param FileSystemInterface $filesystem
+     * @param GitInterface $git
+     * @param BagInterface $bag
      */
     public function __construct(
-        \Models\Interfaces\FileSystemInterface $filesystem,
-        \Models\Interfaces\GitInterface $git,
-        \Models\Interfaces\BagInterface $bag
-    )
-    {
-        $this->config = config()['settings'];
+        FileSystemInterface $filesystem,
+        GitInterface $git,
+        BagInterface $bag,
+        array $config = []
+    ) {
+        $this->config = empty($config) ? config()['settings'] : $config;
 
         $this->resolveCacheCondition();
 
@@ -66,12 +71,16 @@ abstract class GitDAO implements GitDAOInterface
     /**
      * Search for a Single Record by the id
      *
-     * @param int $id
+     * @param int|string $id
      * @return array
      */
-    public function find(int $id)
+    public function find($id)
     {
-        $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $this->bag->locationOfBag($id, $this->isBag()) . ".json";
+        if ($this->isBag()) {
+            $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $this->bag->locationOfBag($id, $this->isBag()) . ".json";
+        } else {
+            $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $id;
+        }
         
         if (!file_exists($address)) {
             throw new \Exception("Inexistent Record.");
@@ -118,22 +127,17 @@ abstract class GitDAO implements GitDAOInterface
      *
      * @internal used to update cache
      * @internal used to search when there is no cache
+     *
      * @param CacheHelper $cache_helper
      */
     public function getGitData(CacheHelper $cache_helper)
     {
-        // $date1 = new \DateTime();
-
         $results = $this->git->lsTreeHead(
             '.',
             $this->filesystem,
             $this->isBag(),
             $this->config['database-address'] . "/" . $this->_getDatabaseLocation()
         );
-
-        // $date2 = new \DateTime();
-        // var_dump($date2->diff($date1));
-        // var_dump($results);exit;
 
         $results->sort(function ($a, $b) {
             return $a->getId() > $b->getId();
@@ -192,8 +196,12 @@ abstract class GitDAO implements GitDAOInterface
         $result_complete = $this->getAllRecords();
 
         $result_complete = $result_complete->filter(function ($record) use ($param, $value) {
-            if ($param !== 'id') {
+            if ($param !== 'id' && $this->isBag()) {
                 return $record->multipleParamsMatch([$param => $value]);
+            }
+
+            if ($param !== 'id' && !$this->isBag()) {
+                return $record->titleContentMatch([$param => $value]);
             }
 
             if ($param === 'id' && $record->valueEqual($param, $value)) {
@@ -208,6 +216,8 @@ abstract class GitDAO implements GitDAOInterface
      * Search that works with multiple params
      *
      * @param array $params
+     * @param array $logic
+     *
      * @return JSON | ["results": \Ds\Vector, "pages": \Ds\Vector]
      */
     public function searchRecord(array $params, $logic = [])
@@ -217,7 +227,11 @@ abstract class GitDAO implements GitDAOInterface
         $search_params = $this->filterPaginationParams($params);
 
         $result_complete = $result_complete->filter(function ($record) use ($search_params, $logic) {
-            return $record->multipleParamsMatch($search_params, $logic);
+            $extension = $this->filesystem->getExtension($record->getAddress());
+            if ($extension === 'json') {
+                return $record->multipleParamsMatch($search_params, $logic);
+            }
+            return $record->titleContentMatch($search_params);
         });
 
         $result_complete->sort(function ($a, $b) {
@@ -237,25 +251,73 @@ abstract class GitDAO implements GitDAOInterface
      * Persist record
      *
      * @param array $client_data | eg.: ["id" => {int}, "content" => {array}]
+     *
+     * @return string|int
      */
     public function save(array $client_data)
     {
-        $client_data = (object) $client_data;
-
         $local_address = $this->_getDatabaseFullPathLocation();
 
         // @var League\Flysystem\Filesystem
         $filesystem = $this->filesystem->getFileSystemAbstraction($local_address);
 
-        $content = json_encode($client_data->content, JSON_PRETTY_PRINT);
+        if ($this->isBag()) {
+            /* @var int - id */
+            $result = $this->saveBag($filesystem, $client_data);
+        } else {
+            /* @var string - filename */
+            $result = $this->saveRawFile($filesystem, $client_data); // (string) filename
+        }
 
+        $this->saveVersion();
+
+        return $result;
+    }
+
+    /**
+     * @param Filesystem $filesystem
+     *
+     * @return int $id
+     */
+    protected function saveRawFile(Filesystem $filesystem, $client_data) : string
+    {
+        $item_address = null;
+
+        $item_address = $client_data['content']['address'];
+        $content = $client_data['content']['content'];
+
+        $this->last_inserted_id = $item_address;
+
+        if (
+            !isset($client_data['id'])
+            || is_null($client_data['id'])
+        ) {
+            $filesystem->write($item_address, $content, ['visibility' => 'public']);
+
+            return $item_address;
+        }
+
+        $result = $filesystem->update($item_address, $content);
+
+        return $filename;
+    }
+
+    /**
+     * @param Filesystem $filesystem
+     *
+     * @return int $id
+     */
+    protected function saveBag(Filesystem $filesystem, $client_data) : int
+    {
         $id = null;
 
         $item_address = null;
 
+        $content = json_encode($client_data['content'], JSON_PRETTY_PRINT);
+
         if (
-            !isset($client_data->id)
-            || is_null($client_data->id)
+            !isset($client_data['id'])
+            || is_null($client_data['id'])
         ) {
             $id = $this->_nextIdFilesystem();
 
@@ -276,19 +338,14 @@ abstract class GitDAO implements GitDAOInterface
             return $id;
         }
 
-        $id = $client_data->id;
+        $id = $client_data['id'];
 
         $item_address = $this->bag->locationOfBag($id, $this->isBag());
         $item_address .= '.json';
 
         $result = $filesystem->update($this->bag->locationOfBag($id, $this->isBag()) . ".json", $content);
 
-        $this->saveVersion();
-
-        $result = $this->saveRecordVersion($id);
-
         return $id;
-
     }
 
     /**
@@ -375,9 +432,9 @@ abstract class GitDAO implements GitDAOInterface
      *
      * @internal simple registers can be simple json files, but
      *           any other type of file, have to be a BagIt.
-     * @param int $id
+     * @param int|string $id
      */
-    public function delete(int $id)
+    public function delete($id)
     {
 
         $database_url = $this->_getDatabaseFullPathLocation();
@@ -385,13 +442,19 @@ abstract class GitDAO implements GitDAOInterface
         // League\Flysystem\Filesystem
         $filesystem = $this->filesystem->getFileSystemAbstraction($database_url);
 
-        if ($filesystem->has($id . '.json')) {
+        if ($filesystem->has($id . '.json')) { // for json records
 
             $filesystem->delete($id . '.json');
 
         } elseif ($filesystem->has($id)) {
 
-            $filesystem->deleteDir($id);
+            $type = $this->filesystem->getType($database_url . '/' . $id);
+
+            if ($type === 'file') {
+                $filesystem->delete($id);
+            } else {
+                $filesystem->deleteDir($id);
+            }
 
         } else {
 
@@ -419,13 +482,50 @@ abstract class GitDAO implements GitDAOInterface
     {
         $is_bag = false;
 
-        if (method_exists($this, 'createBagForRecord')) {
-
+        if (
+            $this->checkBagitDependencies() 
+            && $this->checkBagitConfig()
+            && !$this->isOAuthRelatedModel()
+        ) {
             $is_bag = true;
-
         }
 
         return $is_bag;
+    }
+
+    /**
+     * @internal check get_loaded_extensions() it there is any extension 
+     *           that  the bagit package might eventually depend on
+     *
+     * @return bool
+     */
+    private function checkBagitDependencies() : bool
+    {
+        return method_exists($this, 'createBagForRecord');
+    }
+
+    /**
+     * Wether uses raw files (false) or bagit for records (false).
+     *
+     * @return bool
+     */
+    private function checkBagitConfig() : bool
+    {
+        return !$this->config['raw_files'] ?? false;
+    }
+
+    /**
+     * Checks if the current model execution has OAuth2 related traits
+     *
+     * @return bool
+     */
+    private function isOAuthRelatedModel() : bool
+    {
+        $traits = get_declared_traits();
+
+        $oauthRelatedTrait = 'League\OAuth2\Server\Entities\Traits\TokenEntityTrait';
+
+        return in_array($oauthRelatedTrait, $traits);
     }
 
     /**
@@ -452,13 +552,10 @@ abstract class GitDAO implements GitDAOInterface
      */
     protected function _nextId()
     {
-        // var_dump($this->git);exit;
         $ls_tree_result = $this->git->lsTreeHead(
-        // $this->_getDatabaseLocation() . '/',
             '.',
             $this->filesystem,
             $this->isBag(),
-            // $this->config['database-address'] . '/' . $this->database
             $this->config['database-address'] . "/" . $this->_getDatabaseLocation()
         );
 

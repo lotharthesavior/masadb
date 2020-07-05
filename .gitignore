@@ -11,3 +11,7 @@ updatecache_async_result
 server.key
 server.pub
 server.csr
+config.json-develop
+config.json-production
+supervisord.log
+supervisord.pid
