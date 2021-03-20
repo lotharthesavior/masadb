@@ -37,7 +37,6 @@ function start_server(array $config) : void {
         $http = new swoole_http_server("0.0.0.0", 80);
     } else {
         $http = new swoole_http_server("0.0.0.0", 443, SWOOLE_BASE, SWOOLE_SOCK_TCP | SWOOLE_SSL);
-        // $http = new swoole_http_server("0.0.0.0", 443);
         $http->set([
             'ssl_cert_file' => $config['settings']['cert'],
             'ssl_key_file' => $config['settings']['private_key'],

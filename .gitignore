@@ -15,3 +15,5 @@ config.json-develop
 config.json-production
 supervisord.log
 supervisord.pid
+.idea
+certs/*

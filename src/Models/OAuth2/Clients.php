@@ -41,7 +41,8 @@ class Clients extends AbstractGitDAO implements ClientEntityInterface
     public function __construct(
         FileSystemInterface $filesystem,
         GitInterface $git,
-        BagInterface $bag
+        BagInterface $bag,
+        array $config = []
     ) {
         parent::__construct($filesystem, $git, $bag);
 

@@ -1,6 +1,7 @@
 FROM php:7.4.2-cli
 
 ARG ENVIRONMENT_NAME
+ARG DOMAIN
 
 COPY ./rootfilesystem/ /
 
@@ -16,7 +17,7 @@ RUN apt-get update && apt-get install vim -y && \
 # install swoole
 RUN cd /tmp && git clone https://github.com/swoole/swoole-src.git && \
     cd swoole-src && \
-    git checkout v4.5.2 && \
+    git checkout v4.6.4 && \
     phpize  && \
     ./configure  --enable-openssl --enable-http2 && \
     make && make install
@@ -28,10 +29,7 @@ RUN touch /usr/local/etc/php/conf.d/swoole.ini && \
 RUN apt-get install -y libpq-dev libpng-dev
 
 # Install php extensions
-RUN docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd \
-  && docker-php-ext-configure mysqli --with-mysqli=mysqlnd \
-  && docker-php-ext-install pdo pdo_mysql mysqli \
-  && docker-php-ext-install json \
+RUN docker-php-ext-install json \
   && docker-php-ext-install gd
 
 # install some base extensions
@@ -47,10 +45,6 @@ RUN apt-get install git -y \
 RUN git config --global user.email "savio@savioresende.com.br" \
     && git config --global user.name "MasaDB"
 
-# RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
-# RUN chmod +x /usr/local/bin/dumb-init
-# RUN apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
-
 RUN chmod +x /entrypoint.sh
 RUN chmod +x /usr/local/boot/sample.sh
 
@@ -62,6 +56,8 @@ else \
 fi
 
 COPY "$CONFIG_FILE" /var/www/html/config.json
+
+RUN echo "127.0.0.1 ${DOMAIN}" >> /etc/hosts
 
 ENTRYPOINT ["/entrypoint.sh"]
 # CMD []

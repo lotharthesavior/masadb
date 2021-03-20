@@ -10,7 +10,20 @@ services:
       DISABLE_DEFAULT_SERVER: 1
       ENVIRONMENT_NAME: production
       RAW_FILES: 1
-    ports:
-      - 443:443
+      DOMAIN: ${DOMAIN}
+    expose:
+      - "443"
+      # - "80"
     volumes:
       - ${LOCAL_DIRECTORY}:${SERVER_DIRECTORY}
+    networks:
+      masadb-network:
+        ipv4_address: ${DOCKER_APP_IP}.0.7
+
+networks:
+  masadb-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${DOCKER_APP_IP}.0.0/16
+          gateway: ${DOCKER_APP_IP}.0.1

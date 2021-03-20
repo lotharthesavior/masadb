@@ -1,4 +1,8 @@
-# Masa Git Server
+# MasaDB
+
+MasaDB is a small app with the intent to manage files with native version control via a Restful API. It comes with an OAuth2 Server structure for Authorization. It allows the system to, not just protect the data, but also to allow Authorization to other apps with MasaDB's existent user.
+
+The data here is kept in plain-text format within files. Tables in MasaDB are Git Repositories, and can be easily shared like such.
 
 ### Dependencies
 
@@ -8,7 +12,7 @@ Reference: http://slimframework.com/
 
 ##### Git interaction
 
-Reference: https://github.com/lotharthesavior/git
+Reference: https://github.com/lotharthesavior/branch
 
 ##### OAuth2 library
 
@@ -18,81 +22,75 @@ Reference: https://oauth2.thephpleague.com/
 
 Reference: https://flysystem.thephpleague.com/
 
-### API Reference
-
-(this still to be published)
-https://savioresende.postman.co/collections/2828959-075664e1-21d6-983c-eea1-c01f021d5b43?version=latest&workspace=698ac165-0810-4a72-8447-f48b0ca7edf9#05ac60ce-9cd7-4d49-82f0-304aa95c93d0
-
-#### Clients Credential Workflow
+### Clients Credential Workflow
 
 Reference: https://tools.ietf.org/html/rfc6749#section-4.4
 
 **Request**:
 
-URL: http://git.dev/access_token
-
-HTTP Verb: "POST"
-
-Content-Type: application/x-www-form-urlencoded
-```json
-grant_type=client_credentials&client_id=1&client_secret=e776dbd85f227b0f6851d10eb76cdb04903b9632&scope=basic
-```
-The previous data is this:
-```json
-{
-	"grant_type": "client_credentials",
-	"client_id": "1",
-	"client_secret": "secret",
-	"scope": "basic"
-}
+```shell
+curl --location -g --request POST '{{masadburl}}/access_token' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "grant_type": "client_credentials",
+    "client_id": "{{clientid}}",
+    "client_secret": "{{clientsecret}}",
+    "scope": "basic"
+}'
 ```
 
 **Response**
+
 ```json
 {
-  "token_type": "...",
+  "token_type": "Bearer",
   "expires_in": 3600,
   "access_token": "..."
 }
 ```
-**Persistent Data**:
-1. **\oauth\Access Tokens**: 
-2. **\oauth\Auth Codes**
+With this Access Token in hand, the user will be able to proceed with persistent data within the system.
+
+Such authorization is also saved in MasaDB like the rest of the data. Here is where to find it:
+
+1. `\oauth\Access Tokens `
+2. `\oauth\Auth Codes`
 **Description**: Instead of requesting authorization directly from the resource owner, the client directs the resource owner to an authorization server (via its user-agent as defined in [RFC2616]), which in turn directs the resource owner back to the client with the authorization code.
 **Reference**: https://tools.ietf.org/html/rfc6749#section-1.3.1 
-3. **\oauth\Clients**: client created for authorization in regard of other users
- 
+3. `\oauth\Clients`: client created for authorization in regard of other users.
+
 **Step-by-Step**
 
-1. Generate Certificate with (self signed):
+If using Swoole, follow only 1, 2, 5, 6 and 7 steps. If using another webserver such as Nginx or Apache, follow the steps 1, 2, 3, 4, 5 and 7.
+
+1. Generate proper certificates to avoid problems with Authorization. For that, you can use this package: https://github.com/FiloSottile/mkcert . To use it, navigate to the `/certs` directory and generate the proper certificate:
 
 ```shell
-openssl req -new -x509 -sha256 -newkey rsa:2048 -nodes -keyout masadb.key -days 365 -out masadb.csr -subj '/CN=localhost'
+mkcert {{domain}}
 ```
 
-(for productoin certificates you can use letsencrypt)
+(for production certificates you can use letsencrypt)
 
 for public key:
 
 ```shell
-openssl rsa -in masadb.key -pubout > masadb.pub
+openssl rsa -in {private-key} -pubout > pubkey.pem
 ```
 
 2. Create the "data" directory using the server user, so you avoid problem with permissions:
 
-Is using swoole:
+​    - If using swoole:
 
 ```sh
 cp data.sample data
 ```
 
-If using webservers like nginx or apache:
+​    - If using webservers like nginx or apache:
 
 ```sh
 cp data.sample data && sudo chown -R www-data data
 ```
 
-3. Configure Apache server
+3. Configure Apache server (jump this step if using Swoole)
 
 The www-data must have enough permission to access the data through git.
 To do that, you can edit the envvars of apache with this (I didn't test 
@@ -112,7 +110,7 @@ Restart apache
 sudo services apache2 restart
 ```
 
-4. Give permission to www-data to the folder of the project:
+4. Give permission to www-data to the folder of the project: (jump this step if using Swoole)
 
 ```sh
 sudo chown -R www-data {directory of the project}
@@ -124,16 +122,16 @@ sudo chown -R www-data {directory of the project}
 cp config.json.sample config.json
 ```
 
-Notice that:
+**Important**:
 
 - the `database-address` key must be a a full path to the data directory.
 - the `private_key` and `public_key` keys must be full paths to the actual keys generated in the Step 1.
 - possible values for `env` are (can be found in the file `src/constants.php`):
-  - develop
-  - staging
-  - production
+  - `develop`
+  - `staging`
+  - `production`
 
-6. Start your Swoole Server
+6. Start your Swoole Server (jump this step if not using Swoole)
 
 Make sure that the key `swoole` at your `config.json` is set to `true` to be able to run the Swoole Server.
 
@@ -142,6 +140,13 @@ php index.php
 ```
 
 7. Copy the `config.json.tests.sample` to `config.json.tests` for the fields that you want to customize in order to run properly the tests in your machine.
+8. Install Composer dependencies:
+
+```shell
+composer install
+```
+
+
 
 ##### Cofiguration Customization
 

@@ -6,10 +6,11 @@
     "protocol": "http",
     "displayErrorDetails": "true",
     "case_sensitive": false,
+    "addContentLengthHeader": false,
     "cert": "/var/www/html/certs/masadb.csr",
     "private_key": "/var/www/html/certs/masadb.key",
     "public_key": "/var/www/html/certs/masadb.pub",
-    "timezone": "America/Toronto",
+    "timezone": "America/Edmonton",
     "swoole": true,
     "raw_files": false
 }
