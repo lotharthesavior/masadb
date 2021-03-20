@@ -2,76 +2,62 @@
 
 namespace Controllers;
 
-use \Psr\Container\ContainerInterface;
-use \Psr\Http\Message\ResponseInterface;
-use \Psr\Http\Message\ServerRequestInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
-use \League\Flysystem\Filesystem;
-use \League\Flysystem\Adapter\Local;
-use \League\Flysystem\Plugin\ListPaths;
-use \League\Flysystem\Plugin\ListWith;
-use \League\Flysystem\Plugin\GetWithMetadata;
+use Models\Interfaces\FileSystemInterface;
+use Models\Interfaces\GitInterface;
+use Models\Interfaces\BagInterface;
+use League\Flysystem\Filesystem;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Plugin\ListPaths;
+use League\Flysystem\Plugin\ListWith;
+use League\Flysystem\Plugin\GetWithMetadata;
 
-use \Models\Exceptions\NotExistentDatabaseException;
-use \Models\FileSystem\FileSystemBasic;
-use \Models\Git\GitBasic;
-use \Models\Bag\BagBasic;
-use \Models\Generic;
+use Models\Exceptions\NotExistentDatabaseException;
+use Models\FileSystem\FileSystemBasic;
+use Models\Git\GitBasic;
+use Models\Bag\BagBasic;
+use Models\Generic;
+
+use Controllers\traits\CommonController;
 
 class MasaDBController extends Abstraction\MasaController
 {
+    use CommonController;
 
-	use \Controllers\traits\commonController;
-
-	protected $container;
+    /** @var ContainerInterface */
+    protected $container;
 
     /**
      * Start the controller instantiating the Slim Container
      *
+     * @param ContainerInterface $container
      * @todo move this to a controller parent class
      *
-     * @param ContainerInterface $container
      */
-    public function __construct(ContainerInterface $container){
+    public function __construct(ContainerInterface $container)
+    {
         $this->container = $container;
     }
 
-	/**
-	 * Fetch All Records
-	 *
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
+    /**
+     * Fetch All Records
      *
-	 * @param array $args
-	 */
-	public function getFullCollection (
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     *
+     * @param array $args
+     */
+    public function getFullCollection(
         ServerRequestInterface $request,
         ResponseInterface $response,
         $args
-    ) {
+    )
+    {
         return $this->searchRecords($request, $response, $args);
-	}
-
-	/**
-	 * Get a Single Record
-	 *
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-     *
-	 * @param array $args
-	 */
-	public function getGeneric (
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        array $args
-    ) {
-	    $args['key']   = 'id';
-	    $args['value'] = $args['id'];
-
-	    unset($args['id']);
-
-	 	return $this->searchRecords($request, $response, $args);
-	}
+    }
 
     /**
      * Get a Single Record
@@ -81,41 +67,65 @@ class MasaDBController extends Abstraction\MasaController
      *
      * @param array $args
      */
-    public function getGenericFile (
+    public function getGeneric(
         ServerRequestInterface $request,
         ResponseInterface $response,
         array $args
-    ) {
+    )
+    {
+        $args['key'] = 'id';
+        $args['value'] = $args['id'];
+
+        unset($args['id']);
+
+        return $this->searchRecords($request, $response, $args);
+    }
+
+    /**
+     * Get a Single Record
+     *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     *
+     * @param array $args
+     */
+    public function getGenericFile(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    )
+    {
         $queryParams = $request->getQueryParams();
 
-        $args['key']   = 'id';
+        $args['key'] = 'id';
         $args['value'] = $queryParams['address'];
 
         return $this->searchRecords($request, $response, $args);
     }
 
-	/**
-	 * Search Records
-	 *
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @param array $args | ['field' => string, 'value' => string]
-	 */
-	public function searchRecords (
+    /**
+     * Search Records
+     *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param array $args | ['field' => string, 'value' => string]
+     */
+    public function searchRecords(
         ServerRequestInterface $request,
         ResponseInterface $response,
         array $args
-    ) {
+    )
+    {
         $logic = [];
 
-	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface
+        $generic_model = new Generic(
+        // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
             // \Models\Interfaces\BagInterface
             new BagBasic
-	 	);
+        );
 
         // this part is to be improved, right now the simple
         // presence will change all comparisons to OR
@@ -134,7 +144,7 @@ class MasaDBController extends Abstraction\MasaController
             $current_client_id = $request->getHeader("CurrentClientId");
         }
 
-	 	$generic_model = $this->setClient($current_client_id, $generic_model);
+        $generic_model = $this->setClient($current_client_id, $generic_model);
 
         try {
 
@@ -144,44 +154,45 @@ class MasaDBController extends Abstraction\MasaController
 
             return $response->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode(['results' => []]) );
+                ->write(json_encode(['results' => []]));
 
         }
 
         // JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
         $records_found = $generic_model->searchRecord($post_data, $logic);
 
-		$response->getBody()->write($records_found);
+        $response->getBody()->write($records_found);
 
         $response = $response->withHeader('Content-Type', 'application/json');
 
         return $response->withStatus(200);
-	}
+    }
 
-	/**
-	 * Search Records Post
-	 *
-	 * @param array $args
-	 */
-	public function searchRecordsPost(ServerRequestInterface $request, ResponseInterface $response, array $args){
-		$logic = [];
+    /**
+     * Search Records Post
+     *
+     * @param array $args
+     */
+    public function searchRecordsPost(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    {
+        $logic = [];
 
-	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface
+        $generic_model = new Generic(
+        // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
             // \Models\Interfaces\BagInterface
             new BagBasic
-	 	);
+        );
 
-	 	// this part is to be improved, right now the simple
-	 	// presence will change all comparisons to OR
-		$post_data = ($request->getParsedBody() === null)? [] : $request->getParsedBody();
-		if( isset($post_data['logic']) ){
-		 	$logic = $post_data['logic'];
-		 	unset($post_data['logic']);
-		}
+        // this part is to be improved, right now the simple
+        // presence will change all comparisons to OR
+        $post_data = ($request->getParsedBody() === null) ? [] : $request->getParsedBody();
+        if (isset($post_data['logic'])) {
+            $logic = $post_data['logic'];
+            unset($post_data['logic']);
+        }
 
         $current_client_id = $request->getHeader("ClientId");
         if (!empty($request->getHeader("CurrentClientId"))) {
@@ -190,7 +201,7 @@ class MasaDBController extends Abstraction\MasaController
 
         $generic_model = $this->setClient($current_client_id, $generic_model);
 
-		try {
+        try {
 
             $generic_model->setDatabase($args['database']);
 
@@ -198,45 +209,47 @@ class MasaDBController extends Abstraction\MasaController
 
             return $response->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode(['results' => []]) );
+                ->write(json_encode(['results' => []]));
 
         }
 
-		// JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
+        // JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
         $records_found = $generic_model->searchRecord($post_data, $logic);
 
-        $response->getBody()->write( $records_found );
+        $response->getBody()->write($records_found);
 
         $response = $response->withHeader('Content-Type', 'application/json');
 
         return $response->withStatus(200);
-	}
+    }
 
-	/**
-	 * Persist record
-	 *
-	 * Expected Request Body Format:
-	 * 	{
-	 * 		"title": {string},
-	 * 		"author": {string},
-	 * 		"email": {string},
-	 * 		"content": {string}
-	 * 	}
-	 *
-	 * @return JSON String - e.g: {"success": 1, "successMessage": {id}}
-	 */
-	public function saveGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
+    /**
+     * Persist record
+     *
+     * Expected Request Body Format:
+     *    {
+     *        "title": {string},
+     *        "author": {string},
+     *        "email": {string},
+     *        "content": {string}
+     *    }
+     *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param array $args
+     *
+     * @return ResponseInterface {"success": 1, "successMessage": {id}}
+     * @todo There is some space to responde according to the "Accept" header.
+     */
+    public function saveGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    {
+        $generic_model = new Generic(
+            new FileSystemBasic, // FileSystemInterface
+            new GitBasic,        // GitInterface
+            new BagBasic         // BagInterface
+        );
 
-	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface
-            new FileSystemBasic,
-            // \Models\Interfaces\GitInterface
-            new GitBasic,
-            // \Models\Interfaces\BagInterface
-            new BagBasic
-	 	);
-
-	 	$current_client_id = $request->getHeader("ClientId");
+        $current_client_id = $request->getHeader("ClientId");
         if (!empty($request->getHeader("CurrentClientId"))) {
             $current_client_id = $request->getHeader("CurrentClientId");
         }
@@ -257,116 +270,51 @@ class MasaDBController extends Abstraction\MasaController
 
             return $response->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
+                ->write(json_encode([]));
 
         }
 
         $result = $this->saveRecord($request, $response, $args, $generic_model);
 
-	 	// place record address in the result
+        return $response->withStatus(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->write($result);
+    }
 
-	 	return $response->withStatus(200)
-                 ->withHeader('Content-Type', 'application/json')
-                 ->write( $result );
-
-	}
-
-	/**
-	 * This method specify the client Id from a Header parameter.
-	 *
-	 * This header is validated in the OAuth2 lib.
-	 *
-	 * @param mix $client_id
-	 * @return Generic $generic_model
-	 */
-	private function setClient( $client_id, Generic $generic_model ){
-
-		if( !empty($client_id) ){
-
-	 		$client_id = $client_id;
-
-	 		if( is_array($client_id) )
-	 			$client_id = $client_id[0];
-
-			$generic_model->setClientId( $client_id );
-
-		}
-
-		return $generic_model;
-
-	}
-
-	/**
-	 * Deleted record
-	 */
-	public function deleteGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    /**
+     * This method specify the client Id from a Header parameter.
+     *
+     * This header is validated in the OAuth2 lib.
+     *
+     * @param mix $client_id
+     * @return Generic $generic_model
+     */
+    private function setClient($client_id, Generic $generic_model)
     {
 
-	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface
-            new FileSystemBasic,
-            // \Models\Interfaces\GitInterface
-            new GitBasic,
-            // \Models\Interfaces\BagInterface
-            new BagBasic
-	 	);
+        if (!empty($client_id)) {
 
-		$current_client_id = $request->getHeader("ClientId");
-        if (!empty($request->getHeader("CurrentClientId"))) {
-            $current_client_id = $request->getHeader("CurrentClientId");
-        }
+            $client_id = $client_id;
 
-        $generic_model = $this->setClient($current_client_id, $generic_model);
+            if (is_array($client_id))
+                $client_id = $client_id[0];
 
-        try {
-
-            $generic_model->setDatabase($args['database']);
-
-        } catch (\Exception $e) { // TODO: specialize this
-
-            return $response->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
+            $generic_model->setClientId($client_id);
 
         }
 
-	 	try {
+        return $generic_model;
 
-	 		$result = $generic_model->delete($args['id']);
-
-	 	} catch (\Exception $e) {
-
-	 		$return_message = [
-	 			"error" => 1,
-	 			"message" => $e->getMessage()
-	 		];
-
-	 		return $response->withStatus(500)
-                     ->withHeader('Content-Type', 'application/json')
-                     ->write( json_encode( $return_message ) );
-
-	 	}
-
-	 	$return_message = [
- 			"success" => 1,
- 			"message" => "Record successfully removed!"
- 		];
-
- 		return $response->withStatus(200)
-                 ->withHeader('Content-Type', 'application/json')
-                 ->write( json_encode( $return_message ) );
-
-	}
+    }
 
     /**
      * Deleted record
      */
-    public function deleteGenericFile(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    public function deleteGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args)
     {
-        $queryParams = $request->getQueryParams();
 
         $generic_model = new Generic(
-            // \Models\Interfaces\FileSystemInterface
+        // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -389,7 +337,70 @@ class MasaDBController extends Abstraction\MasaController
 
             return $response->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
+                ->write(json_encode([]));
+
+        }
+
+        try {
+
+            $result = $generic_model->delete($args['id']);
+
+        } catch (\Exception $e) {
+
+            $return_message = [
+                "error" => 1,
+                "message" => $e->getMessage()
+            ];
+
+            return $response->withStatus(500)
+                ->withHeader('Content-Type', 'application/json')
+                ->write(json_encode($return_message));
+
+        }
+
+        $return_message = [
+            "success" => 1,
+            "message" => "Record successfully removed!"
+        ];
+
+        return $response->withStatus(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->write(json_encode($return_message));
+
+    }
+
+    /**
+     * Deleted record
+     */
+    public function deleteGenericFile(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    {
+        $queryParams = $request->getQueryParams();
+
+        $generic_model = new Generic(
+        // \Models\Interfaces\FileSystemInterface
+            new FileSystemBasic,
+            // \Models\Interfaces\GitInterface
+            new GitBasic,
+            // \Models\Interfaces\BagInterface
+            new BagBasic
+        );
+
+        $current_client_id = $request->getHeader("ClientId");
+        if (!empty($request->getHeader("CurrentClientId"))) {
+            $current_client_id = $request->getHeader("CurrentClientId");
+        }
+
+        $generic_model = $this->setClient($current_client_id, $generic_model);
+
+        try {
+
+            $generic_model->setDatabase($args['database']);
+
+        } catch (\Exception $e) { // TODO: specialize this
+
+            return $response->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->write(json_encode([]));
 
         }
 
@@ -406,8 +417,8 @@ class MasaDBController extends Abstraction\MasaController
             ];
 
             return $response->withStatus(500)
-                     ->withHeader('Content-Type', 'application/json')
-                     ->write( json_encode( $return_message ) );
+                ->withHeader('Content-Type', 'application/json')
+                ->write(json_encode($return_message));
 
         }
 
@@ -417,28 +428,29 @@ class MasaDBController extends Abstraction\MasaController
         ];
 
         return $response->withStatus(200)
-                 ->withHeader('Content-Type', 'application/json')
-                 ->write( json_encode( $return_message ) );
+            ->withHeader('Content-Type', 'application/json')
+            ->write(json_encode($return_message));
 
     }
 
-	/**
-	 * This method is used to create a version after each change.
+    /**
+     * This method is used to create a version after each change.
      *
      * Description: It is necessary because the "git add" and
      *              "git commit" are expensive once the database
      *              grows bigger.
-	 */
-	public function gitAsync(ServerRequestInterface $request, ResponseInterface $response, array $args){
+     */
+    public function gitAsync(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    {
         $request_body = $request->getParsedBody();
 
         $date1 = new \DateTime;
 
-        $adapter = new Local( __DIR__."/../" );
+        $adapter = new Local(__DIR__ . "/../");
         $filesystem = new Filesystem($adapter);
 
         $generic_model = new Generic(
-            // \Models\Interfaces\FileSystemInterface
+        // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -461,7 +473,7 @@ class MasaDBController extends Abstraction\MasaController
 
             return $response->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
+                ->write(json_encode([]));
 
         }
 
@@ -471,23 +483,24 @@ class MasaDBController extends Abstraction\MasaController
         $date_diff = $date1->diff($date2);
 
         $filesystem->put("git_async_result", $result . ' - ' . date("Y-m-d H:i:s") . ' | ' . $date_diff->s . ' seconds.');
-	}
+    }
 
     /**
      * This method is to update a cache of a specific database
      *
      * @internal It comes from @save on the Generic Model
      */
-    public function updateCacheAsync(ServerRequestInterface $request, ResponseInterface $response, array $args){
+    public function updateCacheAsync(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    {
         $request_body = $request->getParsedBody();
 
         $date1 = new \DateTime;
 
-        $adapter = new Local( __DIR__."/../" );
+        $adapter = new Local(__DIR__ . "/../");
         $filesystem = new Filesystem($adapter);
 
         $generic_model = new Generic(
-            // \Models\Interfaces\FileSystemInterface
+        // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -510,12 +523,12 @@ class MasaDBController extends Abstraction\MasaController
 
             return $response->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->write( json_encode([]) );
+                ->write(json_encode([]));
 
         }
 
         $cache_helper = new \Helpers\CacheHelper;
-        $result = $generic_model->getGitData( $cache_helper );
+        $result = $generic_model->getGitData($cache_helper);
 
         $date2 = new \DateTime;
         $date_diff = $date1->diff($date2);

@@ -6,12 +6,12 @@ use \Exception;
 
 /**
  * Record Object Hashable for Collections of the database
- * 
+ *
  * @author Savio Resende <savio@savioresende.com.br>
  */
-class Record implements \JsonSerializable 
+class Record implements \JsonSerializable
 {
-    
+
     protected $id;
 
     protected $permissions;
@@ -39,7 +39,7 @@ class Record implements \JsonSerializable
 
     // ############################## getters and setters ##############################
 
-    public function setId( $id )
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -51,7 +51,7 @@ class Record implements \JsonSerializable
 
     // --
 
-    public function setPermissions( $permissions )
+    public function setPermissions($permissions)
     {
         $this->permissions = $permissions;
     }
@@ -63,7 +63,7 @@ class Record implements \JsonSerializable
 
     // --
 
-    public function setType( $type )
+    public function setType($type)
     {
         $this->type = $type;
     }
@@ -75,7 +75,7 @@ class Record implements \JsonSerializable
 
     // --
 
-    public function setRevisionHash( $revision_hash )
+    public function setRevisionHash($revision_hash)
     {
         $this->revision_hash = $revision_hash;
     }
@@ -87,7 +87,7 @@ class Record implements \JsonSerializable
 
     // --
 
-    public function setAddress( $address )
+    public function setAddress($address)
     {
         $this->address = trim($address);
     }
@@ -99,7 +99,7 @@ class Record implements \JsonSerializable
 
     // -- file_content --
 
-    public function setFileContent( $file_content )
+    public function setFileContent($file_content)
     {
         foreach ($file_content as $key => $value) {
             $this->file_content->{$key} = $value;
@@ -111,7 +111,7 @@ class Record implements \JsonSerializable
         return $this->file_content;
     }
 
-    public function setFileTimestamp( $timestamp )
+    public function setFileTimestamp($timestamp)
     {
         $this->file_content->timestamp = $timestamp;
     }
@@ -121,7 +121,7 @@ class Record implements \JsonSerializable
         return $this->file_content->timestamp;
     }
 
-    public function setFileUpdatedAt( $timestamp )
+    public function setFileUpdatedAt($timestamp)
     {
         $this->file_content->updated_at = $timestamp;
     }
@@ -155,15 +155,15 @@ class Record implements \JsonSerializable
     /**
      * This match is for JSON assets
      *
-     * @todo implement the logic (OR, AND, ...)
-     * @todo the OR is not complete
-     *
      * @param array $params
      * @param array $logic
      *
      * @return bool
+     * @todo the OR is not complete
+     *
+     * @todo implement the logic (OR, AND, ...)
      */
-    public function multipleParamsMatch ($params, $logic = [])
+    public function multipleParamsMatch($params, $logic = [])
     {
         // --------------------------------------------------------
         // AND for all logics -------------------------------------
@@ -173,16 +173,16 @@ class Record implements \JsonSerializable
                 if (
                     (
                         isset($this->file_content->{$key}) && (
-                        (
-                            $this->file_content->{$key} === "id"
-                            && $this->valueEqual( $key, $attribute )
-                        ) || (
-                            isset($this->file_content->{$key})
-                            && $this->stringMatch( $this->file_content->{$key}, $attribute ))
+                            (
+                                $this->file_content->{$key} === "id"
+                                && $this->valueEqual($key, $attribute)
+                            ) || (
+                                isset($this->file_content->{$key})
+                                && $this->stringMatch($this->file_content->{$key}, $attribute))
                         )
                     ) || (
                         isset($this->{$key})
-                        && $this->stringMatch( $this->{$key}, $attribute )
+                        && $this->stringMatch($this->{$key}, $attribute)
                     )
                 ) {
                     continue;
@@ -196,18 +196,17 @@ class Record implements \JsonSerializable
         // --------------------------------------------------------
         // OR for all logics --------------------------------------
         // --------------------------------------------------------
-        if( !empty($logic) )
-        {
-            $resultant = array_filter($params, function($attribute, $key) use ($params) {
+        if (!empty($logic)) {
+            $resultant = array_filter($params, function ($attribute, $key) use ($params) {
                 return isset($this->file_content->{$key}) && (
-                    (
-                        $this->file_content->{$key} == "id"
-                        && $this->valueEqual($key, $attribute)
-                    ) || (
-                        $this->file_content->{$key} != "id"
-                        && $this->stringMatch($this->file_content->{$key}, $attribute)
-                    )
-                );
+                        (
+                            $this->file_content->{$key} == "id"
+                            && $this->valueEqual($key, $attribute)
+                        ) || (
+                            $this->file_content->{$key} != "id"
+                            && $this->stringMatch($this->file_content->{$key}, $attribute)
+                        )
+                    );
             }, ARRAY_FILTER_USE_BOTH);
 
             return !empty($resultant);
@@ -222,7 +221,7 @@ class Record implements \JsonSerializable
      *
      * @return bool
      */
-    public function titleContentMatch(array $params) : bool
+    public function titleContentMatch(array $params): bool
     {
         $match = true;
 
@@ -249,9 +248,9 @@ class Record implements \JsonSerializable
     }
 
     /**
-     * 
+     *
      */
-    public function stringMatch( $param, $value )
+    public function stringMatch($param, $value)
     {
         if ($this->case_sensitive) {
             $match_string = strstr($param, $value) !== false;
@@ -263,84 +262,84 @@ class Record implements \JsonSerializable
     }
 
     /**
-     * 
+     *
      */
-    public function valueEqual( $param, $value )
+    public function valueEqual($param, $value)
     {
         return $this->file_content->{$param} != $value;
     }
 
     /**
-     * This method loads the Structure 1 (as a line result of `git ls-tree` 
+     * This method loads the Structure 1 (as a line result of `git ls-tree`
      * command).
-     * 
+     *
      * @param string $records_row
      * @param Bool $is_db
      * @return $this
      */
-    public function loadRowStructure1( $records_row, $is_db )
+    public function loadRowStructure1($records_row, $is_db)
     {
         $records_row = preg_split('/\s+/', $records_row);
 
         $records_row = array_filter($records_row);
-        
-        if( empty($records_row) ) {
+
+        if (empty($records_row)) {
             return $this;
         }
 
-        if( $is_db ) {
+        if ($is_db) {
             $this->setId($this->getIdOfAsset($records_row[3]));
         }
 
-        $this->setPermissions( $records_row[0] );
-        $this->setType( $records_row[1] );
-        $this->setRevisionHash( $records_row[2] );
-        $this->setAddress( $records_row[3] );
+        $this->setPermissions($records_row[0]);
+        $this->setType($records_row[1]);
+        $this->setRevisionHash($records_row[2]);
+        $this->setAddress($records_row[3]);
 
         return $this;
     }
 
     /**
-     * This method loads the Structure 1 (as a line result of `git ls-files` 
+     * This method loads the Structure 1 (as a line result of `git ls-files`
      * command).
-     * 
+     *
      * @param string $records_row
      * @param Bool $is_db
      *
      * @return $this
      */
-    public function loadRowStructure2( string $records_row, bool $is_db )
+    public function loadRowStructure2(string $records_row, bool $is_db)
     {
         $records_row_exploded = explode('/', $records_row);
 
         $records_row_exploded = end($records_row_exploded);
-        
-        if(empty($records_row_exploded)) {
+
+        if (empty($records_row_exploded)) {
             return $this;
         }
 
-        if( $is_db ) {
+        if ($is_db) {
             $this->setId($this->getIdOfAsset($records_row_exploded));
         }
 
-        $this->setAddress( $records_row );
+        $this->setAddress($records_row);
 
         return $this;
     }
 
     /**
      * Load structure for the filesystem search
-     * 
+     *
      * @param String $full_database_address (directory tree)
      * @param String $records_row
      * @return $this
      */
-    public function loadRowStructureSimpleDir( $full_database_address, $records_row )
+    public function loadRowStructureSimpleDir($full_database_address, $records_row)
     {
-        if( empty($records_row) )
+        if (empty($records_row))
             return $this;
 
-        if( $full_database_address[strlen($full_database_address) - 1] != "/" ) {
+        if ($full_database_address[strlen($full_database_address) - 1] != "/") {
             $full_database_address = $full_database_address . "/";
         }
 
@@ -348,43 +347,43 @@ class Record implements \JsonSerializable
 
         // avoid existent bag records_row to get inside the object attribute "id"
         $records_row_exploded = explode("/", $records_row);
-        if( count($records_row_exploded) > 1 ) {
+        if (count($records_row_exploded) > 1) {
             $records_row = $records_row_exploded[0];
         }
 
         $permissions = substr(sprintf('%o', fileperms($records_address)), -4);
         $this->setId($records_row);
-        $this->setPermissions( $permissions );
-        $this->setAddress( $records_address );
-        $this->setFileTimestamp( filemtime( $records_address ) );
-        $this->setFileUpdatedAt( gmdate("Y-m-d H:i:s", $this->getFileTimestamp()) );
+        $this->setPermissions($permissions);
+        $this->setAddress($records_address);
+        $this->setFileTimestamp(filemtime($records_address));
+        $this->setFileUpdatedAt(gmdate("Y-m-d H:i:s", $this->getFileTimestamp()));
 
         return $this;
     }
 
     /**
      * Load structure from cache, which is basic Array.
-     * 
-     * @todo to be deleted soon (maybe)
+     *
      * @param Array $record_row
      * @return void
+     * @todo to be deleted soon (maybe)
      */
-    public function loadRecordCacheStructure( $record_row )
+    public function loadRecordCacheStructure($record_row)
     {
-        $this->setId( $record_row['id'] );
-        $this->setPermissions( $record_row['permissions'] );
-        $this->setType( $record_row['type'] );
-        $this->setRevisionHash( $record_row['revision_hash'] );
-        $this->setAddress( $record_row['address'] );
-        $this->setFileContent( (object) $record_row['file_content'] );
+        $this->setId($record_row['id']);
+        $this->setPermissions($record_row['permissions']);
+        $this->setType($record_row['type']);
+        $this->setRevisionHash($record_row['revision_hash']);
+        $this->setAddress($record_row['address']);
+        $this->setFileContent((object)$record_row['file_content']);
     }
 
     /**
      * Return the Id of the physical address
-     * 
+     *
      * @return Int
      */
-    public function getIdOfAsset( $address )
+    public function getIdOfAsset($address)
     {
 
         $address_exploded = explode('/', $address);

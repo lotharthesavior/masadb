@@ -12,31 +12,33 @@ use \Models\OAuth2\User;
 class UserRepository implements UserRepositoryInterface
 {
 
-	/**
-	 * 
-	 */
-	public function __construct(){
+    /**
+     *
+     */
+    public function __construct()
+    {
 
-	}
+    }
 
-	/**
+    /**
      * Get a user entity.
      *
-     * @param string                $username
-     * @param string                $password
-     * @param string                $grantType    The grant type used
+     * @param string $username
+     * @param string $password
+     * @param string $grantType The grant type used
      * @param ClientEntityInterface $clientEntity
-     * 
-     * @todo finish this
      *
      * @return UserEntityInterface
+     * @todo finish this
+     *
      */
     public function getUserEntityByUserCredentials(
         $username,
         $password,
         $grantType,
         ClientEntityInterface $clientEntity
-    ){
+    )
+    {
 
         $user_model = new User;
 

@@ -7,24 +7,25 @@ use \Lotharthesavior\BagItPHP\BagIt;
 trait BagUtilities
 {
 
-	/**
-	  * @param Integer $id
-      * @return String path of the record
-	  */
-	protected function createBagForRecord( $id ){
+    /**
+     * @param Integer $id
+     * @return String path of the record
+     */
+    protected function createBagForRecord($id)
+    {
 
-		$record_path = $this->config['database-address'] . '/' . $this->_getDatabaseLocation() . '/' . $id;
-		
-	 	$bag = new BagIt( $record_path );
+        $record_path = $this->config['database-address'] . '/' . $this->_getDatabaseLocation() . '/' . $id;
 
-	 	$bag->addFile( $record_path . '.json', $id . '.json' );
+        $bag = new BagIt($record_path);
 
-	 	$bag->update();
+        $bag->addFile($record_path . '.json', $id . '.json');
 
-		unlink( $record_path . '.json' );
+        $bag->update();
+
+        unlink($record_path . '.json');
 
         return $id;
 
-	}
+    }
 
 }

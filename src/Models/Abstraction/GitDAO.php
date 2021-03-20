@@ -2,56 +2,43 @@
 
 namespace Models\Abstraction;
 
-use \Git\Git;
-use \Models\Traits\Pagination;
-use \Helpers\CacheHelper;
-use \Ds\Deque;
+use Exception;
+
+use Ds\Deque;
+
+use Git\Git;
+use Helpers\CacheHelper;
 use League\Flysystem\Filesystem;
 
-use \Models\Interfaces\GitDAOInterface;
-use \Models\Interfaces\FileSystemInterface;
-use \Models\Interfaces\GitInterface;
-use \Models\Interfaces\BagInterface;
+use Models\Traits\Pagination;
+use Models\Interfaces\GitDAOInterface;
+use Models\Interfaces\FileSystemInterface;
+use Models\Interfaces\GitInterface;
+use Models\Interfaces\BagInterface;
 
 /**
- *
  * Abstraction for the Model that keeps the data with Git
- *
- * @author Savio Resende <savio@savioresende.com.br>
- *
  */
 abstract class GitDAO implements GitDAOInterface
 {
     use Pagination;
 
-    // Core instance for FileSystem interaction
-    // proteced filesystem;
-
-    // Core instance for Git interaction
-    // proteced git;
-
-    // Core instance for Bag interaction
-    // proteced bag;
-
-    // keep the config.json content parsed
-    // protected $config;
-
-    // attribute to specify the sorting type: ASC | DESC
-    // protected $sortType;
-
+    /** @var bool */
     protected $no_cache = true;
 
     /**
      * @param FileSystemInterface $filesystem
      * @param GitInterface $git
      * @param BagInterface $bag
+     * @param array $config
      */
     public function __construct(
         FileSystemInterface $filesystem,
         GitInterface $git,
         BagInterface $bag,
         array $config = []
-    ) {
+    )
+    {
         $this->config = empty($config) ? config()['settings'] : $config;
 
         $this->resolveCacheCondition();
@@ -61,6 +48,11 @@ abstract class GitDAO implements GitDAOInterface
         $this->bag = $bag;
     }
 
+    /**
+     * Add to instance the cache related configuration.
+     *
+     * @return void
+     */
     protected function resolveCacheCondition()
     {
         if (isset($this->config['no_cache'])) {
@@ -72,31 +64,39 @@ abstract class GitDAO implements GitDAOInterface
      * Search for a Single Record by the id
      *
      * @param int|string $id
+     *
      * @return array
      */
     public function find($id)
     {
         if ($this->isBag()) {
-            $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $this->bag->locationOfBag($id, $this->isBag()) . ".json";
+            $address = $this->config['database-address']
+                . DIRECTORY_SEPARATOR
+                . $this->_getDatabaseLocation()
+                . DIRECTORY_SEPARATOR
+                . $this->bag->locationOfBag($id, $this->isBag())
+                . ".json";
         } else {
-            $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $id . ".json";
+            $address = $this->config['database-address']
+                . DIRECTORY_SEPARATOR
+                . $this->_getDatabaseLocation()
+                . DIRECTORY_SEPARATOR
+                . $id;
         }
 
         if (!file_exists($address)) {
-            throw new \Exception("Inexistent Record.");
+            throw new Exception("Inexistent Record.");
         }
 
-        $result = file_get_contents($address);
-
-        return $result;
+        return file_get_contents($address);
     }
 
     /**
      * Find all the Records in the database
      *
-     * @return \Ds\Deque
+     * @return Deque
      */
-    public function findAll()
+    public function findAll(): Deque
     {
         $result_complete = $this->getAllRecords();
 
@@ -106,31 +106,24 @@ abstract class GitDAO implements GitDAOInterface
     }
 
     /**
+     * @return Deque
      * @todo store cache in a async request
      *
-     * @return mix
      */
-    private function getAllRecords()
+    private function getAllRecords(): Deque
     {
-        $cache_helper = new CacheHelper;
-
-        // $cache_result = $cache_helper->getCacheData($this->getClientId(), $this->database);
-        // if ($cache_result !== false) {
-        //     return $cache_result;
-        // }
-
-        return $this->getGitData($cache_helper);
+        return $this->getGitData();
     }
 
     /**
      * Execute the Full Search on Git and store cache
      *
-     * @internal used to update cache
+     * @return Deque
      * @internal used to search when there is no cache
      *
-     * @param CacheHelper $cache_helper
+     * @internal used to update cache
      */
-    public function getGitData(CacheHelper $cache_helper)
+    public function getGitData(): Deque
     {
         $results = $this->git->lsTreeHead(
             '.',
@@ -143,56 +136,23 @@ abstract class GitDAO implements GitDAOInterface
             return $a->getId() > $b->getId();
         });
 
-        // $cache_helper->setData($results);
-        // $cache_helper->persistCache($this->_getDatabaseLocation());
-
-        return $results;
-    }
-
-    /**
-     * Execute the Full Search on Filesystem and store cache.
-     *
-     * This method exists as an alternative, but it didn't beat
-     * the speed of the git ls-tree ($this->getGitData) speed to
-     * retrieve big amount of data in the working directory.
-     *
-     * @internal used to update cache
-     * @internal used to search when there is no cache
-     * @ $cache_helper
-     */
-    public function getFilesystemData(CacheHelper $cache_helper)
-    {
-        // $date1 = new \DateTime();
-
-        $results = $this->filesystem->listWorkingDirectory(
-            $this->config['database-address'] . "/" . $this->_getDatabaseLocation(),
-            $this->isBag()
-        );
-
-        // $date2 = new \DateTime();
-        // var_dump($date2->diff($date1));
-        // var_dump($results);exit;
-
-        $results->sort(function ($a, $b) {
-            return $a->getId() > $b->getId();
-        });
-
-        $cache_helper->setData($results);
-        $cache_helper->persistCache($this->_getDatabaseLocation());
-
         return $results;
     }
 
     /**
      * Search for a single param
      *
+     * @param string $param
+     * @param string $value
+     *
+     * @return Deque
      * @internal Any param with field name 'logic', will be considered
      *           logic condition for the search
-     * @param string $param || array $param
-     * @param string $value || array $value
+     *
      */
-    public function search($param, $value)
+    public function search(string $param, string $value): Deque
     {
+        /** @var Deque $result_complete */
         $result_complete = $this->getAllRecords();
 
         $result_complete = $result_complete->filter(function ($record) use ($param, $value) {
@@ -218,10 +178,11 @@ abstract class GitDAO implements GitDAOInterface
      * @param array $params
      * @param array $logic
      *
-     * @return JSON | ["results": \Ds\Vector, "pages": \Ds\Vector]
+     * @return string '["results": \Ds\Vector, "pages": \Ds\Vector]'
      */
-    public function searchRecord(array $params, $logic = [])
+    public function searchRecord(array $params, $logic = []): string
     {
+        /** @var Deque $result_complete */
         $result_complete = $this->getAllRecords();
 
         $search_params = $this->filterPaginationParams($params);
@@ -250,23 +211,24 @@ abstract class GitDAO implements GitDAOInterface
     /**
      * Persist record
      *
-     * @param array $client_data | eg.: ["id" => {int}, "content" => {array}]
+     * @param array $client_data ["id" => {int}, "content" => {array}]
      *
      * @return string|int
      */
     public function save(array $client_data)
     {
+        /** @var string $local_address */
         $local_address = $this->_getDatabaseFullPathLocation();
 
-        // @var League\Flysystem\Filesystem
+        /** @var Filesystem $filesystem */
         $filesystem = $this->filesystem->getFileSystemAbstraction($local_address);
 
         if ($this->isBag()) {
-            /* @var int - id */
+            /* @var int $result */
             $result = $this->saveBag($filesystem, $client_data);
         } else {
-            /* @var string - filename */
-            $result = $this->saveRawFile($filesystem, $client_data); // (string) filename
+            /* @var string $result */
+            $result = $this->saveRawFile($filesystem, $client_data);
         }
 
         $this->saveVersion();
@@ -276,29 +238,27 @@ abstract class GitDAO implements GitDAOInterface
 
     /**
      * @param Filesystem $filesystem
+     * @param array $client_data
      *
-     * @return bool|null|string
+     * @return bool|string
      */
-    protected function saveRawFile(Filesystem $filesystem, $client_data)
+    protected function saveRawFile(Filesystem $filesystem, array $client_data)
     {
         $item_address = null;
 
         $item_address = $client_data['content']['address'];
         $content = $client_data['content']['content'];
 
-        if ( null === $item_address ) {
+        if (null === $item_address) {
             $item_address = $this->_nextIdFilesystem() . '.json';
         }
 
         $this->last_inserted_id = $item_address;
 
-        if (
-            !isset($client_data['id'])
-            || is_null($client_data['id'])
-        ) {
+        if (!isset($client_data['id']) || is_null($client_data['id'])) {
             $filesystem->write($item_address, $content, ['visibility' => 'public']);
 
-            /** @var string|null */
+            /** @var string */
             return $item_address;
         }
 
@@ -308,10 +268,11 @@ abstract class GitDAO implements GitDAOInterface
 
     /**
      * @param Filesystem $filesystem
+     * @param array $client_data
      *
      * @return int $id
      */
-    protected function saveBag(Filesystem $filesystem, $client_data) : int
+    protected function saveBag(Filesystem $filesystem, array $client_data): int
     {
         $id = null;
 
@@ -319,10 +280,7 @@ abstract class GitDAO implements GitDAOInterface
 
         $content = json_encode($client_data['content'], JSON_PRETTY_PRINT);
 
-        if (
-            !isset($client_data['id'])
-            || is_null($client_data['id'])
-        ) {
+        if (!isset($client_data['id']) || is_null($client_data['id'])) {
             $id = $this->_nextIdFilesystem();
 
             $item_address = $id . '.json';
@@ -337,7 +295,7 @@ abstract class GitDAO implements GitDAOInterface
 
             $this->saveVersion();
 
-            $result = $this->saveRecordVersion($item_address);
+            $this->saveRecordVersion($item_address);
 
             return $id;
         }
@@ -347,15 +305,17 @@ abstract class GitDAO implements GitDAOInterface
         $item_address = $this->bag->locationOfBag($id, $this->isBag());
         $item_address .= '.json';
 
-        $result = $filesystem->update($this->bag->locationOfBag($id, $this->isBag()) . ".json", $content);
+        $result = $filesystem->update($item_address, $content);
 
         return $id;
     }
 
     /**
      * Update Cache
+     *
+     * @return void
      */
-    public function updateCache()
+    public function updateCache(): void
     {
         $url = $this->config['protocol'] . '://' . $this->config['domain'] . "/update-cache-async";
 
@@ -363,84 +323,29 @@ abstract class GitDAO implements GitDAOInterface
             'database' => $this->_getDatabaseLocation()
         ];
 
-        // This is commented because it doesn't perform in the necessary
-        // speed. The alternative is to update the cache "manually".
-        // $header = [
-        //     'ClientId' => $_SERVER['HTTP_CLIENTID'],
-        //     'Authorization' => $_SERVER['HTTP_AUTHORIZATION'],
-        //     'Content-Type' => $_SERVER['HTTP_CONTENT_TYPE']
-        // ];
-        // \Helpers\AppHelper::curlPostAsync($url, $body, $header);
-        // \Helpers\AppHelper::curlPostAsync($url, $body);
+        // TODO: implement this.
     }
 
     /**
-     * This method adds a new filesystem record to the cache
-     *
-     * @param int $item
-     * @return void
+     * @return bool
      */
-    public function addItemToCache(int $item)
-    {
-        $cache_helper = new CacheHelper;
-
-        $cache_helper->getCacheData(
-            $this->client_id,
-            $this->database,
-            'all',
-            true
-        );
-
-        $item_path = (string) $item;
-        $new_record = $cache_helper->buildRecordFromPath($item_path, $this->client_id, $this->database);
-        $cache_helper->merge($new_record);
-        $cache_helper->persistCache($this->_getDatabaseLocation());
-    }
-
-    /**
-     * This method adds a new filesystem record to the cache
-     *
-     * @param int $item
-     *
-     * @return void
-     */
-    public function removeItemFromCache(int $item)
-    {
-        $cache_helper = new CacheHelper;
-
-        $cache_helper->getCacheData(
-            $this->client_id,
-            $this->database,
-            'all',
-            true
-        );
-
-        $cache_data = $cache_helper->getData();
-        $cache_data = $cache_data->filter(function ($record) use ($item) {
-            return (int) $record->getId() !== (int) $item;
-        });
-        $cache_helper->setData($cache_data);
-
-        $cache_helper->persistCache($this->_getDatabaseLocation());
-    }
-
-    /**
-     *
-     */
-    public function stageAndCommitAll()
+    public function stageAndCommitAll(): bool
     {
         return $this->saveVersion();
     }
 
     /**
+     * @param int|string $id
      *
+     * @return bool
+     *
+     * @throws Exception
      * @internal simple registers can be simple json files, but
      *           any other type of file, have to be a BagIt.
-     * @param int|string $id
+     *
      */
-    public function delete($id)
+    public function delete($id): bool
     {
-
         $database_url = $this->_getDatabaseFullPathLocation();
 
         // League\Flysystem\Filesystem
@@ -462,27 +367,25 @@ abstract class GitDAO implements GitDAOInterface
 
         } else {
 
-            throw new \Exception("Record not found!", 1);
+            throw new Exception("Record not found!", 1);
 
         }
 
         $this->saveVersion();
 
-        $result = $this->saveRecordVersion($id, true);
-
-        return $result;
-
+        /** @var bool */
+        return $this->saveRecordVersion($id, true);
     }
 
     /**
      * Verify if the current model is compatible with Bagit
      *
+     * @return boolean
      * @internal this method analyze the trait. For a more
      *           reliable use a BagIt Instance.
      *
-     * @return boolean
      */
-    public function isBag()
+    public function isBag(): bool
     {
         $is_bag = false;
 
@@ -498,12 +401,12 @@ abstract class GitDAO implements GitDAOInterface
     }
 
     /**
+     * @return bool
      * @internal check get_loaded_extensions() it there is any extension
      *           that  the bagit package might eventually depend on
      *
-     * @return bool
      */
-    private function checkBagitDependencies() : bool
+    private function checkBagitDependencies(): bool
     {
         return method_exists($this, 'createBagForRecord');
     }
@@ -513,7 +416,7 @@ abstract class GitDAO implements GitDAOInterface
      *
      * @return bool
      */
-    private function checkBagitConfig() : bool
+    private function checkBagitConfig(): bool
     {
         return !$this->config['raw_files'] ?? false;
     }
@@ -523,7 +426,7 @@ abstract class GitDAO implements GitDAOInterface
      *
      * @return bool
      */
-    private function isOAuthRelatedModel() : bool
+    private function isOAuthRelatedModel(): bool
     {
         $traits = get_declared_traits();
 
@@ -534,9 +437,10 @@ abstract class GitDAO implements GitDAOInterface
 
     /**
      * @param bool $no_cache
+     *
      * @return void
      */
-    public function setNoCache(bool $no_cache) : void
+    public function setNoCache(bool $no_cache): void
     {
         $this->no_cache = $no_cache;
     }
@@ -544,7 +448,7 @@ abstract class GitDAO implements GitDAOInterface
     /**
      * @return bool
      */
-    public function getNoCache() : bool
+    public function getNoCache(): bool
     {
         return $this->no_cache;
     }
@@ -554,7 +458,7 @@ abstract class GitDAO implements GitDAOInterface
      *
      * @return int
      */
-    protected function _nextId()
+    protected function _nextId(): int
     {
         $ls_tree_result = $this->git->lsTreeHead(
             '.',
@@ -593,7 +497,7 @@ abstract class GitDAO implements GitDAOInterface
         });
 
         $records = $records->map(function ($dir) {
-            return (int) $dir;
+            return (int)$dir;
         });
 
         if ($records->count() === 0)
@@ -601,7 +505,7 @@ abstract class GitDAO implements GitDAOInterface
 
         $records->sort();
 
-        return (int) $records->last() + 1;
+        return (int)$records->last() + 1;
     }
 
     /**
@@ -624,7 +528,6 @@ abstract class GitDAO implements GitDAOInterface
     }
 
     /**
-     *
      * @return string
      */
     protected function _getDatabaseFullPathLocation(): string
@@ -635,14 +538,12 @@ abstract class GitDAO implements GitDAOInterface
     /**
      * Sort a Collection
      *
-     * @todo this function will encapsulate the sorting functions
-     * @todo validate $this->sortType
+     * @param Deque $collection
      *
-     * @param array $collection
+     * @return Deque
      */
-    private function _sortResult($collection)
+    private function _sortResult(Deque $collection): Deque
     {
-
         $sort_type = "ASC";
         if (
             isset($this->sortType)
@@ -650,7 +551,6 @@ abstract class GitDAO implements GitDAOInterface
         ) {
             $sort_type = $this->sortType;
         }
-
 
         switch ($sort_type) {
 
@@ -669,39 +569,6 @@ abstract class GitDAO implements GitDAOInterface
         }
 
         return $collection;
-
-    }
-
-    /**
-     * Sort Ascending
-     *
-     * @param array $collection
-     */
-    private function _sortAscendingOrder($collection)
-    {
-
-        usort($collection, function ($a, $b) {
-            return (int)$a->id > (int)$b->id;
-        });
-
-        return $collection;
-
-    }
-
-    /**
-     * Sort Ascending
-     *
-     * @param array $collection
-     */
-    private function _sortCreationDescendingOrder($collection)
-    {
-
-        usort($collection, function ($a, $b) {
-            return (int)$b->getFileTimestamp() > (int)$a->getFileTimestamp();
-        });
-
-        return $collection;
-
     }
 
 }

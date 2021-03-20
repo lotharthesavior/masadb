@@ -2,7 +2,7 @@
 
 /**
  * FileSyste Basic
- * 
+ *
  * @author Savio Resende <savio@savioresende.com.br>
  */
 
@@ -28,9 +28,9 @@ class FileSystemBasic implements FileSystemInterface
      * @param $local_address
      * @return Filesystem
      */
-    public function getFileSystemAbstraction( $local_address ) : Filesystem
+    public function getFileSystemAbstraction($local_address): Filesystem
     {
-        $adapter = new Local( $local_address );
+        $adapter = new Local($local_address);
 
         return new Filesystem($adapter, new Config([
             'disable_asserts' => true,
@@ -39,17 +39,17 @@ class FileSystemBasic implements FileSystemInterface
 
     /**
      * Get file content of the record
-     * 
+     *
      * @param Record $record
      */
-    public function getFileContent( Record $record, $is_bag, $database_address = "." )
+    public function getFileContent(Record $record, $is_bag, $database_address = ".")
     {
         $location = $record->getAddress();
         $filesystem = $this->getFileSystemAbstraction($database_address);
 
         $full_record_addess = $location;
         $relative_location = "/" . $location;
-        if( !empty($database_address) ) {
+        if (!empty($database_address)) {
             $full_record_addess = trim($database_address . $relative_location);
         }
 
@@ -61,11 +61,11 @@ class FileSystemBasic implements FileSystemInterface
         } else {
             $record->setFileContent($json_content);
         }
-        
+
         // TODO: move this to a specialized method
-        $timestamp = filemtime( $full_record_addess );
-        $record->setFileTimestamp( $timestamp );
-        $record->setFileUpdatedAt( gmdate("Y-m-d H:i:s", $timestamp) );
+        $timestamp = filemtime($full_record_addess);
+        $record->setFileTimestamp($timestamp);
+        $record->setFileUpdatedAt(gmdate("Y-m-d H:i:s", $timestamp));
 
         return $record;
     }
@@ -85,7 +85,7 @@ class FileSystemBasic implements FileSystemInterface
      *
      * @return bool
      */
-    public function getExtension(string $path) : string
+    public function getExtension(string $path): string
     {
         return $this->getInfo($path)->getExtension();
     }
@@ -95,23 +95,23 @@ class FileSystemBasic implements FileSystemInterface
      *
      * @return string
      */
-    public function getType(string $path) : string
+    public function getType(string $path): string
     {
         return $this->getInfo($path)->getType();
     }
 
     /**
      * This will load the resultant object into file_content attribute
-     * 
+     *
      * @param Array $data_loaded
      * @return stdClass
      */
-    public function loadFileObject( Array $data_loaded )
+    public function loadFileObject(array $data_loaded)
     {
         $file_content = new \stdClass;
 
         foreach ($data_loaded as $key => $record) {
-            
+
             $file_content->{$key} = $record;
 
         }
@@ -121,30 +121,30 @@ class FileSystemBasic implements FileSystemInterface
 
     /**
      * List Records in the working directory
-     * 
-     * @todo not functional right now
-     * @param String $database  - format expected: "{string}/"
+     *
+     * @param String $database - format expected: "{string}/"
      * @return Deque
+     * @todo not functional right now
      */
-    public function listWorkingDirectory( $database = '', $is_bag )
+    public function listWorkingDirectory($database = '', $is_bag)
     {
         $is_db = $database != '';
 
-        if( !$is_db )
+        if (!$is_db)
             return new Deque([]);
 
         $records = new Deque(scandir($database));
-        $records = $records->filter(function( $dir ){
+        $records = $records->filter(function ($dir) {
             return $dir != "."
-                   && $dir != ".."
-                   && $dir != ".git";
+                && $dir != ".."
+                && $dir != ".git";
         });
 
         // parse resutls
-        $result_deque = $records->map(function( $records_row ) use ($is_db, $is_bag, $database){
+        $result_deque = $records->map(function ($records_row) use ($is_db, $is_bag, $database) {
             $new_record = new Record;
-            $new_record->loadRowStructureSimpleDir( $database, $records_row ); // TODO: this method has changed!
-            $new_record = $this->getFileContent( $new_record, $is_bag, "" );
+            $new_record->loadRowStructureSimpleDir($database, $records_row); // TODO: this method has changed!
+            $new_record = $this->getFileContent($new_record, $is_bag, "");
             return $new_record;
         });
 
@@ -153,15 +153,15 @@ class FileSystemBasic implements FileSystemInterface
 
     /**
      * Create the Directory to serve as Database
-     * 
+     *
      * @param string $base_location
      * @param string $database
-     * 
+     *
      * @return bool
      */
     public function createDatabaseDirectory(string $base_location, string $database): bool
     {
-        $filesystem = $this->getFileSystemAbstraction( $base_location );
+        $filesystem = $this->getFileSystemAbstraction($base_location);
         return $filesystem->createDir($database);
     }
 }

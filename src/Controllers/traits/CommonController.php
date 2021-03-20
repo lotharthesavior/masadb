@@ -23,53 +23,40 @@ trait commonController
      * @param ResponseInterface $response
      * @param Array $args
      * @param \Models\Abstraction\GitDAO $model
-     * @return JSON String - {"error": 1, "errorMessage": string}
-     *                       || {"success": 1, "successMessage": {inserted_id}}
+     * @return string {"error": 1, "errorMessage": string}
+     *                || {"success": 1, "successMessage": {inserted_id}}
      */
     public function saveRecord(
         ServerRequestInterface $request,
         ResponseInterface $response,
         array $args,
         GitDAO &$model
-    )
+    ): string
     {
-        $request_body = $request->getParsedBody();
-
-        // try once more
-        if (is_null($request_body)) {
-            /* @var StreamInterface */
-            $body = $request->getBody();
-            $body->rewind();
-            $request_body = json_decode($body->read($body->getSize()), true);
-        }
+        /** @var null|array|object $request_body */
+        $request_body = $this->getBodyFromRequest($request);
 
         $id = null;
         if (isset($args['id'])) {
             $id = $args['id'];
         }
 
-        // model interation
+        // Model iteration.
         try {
-
             $client_data = [
                 "id" => $id,
                 "content" => $request_body,
             ];
-
             $message = $model->save($client_data);
-
             $result = [
                 "success" => 1,
                 "successMessage" => $message
             ];
-
         } catch (\Exception $e) {
-
             $result = [
                 "error" => 1,
                 "errorMessage" => $e->getMessage()
             ];
-
         }
 
         return json_encode($result);
@@ -137,6 +124,26 @@ trait commonController
             'value' => $values
         ];
 
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     *
+     * @return mixed
+     */
+    private function getBodyFromRequest(ServerRequestInterface $request)
+    {
+        $request_body = $request->getParsedBody();
+
+        // try once more
+        if (is_null($request_body)) {
+            /* @var StreamInterface */
+            $body = $request->getBody();
+            $body->rewind();
+            $request_body = json_decode($body->read($body->getSize()), true);
+        }
+
+        return $request_body;
     }
 
 }

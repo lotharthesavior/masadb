@@ -105,17 +105,17 @@ class OAuthController
     }
 
     /**
-      * Expected Body Format:
-      *
-      *     {
-      *         "email": string
-      *         "password": string
-      *     }
-      *
-      * @param ServerRequestInterface $request
-      * @param ResponseInterface $response
-      * @return Boolean
-      */
+     * Expected Body Format:
+     *
+     *     {
+     *         "email": string
+     *         "password": string
+     *     }
+     *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return Boolean
+     */
     public function generateClientKey(ServerRequestInterface $request, ResponseInterface $response)
     {
         $secret_key = uniqid();
@@ -126,18 +126,18 @@ class OAuthController
 
         // find client
         $clients_model = new Clients;
-        $client_result = $clients_model->find( $client );
+        $client_result = $clients_model->find($client);
 
         // find user
         $users_model = new Users;
-        $users_result = $users_model->find( $client_result->file_content->user_id );
+        $users_result = $users_model->find($client_result->file_content->user_id);
 
         // validate user credential
 
-        if(
+        if (
             $users_result->file_content->email != $email
             || $users_result->file_content->password != $password
-        ){
+        ) {
             return false;
         }
 
@@ -145,7 +145,7 @@ class OAuthController
 
         $client_result->file_content->secret_key = sha1($secret_key);
 
-        $new_client_data = (array) $client_result->file_content;
+        $new_client_data = (array)$client_result->file_content;
 
         return $clients_model->save([
             'id' => $client,

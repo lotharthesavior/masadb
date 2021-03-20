@@ -11,13 +11,14 @@ use League\OAuth2\Server\Entities\ScopeEntityInterface;
 
 class Administrator implements ScopeEntityInterface
 {
-    
+
     protected $identifier = 'administrator';
 
     /**
-	 * 
-	 */
-	public function __construct(){
+     *
+     */
+    public function __construct()
+    {
 
     }
 
@@ -26,7 +27,8 @@ class Administrator implements ScopeEntityInterface
      *
      * @return string
      */
-    public function getIdentifier(){
+    public function getIdentifier()
+    {
 
         return $this->identifier;
 

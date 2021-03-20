@@ -2,7 +2,8 @@
 
 namespace Models\Collections;
 
-class RecordsCollection {
+class RecordsCollection
+{
 
 
 }

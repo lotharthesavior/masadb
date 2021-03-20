@@ -12,19 +12,21 @@ use \Models\OAuth2\RefreshToken;
 class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 {
 
-	/**
-	 * 
-	 */
-	public function __construct(){
+    /**
+     *
+     */
+    public function __construct()
+    {
 
-	}
+    }
 
-	/**
+    /**
      * Creates a new refresh token
      *
      * @return RefreshTokenEntityInterface
      */
-    public function getNewRefreshToken(){
+    public function getNewRefreshToken()
+    {
 
         $refresh_token_model = new RefreshToken;
 
@@ -38,7 +40,8 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
      * @param RefreshTokenEntityInterface $refreshTokenEntity
      * @todo persist the present data
      */
-    public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity){
+    public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity)
+    {
 
         // string this is randomly generated unique identifier (of 80+ characters in length) for the refresh token.
         // $refreshTokenEntity->getIdentifier();
@@ -56,7 +59,8 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
      *
      * @param string $tokenId
      */
-    public function revokeRefreshToken($tokenId){
+    public function revokeRefreshToken($tokenId)
+    {
 
     }
 
@@ -67,7 +71,8 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
      *
      * @return bool Return true if this token has been revoked
      */
-    public function isRefreshTokenRevoked($tokenId){
+    public function isRefreshTokenRevoked($tokenId)
+    {
 
     }
 

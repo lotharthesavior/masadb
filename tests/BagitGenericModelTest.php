@@ -33,11 +33,11 @@ final class BagitGenericModelTest extends TestCase
 
     /** @var string */
     protected $client_dir = 'client_1';
-    
+
     /**
      *
      */
-    protected function setUp() : void
+    protected function setUp(): void
     {
         $this->checkPermissions();
         $this->config = config();
@@ -51,7 +51,7 @@ final class BagitGenericModelTest extends TestCase
     /**
      *
      */
-    protected function tearDown() : void
+    protected function tearDown(): void
     {
         $this->clearDatabase();
     }
@@ -69,7 +69,7 @@ final class BagitGenericModelTest extends TestCase
     {
         $path_to_db = strstr(
             $this->config['settings']['database-address'],
-            $this->config['settings']['test-database-dir-name'], 
+            $this->config['settings']['test-database-dir-name'],
             true
         );
 
@@ -115,7 +115,7 @@ final class BagitGenericModelTest extends TestCase
 
         $this->generic->setClientId($this->client_id);
 
-        try {     
+        try {
             $this->generic->setDatabase($database);
         } catch (NotExistentDatabaseException $e) {
             $this->generic->createDatabase($database);
@@ -124,7 +124,7 @@ final class BagitGenericModelTest extends TestCase
     }
 
     /**
-     * 
+     *
      */
     private function createDummyRecord()
     {
@@ -135,18 +135,19 @@ final class BagitGenericModelTest extends TestCase
             ]
         ]);
     }
-    
+
     /**
-     * 
+     *
      */
-    private function getPhysicalNumberOrRecords(){
+    private function getPhysicalNumberOrRecords()
+    {
         $adapter = new Local("/");
 
         $filesystem = new Filesystem($adapter);
 
         $list = $this->filesystem->listContents($this->config['settings']['test-database-dir-name']);
 
-        $list = array_filter($list, function($item){
+        $list = array_filter($list, function ($item) {
             return $item['basename'] !== '.git';
         });
 
@@ -158,7 +159,7 @@ final class BagitGenericModelTest extends TestCase
      */
     // public static function tearDownTestData(){
     //     $generic = new \Models\Generic(
-    //         // \Models\Interfaces\FileSystemInterface 
+    //         // \Models\Interfaces\FileSystemInterface
     //         new \Models\FileSystem\FileSystemBasic,
     //         // \Models\Interfaces\GitInterface
     //         new \Models\Git\GitBasic,
@@ -177,21 +178,24 @@ final class BagitGenericModelTest extends TestCase
     //     }
     // }
 
-    public function testSetDatabase(){
+    public function testSetDatabase()
+    {
         $this->assertEquals("test", $this->generic->getDatabase());
     }
 
-    public function testSetClientId(){
+    public function testSetClientId()
+    {
         $this->assertEquals(1, $this->generic->getClientId());
     }
 
-    public function testFind(){
+    public function testFind()
+    {
         $id = $this->createDummyRecord();
 
         $result = $this->generic->find($id);
-        
+
         $this->assertEquals(
-            json_decode($result, true), 
+            json_decode($result, true),
             [
                 "title" => "Lorem Ipsum",
                 "content" => "Content Content ..."
@@ -210,7 +214,7 @@ final class BagitGenericModelTest extends TestCase
     /**
      * This test is useful to test if:
      *     1. the returning class is a Deque Data Structure
-     *     2. the number of physical files is the same returned 
+     *     2. the number of physical files is the same returned
      *        but the search
      */
     public function testFindAll()
@@ -226,19 +230,21 @@ final class BagitGenericModelTest extends TestCase
     }
 
     /**
-     * 
+     *
      */
-    public function testSearch(){
+    public function testSearch()
+    {
         $this->createDummyRecord();
 
         $results = $this->generic->search("title", "Lorem Ipsum");
-        
+
         $list = $this->getPhysicalNumberOrRecords();
 
         $this->assertEquals(count($list), $results->count());
     }
 
-    public function testSearchRecord(){
+    public function testSearchRecord()
+    {
         $this->createDummyRecord();
 
         $results = $this->generic->searchRecord([
@@ -251,7 +257,8 @@ final class BagitGenericModelTest extends TestCase
         $this->assertEquals(count($list), count($results->results));
     }
 
-    public function testSearchRecordSearchParam(){
+    public function testSearchRecordSearchParam()
+    {
         $this->createDummyRecord();
 
         $results = $this->generic->searchRecord([
@@ -265,7 +272,8 @@ final class BagitGenericModelTest extends TestCase
         $this->assertEquals(count($list), count($results->results));
     }
 
-    public function testSearchRecordSearchParamAND(){
+    public function testSearchRecordSearchParamAND()
+    {
         $this->createDummyRecord();
 
         $results = $this->generic->searchRecord([
@@ -279,7 +287,8 @@ final class BagitGenericModelTest extends TestCase
         $this->assertTrue(count($list) != count($results->results));
     }
 
-    public function testSave(){
+    public function testSave()
+    {
         $this->createDummyRecord();
 
         $results = $this->generic->searchRecord([
@@ -299,10 +308,11 @@ final class BagitGenericModelTest extends TestCase
         $this->assertTrue($results_count_after > $results_count_before);
     }
 
-    public function testDelete(){
+    public function testDelete()
+    {
         $test_id = $this->createDummyRecord();
-        
-        $this->assertTrue( (int)$test_id > 0 );
+
+        $this->assertTrue((int)$test_id > 0);
 
         $this->generic->delete($test_id);
 

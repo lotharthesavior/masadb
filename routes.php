@@ -4,9 +4,8 @@ use \League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 
 $app->get('/', 'HomeController:home');
 
-
 // ------------------------------------------------------------------------------------------
-// OAUTH2 
+// OAUTH2
 // ------------------------------------------------------------------------------------------
 
 $app->post('/access_token', 'OAuthController:accessToken');
@@ -14,28 +13,11 @@ $app->post('/access_token', 'OAuthController:accessToken');
 $app->post('/generate_key', 'OAuthController:generateClientKey');
 
 // ----------------------------------------------------------------------------------------
-// / OAUTH2 
+// / OAUTH2
 // ----------------------------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------------------------
-// ASYNC CALLS 
-// ----------------------------------------------------------------------------------------
-
-// $app->post('/git-async', 'MasaDBController:gitAsync');
-//     ->add(new ResourceServerMiddleware($server));
-
-// $app->post('/update-cache-async', 'MasaDBController:updateCacheAsync');
-//     ->add(new ResourceServerMiddleware($server));
-
-
-// ----------------------------------------------------------------------------------------
-// / ASYNC CALLS 
-// ----------------------------------------------------------------------------------------
-
 
 // ------------------------------------------------------------------------------------------
-// Generic Database 
+// Generic Database
 // ------------------------------------------------------------------------------------------
 
 $oauthMiddleware = function ($request, $response, $next) use ($config, $server) {
@@ -77,11 +59,6 @@ $app->delete('/{database}/file', 'MasaDBController:deleteGenericFile')
     ->add($oauthMiddleware);
 
 // TODO: upload asset
-
-// ------------------------------------------------------------------------------------------
-// / Generic Database 
-// ------------------------------------------------------------------------------------------
-
 
 // ------------------------------------------------------------------------------------------
 // Git Procedures

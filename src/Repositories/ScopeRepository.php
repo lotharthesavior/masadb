@@ -16,21 +16,23 @@ use \Models\OAuth2\Scopes\Basic;
 class ScopeRepository implements ScopeRepositoryInterface
 {
 
-	/**
-	 * 
-	 */
-	public function __construct(){
+    /**
+     *
+     */
+    public function __construct()
+    {
 
-	}
+    }
 
-	/**
+    /**
      * Return information about a scope.
      *
      * @param string $identifier The scope identifier
      *
      * @return ScopeEntityInterface
      */
-    public function getScopeEntityByIdentifier($identifier){
+    public function getScopeEntityByIdentifier($identifier)
+    {
 
         $class = '\\Models\\OAuth2\\Scopes\\' . ucfirst($identifier);
 
@@ -45,9 +47,9 @@ class ScopeRepository implements ScopeRepositoryInterface
      * append additional scopes or remove requested scopes.
      *
      * @param ScopeEntityInterface[] $scopes
-     * @param string                 $grantType
-     * @param ClientEntityInterface  $clientEntity
-     * @param null|string            $userIdentifier
+     * @param string $grantType
+     * @param ClientEntityInterface $clientEntity
+     * @param null|string $userIdentifier
      *
      * @return ScopeEntityInterface[]
      */
@@ -56,7 +58,8 @@ class ScopeRepository implements ScopeRepositoryInterface
         $grantType,
         ClientEntityInterface $clientEntity,
         $userIdentifier = null
-    ){
+    )
+    {
 
         // $scope_model = new Scope;
 

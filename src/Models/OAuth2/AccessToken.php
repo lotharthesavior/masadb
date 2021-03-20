@@ -32,13 +32,14 @@ class AccessToken extends GitDAO implements AccessTokenEntityInterface
         GitInterface $git,
         BagInterface $bag,
         array $config = []
-    ){
+    )
+    {
         parent::__construct($filesystem, $git, $bag);
 
         // this is necessary to acomplish with specific
         // models what is being done on the generic
-        if( isset($this->git) )
-            $this->git->setRepo( $this->config['database-address'] . '/' . $this->database );
+        if (isset($this->git))
+            $this->git->setRepo($this->config['database-address'] . '/' . $this->database);
     }
 
     /**

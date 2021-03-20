@@ -14,14 +14,15 @@ use League\OAuth2\Server\Entities\Traits\AuthCodeTrait;
 class AuthCode implements AuthCodeEntityInterface
 {
 
-	use EntityTrait;
-	use TokenEntityTrait;
-	use AuthCodeTrait;
+    use EntityTrait;
+    use TokenEntityTrait;
+    use AuthCodeTrait;
 
-	/**
-	 * 
-	 */
-	public function __construct(){
+    /**
+     *
+     */
+    public function __construct()
+    {
 
     }
 

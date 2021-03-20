@@ -15,9 +15,10 @@ class Basic implements ScopeEntityInterface
     protected $identifier = 'basic';
 
     /**
-	 * 
-	 */
-	public function __construct(){
+     *
+     */
+    public function __construct()
+    {
 
     }
 
@@ -26,10 +27,11 @@ class Basic implements ScopeEntityInterface
      *
      * @return string
      */
-    public function getIdentifier(){
+    public function getIdentifier()
+    {
 
         return $this->identifier;
-        
+
     }
 
     /**

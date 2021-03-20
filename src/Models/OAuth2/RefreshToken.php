@@ -13,13 +13,14 @@ use League\OAuth2\Server\Entities\Traits\EntityTrait;
 class RefreshToken implements RefreshTokenEntityInterface
 {
 
-	use RefreshTokenTrait;
-	use EntityTrait;
+    use RefreshTokenTrait;
+    use EntityTrait;
 
-	/**
-	 * 
-	 */
-	public function __construct(){
+    /**
+     *
+     */
+    public function __construct()
+    {
 
     }
 

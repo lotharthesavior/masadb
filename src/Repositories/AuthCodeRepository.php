@@ -12,20 +12,22 @@ use \Models\OAuth2\AuthCodeEntityInterface;
 class AuthCodeRepository implements AuthCodeRepositoryInterface
 {
 
-	/**
-	 * 
-	 */
-	public function __construct(){
+    /**
+     *
+     */
+    public function __construct()
+    {
 
-	}
+    }
 
     /**
      * Creates a new AuthCode
      *
      * @return AuthCodeEntityInterface
      */
-    public function getNewAuthCode(){
-        
+    public function getNewAuthCode()
+    {
+
         $auth_code_model = new AuthCode;
 
         return $auth_code_model;
@@ -37,7 +39,8 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
      *
      * @param AuthCodeEntityInterface $authCodeEntity
      */
-    public function persistNewAuthCode(AuthCodeEntityInterface $authCodeEntity){
+    public function persistNewAuthCode(AuthCodeEntityInterface $authCodeEntity)
+    {
 
         // string this is randomly generated unique identifier (of 80+ characters in length) for the auth code.
         $authCodeEntity->getIdentifier();
@@ -61,7 +64,8 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
      *
      * @param string $codeId
      */
-    public function revokeAuthCode($codeId){
+    public function revokeAuthCode($codeId)
+    {
 
     }
 
@@ -72,7 +76,8 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
      *
      * @return bool Return true if this code has been revoked
      */
-    public function isAuthCodeRevoked($codeId){
+    public function isAuthCodeRevoked($codeId)
+    {
 
     }
 

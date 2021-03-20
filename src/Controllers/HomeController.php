@@ -2,33 +2,34 @@
 
 namespace Controllers;
 
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-use \Models\Notes;
-
 class HomeController extends Abstraction\MasaController
 {
-
-	protected $container;
+    /** @var ContainerInterface */
+    protected $container;
 
     /**
      * Start the controller instantiating the Slim Container
-     * @todo move this to a controller parent class
+     *
+     * @param ContainerInterface $container
      */
-    public function __construct($container){
-            $this->container = $container;
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
     }
 
-	/**
-	 * 
-	 */
-	public function home(ServerRequestInterface $request, ResponseInterface $response){
-		
-		$response->getBody()->write( "masa git repository" );
-
-    	return $response;
-
-	}
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     *
+     * @return ResponseInterface
+     */
+    public function home(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        return $response->getBody()->write("MasaDB");
+    }
 
 }
