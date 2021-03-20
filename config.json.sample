@@ -12,5 +12,5 @@
     "public_key": "/var/www/html/certs/masadb.pub",
     "timezone": "America/Edmonton",
     "swoole": true,
-    "raw_files": false
+    "raw_files": true
 }

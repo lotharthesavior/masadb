@@ -79,9 +79,9 @@ abstract class GitDAO implements GitDAOInterface
         if ($this->isBag()) {
             $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $this->bag->locationOfBag($id, $this->isBag()) . ".json";
         } else {
-            $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $id;
+            $address = $this->config['database-address'] . "/" . $this->_getDatabaseLocation() . "/" . $id . ".json";
         }
-        
+
         if (!file_exists($address)) {
             throw new \Exception("Inexistent Record.");
         }
@@ -113,7 +113,7 @@ abstract class GitDAO implements GitDAOInterface
     private function getAllRecords()
     {
         $cache_helper = new CacheHelper;
-        
+
         // $cache_result = $cache_helper->getCacheData($this->getClientId(), $this->database);
         // if ($cache_result !== false) {
         //     return $cache_result;
@@ -277,14 +277,18 @@ abstract class GitDAO implements GitDAOInterface
     /**
      * @param Filesystem $filesystem
      *
-     * @return int $id
+     * @return bool|null|string
      */
-    protected function saveRawFile(Filesystem $filesystem, $client_data) : string
+    protected function saveRawFile(Filesystem $filesystem, $client_data)
     {
         $item_address = null;
 
         $item_address = $client_data['content']['address'];
         $content = $client_data['content']['content'];
+
+        if ( null === $item_address ) {
+            $item_address = $this->_nextIdFilesystem() . '.json';
+        }
 
         $this->last_inserted_id = $item_address;
 
@@ -294,12 +298,12 @@ abstract class GitDAO implements GitDAOInterface
         ) {
             $filesystem->write($item_address, $content, ['visibility' => 'public']);
 
+            /** @var string|null */
             return $item_address;
         }
 
-        $result = $filesystem->update($item_address, $content);
-
-        return $filename;
+        /** @var bool */
+        return $filesystem->update($item_address, $content);
     }
 
     /**
@@ -483,7 +487,7 @@ abstract class GitDAO implements GitDAOInterface
         $is_bag = false;
 
         if (
-            $this->checkBagitDependencies() 
+            $this->checkBagitDependencies()
             && $this->checkBagitConfig()
             && !$this->isOAuthRelatedModel()
         ) {
@@ -494,7 +498,7 @@ abstract class GitDAO implements GitDAOInterface
     }
 
     /**
-     * @internal check get_loaded_extensions() it there is any extension 
+     * @internal check get_loaded_extensions() it there is any extension
      *           that  the bagit package might eventually depend on
      *
      * @return bool

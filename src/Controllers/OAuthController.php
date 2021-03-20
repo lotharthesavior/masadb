@@ -39,15 +39,15 @@ class OAuthController
 
     /**
      * Access Token
-     * 
+     *
      * Post header data example:
-     * 
+     *
      *     Content-Type: application/x-www-form-urlencoded
-     * 
-     * Post body data example: 
-     * 
+     *
+     * Post body data example:
+     *
      *     grant_type=client_credentials&client_id={client id}&client_secret={secret}&scope={scopes list}
-     * 
+     *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
@@ -56,7 +56,7 @@ class OAuthController
     {
         // Path to public and private keys
         $privateKey = new CryptKey(
-            $this->container->get('settings')['private_key'], 
+            $this->container->get('settings')['private_key'],
             $this->container->get('settings')['public_key_pass']
         ); // if private key has a pass phrase
         $publicKey = $this->container->get('settings')['public_key'];
@@ -85,33 +85,33 @@ class OAuthController
         );
 
         try {
-        
+
             // Try to respond to the request
             return $server->respondToAccessTokenRequest($request, $response);
-            
+
         } catch (OAuthServerException $exception) {
-        
+
             // All instances of OAuthServerException can be formatted into a HTTP response
             return $exception->generateHttpResponse($response);
-            
+
         } catch (Exception $exception) {
-        
+
             // Unknown exception
             $body = new Stream('php://temp', 'r+');
             $body->write($exception->getMessage());
             return $response->withStatus(500)->withBody($body);
-            
+
         }
     }
 
     /**
       * Expected Body Format:
-      * 
+      *
       *     {
       *         "email": string
       *         "password": string
       *     }
-      * 
+      *
       * @param ServerRequestInterface $request
       * @param ResponseInterface $response
       * @return Boolean
@@ -124,14 +124,14 @@ class OAuthController
         $email = $request->getParam('email');
         $password = $request->getParam('password');
 
-        // find client 
+        // find client
         $clients_model = new Clients;
         $client_result = $clients_model->find( $client );
 
         // find user
         $users_model = new Users;
         $users_result = $users_model->find( $client_result->file_content->user_id );
-        
+
         // validate user credential
 
         if(

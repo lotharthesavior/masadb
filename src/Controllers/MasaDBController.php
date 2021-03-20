@@ -2,7 +2,7 @@
 
 namespace Controllers;
 
-use \Psr\Container\ContainerInterface
+use \Psr\Container\ContainerInterface;
 use \Psr\Http\Message\ResponseInterface;
 use \Psr\Http\Message\ServerRequestInterface;
 
@@ -20,14 +20,14 @@ use \Models\Generic;
 
 class MasaDBController extends Abstraction\MasaController
 {
-	
+
 	use \Controllers\traits\commonController;
 
 	protected $container;
 
     /**
      * Start the controller instantiating the Slim Container
-     * 
+     *
      * @todo move this to a controller parent class
      *
      * @param ContainerInterface $container
@@ -38,7 +38,7 @@ class MasaDBController extends Abstraction\MasaController
 
 	/**
 	 * Fetch All Records
-	 * 
+	 *
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
      *
@@ -54,15 +54,15 @@ class MasaDBController extends Abstraction\MasaController
 
 	/**
 	 * Get a Single Record
-	 * 
+	 *
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
      *
 	 * @param array $args
 	 */
 	public function getGeneric (
-        ServerRequestInterface $request, 
-        ResponseInterface $response, 
+        ServerRequestInterface $request,
+        ResponseInterface $response,
         array $args
     ) {
 	    $args['key']   = 'id';
@@ -75,15 +75,15 @@ class MasaDBController extends Abstraction\MasaController
 
     /**
      * Get a Single Record
-     * 
+     *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      *
      * @param array $args
      */
     public function getGenericFile (
-        ServerRequestInterface $request, 
-        ResponseInterface $response, 
+        ServerRequestInterface $request,
+        ResponseInterface $response,
         array $args
     ) {
         $queryParams = $request->getQueryParams();
@@ -96,7 +96,7 @@ class MasaDBController extends Abstraction\MasaController
 
 	/**
 	 * Search Records
-	 * 
+	 *
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
 	 * @param array $args | ['field' => string, 'value' => string]
@@ -109,7 +109,7 @@ class MasaDBController extends Abstraction\MasaController
         $logic = [];
 
 	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface 
+	 		// \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -150,7 +150,7 @@ class MasaDBController extends Abstraction\MasaController
 
         // JSON | ["results": \Ds\Vector] OR ["results": \Ds\Vector, "pages": \Ds\Vector] (TODO)
         $records_found = $generic_model->searchRecord($post_data, $logic);
-		
+
 		$response->getBody()->write($records_found);
 
         $response = $response->withHeader('Content-Type', 'application/json');
@@ -160,14 +160,14 @@ class MasaDBController extends Abstraction\MasaController
 
 	/**
 	 * Search Records Post
-	 * 
+	 *
 	 * @param array $args
 	 */
 	public function searchRecordsPost(ServerRequestInterface $request, ResponseInterface $response, array $args){
 		$logic = [];
 
 	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface 
+	 		// \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -175,7 +175,7 @@ class MasaDBController extends Abstraction\MasaController
             new BagBasic
 	 	);
 
-	 	// this part is to be improved, right now the simple 
+	 	// this part is to be improved, right now the simple
 	 	// presence will change all comparisons to OR
 		$post_data = ($request->getParsedBody() === null)? [] : $request->getParsedBody();
 		if( isset($post_data['logic']) ){
@@ -214,21 +214,21 @@ class MasaDBController extends Abstraction\MasaController
 
 	/**
 	 * Persist record
-	 * 
-	 * Expected Request Body Format: 
+	 *
+	 * Expected Request Body Format:
 	 * 	{
 	 * 		"title": {string},
 	 * 		"author": {string},
 	 * 		"email": {string},
 	 * 		"content": {string}
 	 * 	}
-	 * 
+	 *
 	 * @return JSON String - e.g: {"success": 1, "successMessage": {id}}
 	 */
 	public function saveGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args){
 
 	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface 
+	 		// \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -250,7 +250,7 @@ class MasaDBController extends Abstraction\MasaController
             $generic_model->setDatabase($args['database']);
 
         } catch (NotExistentDatabaseException $e) {
-            
+
             $generic_model->createDatabase($args['database']);
 
         } catch (\Exception $e) { // TODO: specialize this
@@ -262,7 +262,7 @@ class MasaDBController extends Abstraction\MasaController
         }
 
         $result = $this->saveRecord($request, $response, $args, $generic_model);
-        
+
 	 	// place record address in the result
 
 	 	return $response->withStatus(200)
@@ -273,14 +273,14 @@ class MasaDBController extends Abstraction\MasaController
 
 	/**
 	 * This method specify the client Id from a Header parameter.
-	 * 
+	 *
 	 * This header is validated in the OAuth2 lib.
-	 * 
+	 *
 	 * @param mix $client_id
 	 * @return Generic $generic_model
 	 */
 	private function setClient( $client_id, Generic $generic_model ){
-		
+
 		if( !empty($client_id) ){
 
 	 		$client_id = $client_id;
@@ -289,7 +289,7 @@ class MasaDBController extends Abstraction\MasaController
 	 			$client_id = $client_id[0];
 
 			$generic_model->setClientId( $client_id );
-			
+
 		}
 
 		return $generic_model;
@@ -303,7 +303,7 @@ class MasaDBController extends Abstraction\MasaController
     {
 
 	 	$generic_model = new Generic(
-	 		// \Models\Interfaces\FileSystemInterface 
+	 		// \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -335,7 +335,7 @@ class MasaDBController extends Abstraction\MasaController
 	 		$result = $generic_model->delete($args['id']);
 
 	 	} catch (\Exception $e) {
-	 		
+
 	 		$return_message = [
 	 			"error" => 1,
 	 			"message" => $e->getMessage()
@@ -366,7 +366,7 @@ class MasaDBController extends Abstraction\MasaController
         $queryParams = $request->getQueryParams();
 
         $generic_model = new Generic(
-            // \Models\Interfaces\FileSystemInterface 
+            // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -399,7 +399,7 @@ class MasaDBController extends Abstraction\MasaController
             $result = $generic_model->delete($args['id']);
 
         } catch (\Exception $e) {
-            
+
             $return_message = [
                 "error" => 1,
                 "message" => $e->getMessage()
@@ -424,8 +424,8 @@ class MasaDBController extends Abstraction\MasaController
 
 	/**
 	 * This method is used to create a version after each change.
-     * 
-     * Description: It is necessary because the "git add" and 
+     *
+     * Description: It is necessary because the "git add" and
      *              "git commit" are expensive once the database
      *              grows bigger.
 	 */
@@ -438,7 +438,7 @@ class MasaDBController extends Abstraction\MasaController
         $filesystem = new Filesystem($adapter);
 
         $generic_model = new Generic(
-            // \Models\Interfaces\FileSystemInterface 
+            // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
@@ -475,7 +475,7 @@ class MasaDBController extends Abstraction\MasaController
 
     /**
      * This method is to update a cache of a specific database
-     * 
+     *
      * @internal It comes from @save on the Generic Model
      */
     public function updateCacheAsync(ServerRequestInterface $request, ResponseInterface $response, array $args){
@@ -485,9 +485,9 @@ class MasaDBController extends Abstraction\MasaController
 
         $adapter = new Local( __DIR__."/../" );
         $filesystem = new Filesystem($adapter);
-        
+
         $generic_model = new Generic(
-            // \Models\Interfaces\FileSystemInterface 
+            // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
             // \Models\Interfaces\GitInterface
             new GitBasic,
