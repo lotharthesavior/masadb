@@ -17,3 +17,4 @@ supervisord.log
 supervisord.pid
 .idea
 certs/*
+logs

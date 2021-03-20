@@ -43,7 +43,7 @@ class ClientRepository implements ClientRepositoryInterface
         $client_model = new Clients(
             new FileSystemBasic, // FileSystemInterface
             new GitBasic,        // GitInterface
-            new BagBasic         // BagInterface
+            new BagBasic,        // BagInterface
             []
         );
 

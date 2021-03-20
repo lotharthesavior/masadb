@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use \Models\Abstraction\GitDAO;
 use \Psr\Http\Message\StreamInterface;
 
-trait commonController
+trait CommonController
 {
 
     /**

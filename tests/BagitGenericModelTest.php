@@ -1,8 +1,5 @@
 <?php
 
-// require __DIR__ . "/../vendor/autoload.php";
-// include_once __DIR__ . "/fakes/helpers-bagit.php";
-
 require __DIR__ . "/autoload.php";
 
 use PHPUnit\Framework\TestCase;

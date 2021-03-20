@@ -2,26 +2,26 @@
 
 namespace Controllers;
 
-use \DateInterval;
-use \Exception;
+use DateInterval;
+use Exception;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-use \Models\Repositories;
-use \Models\Generic;
-use \Models\OAuth2\Clients;
-use \Models\Users;
+use Models\Repositories;
+use Models\Generic;
+use Models\OAuth2\Clients;
+use Models\Users;
 
 use League\OAuth2\Server\AuthorizationServer;
-use \League\OAuth2\Server\CryptKey;
-use \League\OAuth2\Server\Grant\ClientCredentialsGrant;
-use \League\OAuth2\Server\Exception\OAuthServerException;
-use \Zend\Diactoros\Stream;
+use League\OAuth2\Server\CryptKey;
+use League\OAuth2\Server\Grant\ClientCredentialsGrant;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use Zend\Diactoros\Stream;
 
-use \Repositories\ClientRepository;
-use \Repositories\AccessTokenRepository;
-use \Repositories\ScopeRepository;
+use Repositories\ClientRepository;
+use Repositories\AccessTokenRepository;
+use Repositories\ScopeRepository;
 
 class OAuthController
 {

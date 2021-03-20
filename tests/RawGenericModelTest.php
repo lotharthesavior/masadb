@@ -1,8 +1,5 @@
 <?php
 
-// require __DIR__ . "/../vendor/autoload.php";
-// include_once __DIR__ . "/fakes/helpers-raw.php";
-
 $raw_files = true;
 require __DIR__ . "/autoload.php";
 
