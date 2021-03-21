@@ -6,66 +6,60 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
-
 use League\OAuth2\Server\Entities\ClientEntityInterface;
-
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 
-use \Models\OAuth2\AccessToken;
+use Models\OAuth2\AccessToken;
+use Models\Interfaces\FileSystemInterface;
+use Models\Interfaces\GitInterface;
+use Models\FileSystem\FileSystemBasic;
+use Models\Git\GitBasic;
+use Models\Interfaces\BagInterface;
+use Models\Bag\BagBasic;
 
 class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
-
-    /**
-     *
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Create a new access token
      *
      * @param ClientEntityInterface $clientEntity
-     * @param ScopeEntityInterface[] $scopes
+     * @param array $scopes ScopeEntityInterface[]
      * @param mixed $userIdentifier
      *
      * @return AccessTokenEntityInterface
      */
-    public function getNewToken(ClientEntityInterface $clientEntity, array $scopes, $userIdentifier = null)
+    public function getNewToken(
+        ClientEntityInterface $clientEntity,
+        array $scopes,
+        $userIdentifier = null
+    ): AccessTokenEntityInterface
     {
         $access_token_model = new AccessToken(
-        // \Models\Interfaces\FileSystemInterface
-            new \Models\FileSystem\FileSystemBasic,
-            // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
-            // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new FileSystemBasic, // FileSystemInterface
+            new GitBasic,        // GitInterface
+            new BagBasic         // BagInterface
         );
 
         return $access_token_model;
-
     }
 
     /**
      * Persists a new access token to permanent storage.
      *
-     * @param AccessTokenEntityInterface $accessTokenEntity
      * @todo persist the elements present
+     *
+     * @param AccessTokenEntityInterface $accessTokenEntity
+     *
+     * @return void
      */
-    public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity)
+    public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity): void
     {
         $access_token_model = new AccessToken(
-        // \Models\Interfaces\FileSystemInterface
-            new \Models\FileSystem\FileSystemBasic,
-            // \Models\Interfaces\GitInterface
-            new \Models\Git\GitBasic,
-            // \Models\Interfaces\BagInterface
-            new \Models\Bag\BagBasic
+            new FileSystemBasic, // FileSystemInterface
+            new GitBasic,        // GitInterface
+            new BagBasic         // BagInterface
         );
 
-        // $result = $access_token_model->save([
         $access_token_model->save([
             'id' => null,
             'content' => [
@@ -99,7 +93,8 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function revokeAccessToken($tokenId)
     {
-
+        $accessToken = new AccessToken;
+        $result = $accessToken->search('identifier', $tokenId);
     }
 
     /**

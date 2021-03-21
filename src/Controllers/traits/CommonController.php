@@ -2,10 +2,13 @@
 
 namespace Controllers\traits;
 
+use Exception;
+
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use \Models\Abstraction\GitDAO;
-use \Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\StreamInterface;
+
+use Models\Abstraction\GitDAO;
 
 trait CommonController
 {
@@ -21,8 +24,9 @@ trait CommonController
      *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
-     * @param Array $args
-     * @param \Models\Abstraction\GitDAO $model
+     * @param array $args
+     * @param GitDAO $model
+     *
      * @return string {"error": 1, "errorMessage": string}
      *                || {"success": 1, "successMessage": {inserted_id}}
      */
@@ -43,6 +47,7 @@ trait CommonController
 
         // Model iteration.
         try {
+
             $client_data = [
                 "id" => $id,
                 "content" => $request_body,
@@ -52,25 +57,33 @@ trait CommonController
                 "success" => 1,
                 "successMessage" => $message
             ];
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
+
             $result = [
                 "error" => 1,
                 "errorMessage" => $e->getMessage()
             ];
+
         }
 
         return json_encode($result);
     }
 
     /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param array $args
+     * @param GitDAO $model
      *
+     * @return ResponseInterface
      */
     protected function deleteRecord(
         ServerRequestInterface $request,
         ResponseInterface $response,
         array $args,
         GitDAO $model
-    )
+    ): ResponseInterface
     {
 
         try {
@@ -82,7 +95,7 @@ trait CommonController
                 "successMessage" => $message
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
             $result = [
                 "error" => 1,
@@ -100,11 +113,12 @@ trait CommonController
     /**
      * Organinize unlimited params with the Slimframework Router
      *
-     * @param String $params
+     * @param string $params
+     *
+     * @return array
      */
-    protected function processUnlimitedParams($params)
+    protected function processUnlimitedParams(string $params): array
     {
-
         $param = [];
         $values = [];
 
@@ -123,19 +137,18 @@ trait CommonController
             'field' => $param,
             'value' => $values
         ];
-
     }
 
     /**
      * @param ServerRequestInterface $request
      *
-     * @return mixed
+     * @return array
      */
-    private function getBodyFromRequest(ServerRequestInterface $request)
+    private function getBodyFromRequest(ServerRequestInterface $request): array
     {
         $request_body = $request->getParsedBody();
 
-        // try once more
+        // Try once more.
         if (is_null($request_body)) {
             /* @var StreamInterface */
             $body = $request->getBody();
@@ -143,7 +156,7 @@ trait CommonController
             $request_body = json_decode($body->read($body->getSize()), true);
         }
 
-        return $request_body;
+        return (array) $request_body;
     }
 
 }

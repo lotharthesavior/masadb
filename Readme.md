@@ -4,6 +4,8 @@ MasaDB is a small app with the intent to manage files with native Git version co
 
 The data here is kept in plain-text format within files. Tables in MasaDB are Git Repositories, and can be easily shared like such.
 
+
+
 ### Dependencies
 
 ##### PHP Framework
@@ -21,6 +23,8 @@ Reference: https://oauth2.thephpleague.com/
 ##### Flysystem (filesystem library)
 
 Reference: https://flysystem.thephpleague.com/
+
+
 
 ### Clients Credential Workflow
 
@@ -152,6 +156,8 @@ composer install
 
 Is possible to use different configuration items accoridng to environment. for that, set the `env` of the config file to develop, as an example, and create a file named `config.json-develop` with the same items of the `config.json`, but with the settings for that environment. The ones present there will overwrite the original ones at the `config.json` file when that file points to that env.
 
+
+
 ### Docker
 
 An image can be prepared with this command:
@@ -166,7 +172,9 @@ To run after that, run this:
 docker run -p 443:443 {image-id}
 ```
 
-#### Parameters to customize:
+
+
+### Parameters to customize
 
 ENVIRONMENT_NAME
 
@@ -178,4 +186,56 @@ Defines the usage of raw files, and can be either true or false.
 
 Raw files instead of [Bagit](http://www.digitalpreservation.gov/multimedia/videos/bagit0609.html) files. the raw files are useful for "normal" repos. the other side of it are records kept with the Bagit format intending to long term preservation.
 
+
+
+### Data Structure
+
+The Authorization is based on OAuth2 server. That said, every connection has a Client Id. Every single record is based on an User. The data structure is basically this:
+
+```
+data/
+| - client_{id}
+    | - {database}
+        | - {record-identifier}
+        | - {record-identifier}
+| - client_{id}
+    | - {database}
+        | - {record-identifier}
+...
+```
+
+
+
+### PsyShell
+
+You can access the context of your MasaDB via shell by running the following command at the server where it is running:
+
+```shell
+php index.php --shell
+```
+
+
+
+#### Useful commands
+
+- Model Usage
+
+To access data stored, this might be the way via code:
+
+```php
+// Step 1: This will instantiate the Generic Model, with it, you'll have access to any record.
+$generic = $container->get('Generic');
+
+// Step 2: Set Client
+$generic->setClientId(1);
+
+// Step 3: Set Database
+$generic->setDatabase('testdb');
+
+// Step 4: Search Record by Identifier
+$generic->find('test.md');
+
+// Step 5: Search Record by field
+$generic->search('content', 'searched value'); // "content" is the only field available for raw data, json data can have any field in schema.
+```
 

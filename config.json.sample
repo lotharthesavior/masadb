@@ -10,6 +10,7 @@
     "cert": "/var/www/html/certs/masadb.csr",
     "private_key": "/var/www/html/certs/masadb.key",
     "public_key": "/var/www/html/certs/masadb.pub",
+    "ssl_allow_self_signed": true,
     "timezone": "America/Edmonton",
     "swoole": true,
     "raw_files": true

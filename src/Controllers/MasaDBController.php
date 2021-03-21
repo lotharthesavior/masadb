@@ -43,9 +43,9 @@ class MasaDBController extends Abstraction\MasaController
     /**
      * Start the controller instantiating the Slim Container
      *
-     * @param ContainerInterface $container
      * @todo move this to a controller parent class
      *
+     * @param ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
     {
@@ -80,7 +80,7 @@ class MasaDBController extends Abstraction\MasaController
      * @param ResponseInterface $response
      * @param array $args
      *
-     * ResponseInterface
+     * @return ResponseInterface
      */
     public function getGeneric(
         ServerRequestInterface $request,
@@ -136,11 +136,7 @@ class MasaDBController extends Abstraction\MasaController
     {
         $logic = [];
 
-        $generic_model = new Generic(
-            new FileSystemBasic, // FileSystemInterface
-            new GitBasic,        // GitInterface
-            new BagBasic         // BagInterface
-        );
+        $generic_model = $this->container->get('Generic');
 
         // This part is to be improved, right now the simple
         // presence will change all comparisons to OR.
@@ -210,11 +206,7 @@ class MasaDBController extends Abstraction\MasaController
     {
         $logic = [];
 
-        $generic_model = new Generic(
-            new FileSystemBasic, // FileSystemInterface
-            new GitBasic,        // GitInterface
-            new BagBasic         // BagInterface
-        );
+        $generic_model = $this->container->get('Generic');
 
         // This part is to be improved, right now the simple
         // presence will change all comparisons to OR.
@@ -288,11 +280,7 @@ class MasaDBController extends Abstraction\MasaController
         array $args
     ): ResponseInterface
     {
-        $generic_model = new Generic(
-            new FileSystemBasic, // FileSystemInterface
-            new GitBasic,        // GitInterface
-            new BagBasic         // BagInterface
-        );
+        $generic_model = $this->container->get('Generic');
 
         $current_client_id = $request->getHeader("ClientId");
         if (!empty($request->getHeader("CurrentClientId"))) {
@@ -354,11 +342,7 @@ class MasaDBController extends Abstraction\MasaController
      */
     public function deleteGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $generic_model = new Generic(
-            new FileSystemBasic, // FileSystemInterface
-            new GitBasic,        // GitInterface
-            new BagBasic         // BagInterface
-        );
+        $generic_model = $this->container->get('Generic');
 
         $current_client_id = $request->getHeader("ClientId");
         if (!empty($request->getHeader("CurrentClientId"))) {
@@ -438,11 +422,7 @@ class MasaDBController extends Abstraction\MasaController
         /** @var array $queryParams */
         $queryParams = $request->getQueryParams();
 
-        $generic_model = new Generic(
-            new FileSystemBasic, // FileSystemInterface
-            new GitBasic,        // GitInterface
-            new BagBasic         // BagInterface
-        );
+        $generic_model = $this->container->get('Generic');
 
         $current_client_id = $request->getHeader("ClientId");
         if (!empty($request->getHeader("CurrentClientId"))) {

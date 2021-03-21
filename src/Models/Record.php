@@ -248,17 +248,20 @@ class Record implements \JsonSerializable
     }
 
     /**
+     * @param string $param
+     * @param string $value
      *
+     * @return bool
      */
-    public function stringMatch($param, $value)
+    public function stringMatch(string $param, string $value)
     {
         if ($this->case_sensitive) {
             $match_string = strstr($param, $value) !== false;
         } else {
-            $match_string = strstr(strtolower($param), strtolower($value)) !== false;
+            $match_string = strstr(strtolower($value), strtolower($param)) !== false;
         }
 
-        return isset($param) && $match_string;
+        return $match_string;
     }
 
     /**

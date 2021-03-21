@@ -29,7 +29,8 @@ class HomeController extends Abstraction\MasaController
      */
     public function home(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $response->getBody()->write("MasaDB");
+        $response->getBody()->write("MasaDB");
+        return $response;
     }
 
 }

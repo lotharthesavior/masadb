@@ -18,7 +18,8 @@
     "pachico/slim-swoole": "^0.3.0",
     "league/plates": "^3.3",
     "monolog/monolog": "^2.2",
-    "ext-json": "*"
+    "ext-json": "*",
+    "psy/psysh": "@stable"
   },
   "autoload": {
     "psr-4": {

@@ -105,11 +105,8 @@ final class RawGenericModelTest extends TestCase
         $database = "test";
 
         $this->generic = new Generic(
-        // \Models\Interfaces\FileSystemInterface
             new FileSystemBasic,
-            // \Models\Interfaces\GitInterface
             new GitBasic,
-            // \Models\Interfaces\BagInterface
             new BagBasic
         );
 
@@ -153,30 +150,6 @@ final class RawGenericModelTest extends TestCase
 
         return $list;
     }
-
-    /**
-     * @afterClass
-     */
-    // public static function tearDownTestData(){
-    //     $generic = new \Models\Generic(
-    //         // \Models\Interfaces\FileSystemInterface
-    //         new \Models\FileSystem\FileSystemBasic,
-    //         // \Models\Interfaces\GitInterface
-    //         new \Models\Git\GitBasic,
-    //         // \Models\Interfaces\BagInterface
-    //         new \Models\Bag\BagBasic
-    //     );
-
-    //     $generic->setClientId("1");
-
-    //     $generic->setDatabase("test");
-
-    //     $results = $generic->search("title", "Lorem Ipsum");
-
-    //     foreach ($results as $key => $record) {
-    //         $generic->delete( $record->getId() );
-    //     }
-    // }
 
     public function testSetDatabase()
     {

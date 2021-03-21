@@ -1,34 +1,51 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
-use Slim\Http;
+use Psy\Configuration;
+use Slim\App;
+use Psy\Shell;
 
 global $app, $config;
 
-include_once __DIR__ . "/src/constants.php";
-include_once __DIR__ .  "/src/helpers.php";
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'constants.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'helpers.php';
 
-(require __DIR__ . '/src/system_checks/config.php')();
+(
+    require __DIR__
+        . DIRECTORY_SEPARATOR. 'src'
+        . DIRECTORY_SEPARATOR . 'system_checks'
+        . DIRECTORY_SEPARATOR . 'config.php'
+)();
 
 $config = config();
 
-(require __DIR__ . '/src/system_checks/settings.php')();
+(
+    require __DIR__
+        . DIRECTORY_SEPARATOR . 'src'
+        . DIRECTORY_SEPARATOR . 'system_checks'
+        . DIRECTORY_SEPARATOR . 'settings.php'
+)();
 
-include_once __DIR__ . "/src/oauth2.php";
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'oauth2.php';
 
-$app = new \Slim\App($config);
+$app = new App($config);
 
 $container = $app->getContainer();
 
-include_once __DIR__ . "/src/middlewares.php";
-include_once __DIR__ . "/src/controllers.php";
-include_once __DIR__ . "/routes.php";
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'controllers.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'models.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . "routes.php";
 
 date_default_timezone_set($config['settings']['timezone']);
 
-if ($config['settings']['swoole']) {
+$is_shell = in_array('--shell', $argv);
+
+if (!$is_shell && $config['settings']['swoole']) {
     start_server($config);
+} else if ($is_shell) {
+    $shell = new Shell();
+    $shell->setScopeVariables(get_defined_vars());
+    $shell->run();
 }
+
