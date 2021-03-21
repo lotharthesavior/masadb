@@ -1,8 +1,21 @@
+![MasaDB Logo](./public/img/masadb.png)
+
 # MasaDB
 
 MasaDB is a small app with the intent to manage files with native Git version control via a Restful API. It comes with an OAuth2 Server structure for Authorization. It allows the system to, not just protect the data, but also to allow Authorization to other apps with MasaDB's existent user.
 
 The data here is kept in plain-text format within files. Tables in MasaDB are Git Repositories, and can be easily shared like such.
+
+
+
+### TOC
+
+- [Dependencies](#dependencies)
+- [Oauth2 Clients Credential Workflow](#clients-credential-workflow)
+- [Docker](#docker)
+- [Parameters to Customize](#parameters-to-customize)
+- [Data Structure](#data-structure)
+- [Psyshell](#psyshell)
 
 
 
