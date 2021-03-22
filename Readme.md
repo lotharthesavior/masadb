@@ -21,7 +21,7 @@ The data here is kept in plain-text format within files. Tables in MasaDB are Gi
 
 ### Dependencies
 
-**Swoole Extension**
+##### Swoole Extension
 
 Reference: https://www.swoole.co.uk/
 
