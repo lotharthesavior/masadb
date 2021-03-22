@@ -4,11 +4,7 @@ namespace Repositories;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\UserEntityInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
-
 use Models\OAuth2\User;
 use Repositories\Abstraction\AbstractRepository;
 

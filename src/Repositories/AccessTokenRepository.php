@@ -2,21 +2,10 @@
 
 namespace Repositories;
 
-use Models\Generic;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
-
 use Models\OAuth2\AccessToken;
-use Models\Interfaces\FileSystemInterface;
-use Models\Interfaces\GitInterface;
-use Models\FileSystem\FileSystemBasic;
-use Models\Git\GitBasic;
-use Models\Interfaces\BagInterface;
-use Models\Bag\BagBasic;
 use Repositories\Abstraction\AbstractRepository;
 
 class AccessTokenRepository extends AbstractRepository implements AccessTokenRepositoryInterface

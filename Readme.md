@@ -21,6 +21,10 @@ The data here is kept in plain-text format within files. Tables in MasaDB are Gi
 
 ### Dependencies
 
+**Swoole Extension**
+
+Reference: https://www.swoole.co.uk/
+
 ##### PHP Framework
 
 Reference: http://slimframework.com/
