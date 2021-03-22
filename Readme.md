@@ -233,7 +233,7 @@ php index.php --shell
 
 - Model Usage
 
-To access data stored, this might be the way via code:
+To access data stored, first you need to prepare the Generic model object:
 
 ```php
 // Step 1: This will instantiate the Generic Model, with it, you'll have access to any record.
@@ -244,11 +244,42 @@ $generic->setClientId(1);
 
 // Step 3: Set Database
 $generic->setDatabase('testdb');
+```
 
-// Step 4: Search Record by Identifier
-$generic->find('test.md');
+Other Models might have data such as the `$database` property already set.
 
-// Step 5: Search Record by field
+
+
+With the `Generic` model prepared, you can proceed with the basic data procedures:
+
+**Search/Find**
+
+```php
+// Find
+$generic->find('test.md'); // raw data type
+$generic->find('1'); // json data type, it can also be "1.json"
+
+// Search: raw data type
 $generic->search('content', 'searched value'); // "content" is the only field available for raw data, json data can have any field in schema.
+
+// Search: json data type
+$generic->setJsonStructure(true); // this makes it possible to search by the fields in the schema
+$generic->search('title', 'my title'); // searching by schema fields
+```
+
+**Create/Update**
+
+```php
+$generic->save([
+    "id" => 1, // or "1.json" (raw data type has to be with the file extension)
+    "content" => "data", // JSON format for json data type, any for raw data
+]);
+```
+
+**Delete**
+
+```php
+$generic->delete('test.md'); // Raw data type
+$generic->delete('1'); // Json data type, it can also be 1.json
 ```
 

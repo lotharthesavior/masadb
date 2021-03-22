@@ -15,18 +15,10 @@ use League\OAuth2\Server\Entities\Traits\ClientTrait;
 use Models\Interfaces\FileSystemInterface;
 use Models\Interfaces\GitInterface;
 use Models\Interfaces\BagInterface;
-use Models\Abstraction\GitDAO;
+use Models\Abstraction\GitDAO as AbstractGitDAO;
 use Models\Traits\GitWorkflow;
 
-/**
- * Format of data:
- * {
- *     "name": string,
- *     "user_id": integer,
- *     "redirect_uri": string
- * }
- */
-class Clients extends GitDAO implements ClientEntityInterface
+class User extends AbstractGitDAO implements ClientEntityInterface
 {
 
     use EntityTrait;
@@ -34,7 +26,7 @@ class Clients extends GitDAO implements ClientEntityInterface
 
     use GitWorkflow;
 
-    protected $database = "oauth/clients";
+    protected $database = "oauth/users";
 
     protected $repo;
 
@@ -59,8 +51,7 @@ class Clients extends GitDAO implements ClientEntityInterface
     /**
      * @param int|string $id
      *
-     * @return $this
-     *
+     * @return $this|array
      * @throws Exception
      */
     public function find($id)

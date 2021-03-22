@@ -2,8 +2,6 @@
 
 namespace Models\OAuth2;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Models\Abstraction\GitDAO;
 
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
@@ -20,7 +18,6 @@ use Models\Interfaces\BagInterface;
 
 class AccessToken extends GitDAO implements AccessTokenEntityInterface
 {
-
     use AccessTokenTrait, EntityTrait, TokenEntityTrait, GitWorkflow;
 
     protected $repo;
@@ -36,14 +33,17 @@ class AccessToken extends GitDAO implements AccessTokenEntityInterface
     {
         parent::__construct($filesystem, $git, $bag);
 
-        // this is necessary to acomplish with specific
-        // models what is being done on the generic
-        if (isset($this->git))
-            $this->git->setRepo($this->config['database-address'] . '/' . $this->database);
+        // This is necessary to accomplish with specific
+        // models what is being done on the generic.
+        if (isset($this->git)) {
+            $this->git->setRepo($this->config['database-address'] . DIRECTORY_SEPARATOR . $this->database);
+        }
+
+        $this->setJsonStructure(true);
     }
 
     /**
-     * We will never keep cache for this db
+     * We will never keep cache for this db.
      */
     protected function resolveCacheCondition()
     {

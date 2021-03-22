@@ -2,17 +2,11 @@
 
 namespace Models\Traits;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Promise;
-use GuzzleHttp\Psr7\Request;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Exception\RequestException;
+use Exception;
 
 /**
  * The purpose of this code is to organize the Workflow tasks
  * of Git in the Data Storage.
- *
- * @author Savio Resende <savio@savioresende.com.br>
  */
 trait GitWorkflow
 {
@@ -21,13 +15,14 @@ trait GitWorkflow
      */
     protected function checkGitUser()
     {
-        // TODO: get from config
-        $this->git->setGitConfig('user.email', 'savio@savioresende.com.br');
-        $this->git->setGitConfig('user.name', 'Savio Resende');
+        global $config;
+
+        $this->git->setGitConfig('user.email', $config['git_user_email']);
+        $this->git->setGitConfig('user.name', $config['git_user_name']);
         $user_email = $this->git->getGitConfig('user.email');
 
         if (empty($user_email)) {
-            throw new \Exception('User not set for Git environment.');
+            throw new Exception('User not set for Git environment.');
         }
     }
 
@@ -53,6 +48,7 @@ trait GitWorkflow
 
         $this->git->placeMetadata($this->database, $filesystem);
 
+        // TODO: set this when cache solved.
         // $this->updateCache();
 
         return $result_stage && $result_commit;

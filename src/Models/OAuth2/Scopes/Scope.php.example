@@ -1,4 +1,7 @@
-<?php
+<?phpuse Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+
 
 namespace Models\OAuth2\Scopes;
 
@@ -13,7 +16,7 @@ class Scope implements ScopeEntityInterface
 {
 
     /**
-	 * 
+	 *
 	 */
 	public function __construct(){
 
@@ -25,7 +28,7 @@ class Scope implements ScopeEntityInterface
      * @return string
      */
     public function getIdentifier(){
-        
+
     }
 
     /**
@@ -35,7 +38,7 @@ class Scope implements ScopeEntityInterface
      */
     public function jsonSerialize()
     {
-        
+
     }
 
 }

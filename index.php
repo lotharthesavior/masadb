@@ -27,14 +27,14 @@ $config = config();
         . DIRECTORY_SEPARATOR . 'settings.php'
 )();
 
-include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'oauth2.php';
-
 $app = new App($config);
 
 $container = $app->getContainer();
 
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'oauth2.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'controllers.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'models.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'repositories.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . "routes.php";
 
 date_default_timezone_set($config['settings']['timezone']);

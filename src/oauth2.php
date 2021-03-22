@@ -3,7 +3,7 @@
 if ($config['settings']['env'] === APP_ENV_PROD) {
 
     // Init our repositories
-    $accessTokenRepository = new \Repositories\AccessTokenRepository(); // instance of AccessTokenRepositoryInterface
+    $accessTokenRepository = new \Repositories\AccessTokenRepository($container); // instance of AccessTokenRepositoryInterface
 
     // Path to authorization server's public key
     $publicKey = $config['settings']['public_key'];

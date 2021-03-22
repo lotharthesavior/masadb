@@ -26,6 +26,9 @@ abstract class GitDAO implements GitDAOInterface
     /** @var bool */
     protected $no_cache = true;
 
+    /** @var bool */
+    protected $jsonStructure = false;
+
     /**
      * @param FileSystemInterface $filesystem
      * @param GitInterface $git
@@ -65,7 +68,7 @@ abstract class GitDAO implements GitDAOInterface
      *
      * @param int|string $id
      *
-     * @return array
+     * @return string
      */
     public function find($id)
     {
@@ -106,9 +109,9 @@ abstract class GitDAO implements GitDAOInterface
     }
 
     /**
-     * @return Deque
      * @todo store cache in a async request
      *
+     * @return Deque
      */
     private function getAllRecords(): Deque
     {
@@ -118,18 +121,20 @@ abstract class GitDAO implements GitDAOInterface
     /**
      * Execute the Full Search on Git and store cache
      *
-     * @return Deque
      * @internal used to search when there is no cache
-     *
      * @internal used to update cache
+     *
+     * @return Deque
      */
     public function getGitData(): Deque
     {
+        $this->git->setDataObject(get_called_class());
+
         $results = $this->git->lsTreeHead(
             '.',
             $this->filesystem,
             $this->isBag(),
-            $this->config['database-address'] . "/" . $this->_getDatabaseLocation()
+            $this->config['database-address'] . DIRECTORY_SEPARATOR . $this->_getDatabaseLocation()
         );
 
         $results->sort(function ($a, $b) {
@@ -142,13 +147,13 @@ abstract class GitDAO implements GitDAOInterface
     /**
      * Search for a single param
      *
+     * @internal Any param with field name 'logic', will be considered
+     *           logic condition for the search
+     *
      * @param string $param
      * @param string $value
      *
      * @return Deque
-     * @internal Any param with field name 'logic', will be considered
-     *           logic condition for the search
-     *
      */
     public function search(string $param, string $value): Deque
     {
@@ -156,12 +161,20 @@ abstract class GitDAO implements GitDAOInterface
         $result_complete = $this->getAllRecords();
 
         $result_complete = $result_complete->filter(function ($record) use ($param, $value) {
-            if ($param !== 'id' && $this->isBag()) {
+            if ($param !== 'id' && $this->isBag() && $this->isJsonStructure()) {
                 return $record->multipleParamsMatch([$param => $value]);
             }
 
-            if ($param !== 'id' && !$this->isBag()) {
-                return $record->titleContentMatch([$param => $value]);
+            if ($param !== 'id' && !$this->isBag() && !$this->isJsonStructure()) {
+                try {
+                    return $record->titleContentMatch([$param => $value]);
+                } catch (Exception $e) {
+                    return false;
+                }
+            }
+
+            if ($param !== 'id' && !$this->isBag() && $this->isJsonStructure()) {
+                return $record->valueEqual($param, $value);
             }
 
             if ($param === 'id' && $record->valueEqual($param, $value)) {
@@ -192,7 +205,12 @@ abstract class GitDAO implements GitDAOInterface
             if ($extension === 'json') {
                 return $record->multipleParamsMatch($search_params, $logic);
             }
-            return $record->titleContentMatch($search_params);
+
+            try {
+                return $record->titleContentMatch($search_params);
+            } catch (Exception $e) {
+                return false;
+            }
         });
 
         $result_complete->sort(function ($a, $b) {
@@ -327,14 +345,6 @@ abstract class GitDAO implements GitDAOInterface
     }
 
     /**
-     * @return bool
-     */
-    public function stageAndCommitAll(): bool
-    {
-        return $this->saveVersion();
-    }
-
-    /**
      * @param int|string $id
      *
      * @return bool
@@ -357,7 +367,7 @@ abstract class GitDAO implements GitDAOInterface
 
         } elseif ($filesystem->has($id)) {
 
-            $type = $this->filesystem->getType($database_url . '/' . $id);
+            $type = $this->filesystem->getType($database_url . DIRECTORY_SEPARATOR . $id);
 
             if ($type === 'file') {
                 $filesystem->delete($id);
@@ -464,7 +474,7 @@ abstract class GitDAO implements GitDAOInterface
             '.',
             $this->filesystem,
             $this->isBag(),
-            $this->config['database-address'] . "/" . $this->_getDatabaseLocation()
+            $this->config['database-address'] . DIRECTORY_SEPARATOR . $this->_getDatabaseLocation()
         );
 
         if ($ls_tree_result->count() < 1)
@@ -486,7 +496,7 @@ abstract class GitDAO implements GitDAOInterface
      */
     protected function _nextIdFilesystem()
     {
-        $database = $this->config['database-address'] . "/" . $this->_getDatabaseLocation();
+        $database = $this->config['database-address'] . DIRECTORY_SEPARATOR . $this->_getDatabaseLocation();
 
         $records = new Deque(scandir($database));
 
@@ -519,7 +529,7 @@ abstract class GitDAO implements GitDAOInterface
         $database_location = "";
 
         if (isset($this->client_id) && !empty($this->client_id)) {
-            $database_location .= "client_" . $this->client_id[0] . '/';
+            $database_location .= "client_" . $this->client_id[0] . DIRECTORY_SEPARATOR;
         }
 
         $database_location .= $this->database;
@@ -532,7 +542,7 @@ abstract class GitDAO implements GitDAOInterface
      */
     protected function _getDatabaseFullPathLocation(): string
     {
-        return $this->config['database-address'] . '/' . $this->_getDatabaseLocation();
+        return $this->config['database-address'] . DIRECTORY_SEPARATOR . $this->_getDatabaseLocation();
     }
 
     /**
@@ -571,4 +581,21 @@ abstract class GitDAO implements GitDAOInterface
         return $collection;
     }
 
+    /**
+     * @param bool $value
+     *
+     * @return void
+     */
+    public function setJsonStructure(bool $value = true): void
+    {
+        $this->jsonStructure = true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isJsonStructure(): bool
+    {
+        return $this->jsonStructure;
+    }
 }

@@ -26,6 +26,9 @@ class GitBasic implements GitInterface
     /** @var Console */
     protected $console;
 
+    /** @var string */
+    protected $recordType;
+
     /**
      * @param Git $repo
      */
@@ -140,6 +143,7 @@ class GitBasic implements GitInterface
             $new_record = new Record;
             $new_record->loadRowStructure2($records_row, $is_db);
             $new_record = $filesystem->getFileContent($new_record, $is_bag, $database_address);
+            $new_record->setType($this->recordType);
             return $new_record;
         });
 
@@ -409,5 +413,17 @@ class GitBasic implements GitInterface
         $result = $this->console->runCommand(Git::getBin() . $command);
 
         return $result;
+    }
+
+    /**
+     * Sets the record type in the returning collection.
+     *
+     * @param string $class
+     *
+     * @return void
+     */
+    public function setDataObject(string $class): void
+    {
+        $this->recordType = $class;
     }
 }

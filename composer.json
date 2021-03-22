@@ -5,6 +5,7 @@
       "type": "vcs"
     }
   ],
+  ],
   "require": {
     "zendframework/zend-diactoros": "^1.3",
     "league/flysystem": "^1.0",

@@ -2,24 +2,13 @@
 
 namespace Repositories;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-
+use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
+use Models\OAuth2\AuthCode;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
+use Repositories\Abstraction\AbstractRepository;
 
-use \Models\OAuth2\AuthCodeEntityInterface;
-
-class AuthCodeRepository implements AuthCodeRepositoryInterface
+class AuthCodeRepository extends AbstractRepository implements AuthCodeRepositoryInterface
 {
-
-    /**
-     *
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Creates a new AuthCode
      *
@@ -27,11 +16,10 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
      */
     public function getNewAuthCode()
     {
-
-        $auth_code_model = new AuthCode;
+        /** @var AuthCode $access_token_model */
+        $auth_code_model = $this->container->get(AuthCode::class);
 
         return $auth_code_model;
-
     }
 
     /**

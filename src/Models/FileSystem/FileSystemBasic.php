@@ -2,8 +2,6 @@
 
 /**
  * FileSyste Basic
- *
- * @author Savio Resende <savio@savioresende.com.br>
  */
 
 namespace Models\FileSystem;

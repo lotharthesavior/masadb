@@ -2,56 +2,56 @@
 
 namespace Repositories;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-
+use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
 use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
+use Models\OAuth2\RefreshToken;
+use Repositories\Abstraction\AbstractRepository;
 
-use \Models\OAuth2\RefreshToken;
-
-class RefreshTokenRepository implements RefreshTokenRepositoryInterface
+class RefreshTokenRepository extends AbstractRepository implements RefreshTokenRepositoryInterface
 {
-
-    /**
-     *
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Creates a new refresh token
      *
      * @return RefreshTokenEntityInterface
      */
-    public function getNewRefreshToken()
+    public function getNewRefreshToken(): RefreshTokenEntityInterface
     {
-
-        $refresh_token_model = new RefreshToken;
+        /** @var RefreshToken $access_token_model */
+        $refresh_token_model = $this->container->get(RefreshToken::class);
 
         return $refresh_token_model;
-
     }
 
     /**
      * Create a new refresh token_name.
      *
-     * @param RefreshTokenEntityInterface $refreshTokenEntity
      * @todo persist the present data
+     *
+     * @param RefreshTokenEntityInterface $refreshTokenEntity
      */
     public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity)
     {
+        /** @var RefreshToken $access_token_model */
+        $refresh_token_model = $this->container->get(RefreshToken::class);
 
-        // string this is randomly generated unique identifier (of 80+ characters in length) for the refresh token.
-        // $refreshTokenEntity->getIdentifier();
+        $refresh_token_model->save([
+            'id' => null,
+            'content' => [
+                'address' => null,
+                'content' => json_encode([
 
-        // \DateTime the expiry date and time of the access token.
-        // $refreshTokenEntity->getExpiryDateTime();
+                    // string this is randomly generated unique identifier (of 80+ characters in length) for the access token.
+                    'identifier' => $refreshTokenEntity->getIdentifier(),
 
-        // string the linked access token’s identifier.
-        // $refreshTokenEntity->getAccessToken()->getIdentifier();
+                    // \DateTime the expiry date and time of the access token.
+                    'expiry_date' => $refreshTokenEntity->getExpiryDateTime()->format('Y-m-d H:i:s'),
 
+                    // string|null the access token.
+                    'access_token' => $refreshTokenEntity->getAccessToken(),
+
+                ]),
+            ],
+        ]);
     }
 
     /**

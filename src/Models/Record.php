@@ -2,35 +2,42 @@
 
 namespace Models;
 
-use \Exception;
+use Exception;
+use Models\Abstraction\GitDAO;
+use stdClass;
+use JsonSerializable;
 
 /**
  * Record Object Hashable for Collections of the database
- *
- * @author Savio Resende <savio@savioresende.com.br>
  */
-class Record implements \JsonSerializable
+class Record implements JsonSerializable
 {
-
+    /** @var string|null */
     protected $id;
 
+    /** @var int|null */
     protected $permissions;
 
+    /** @var string|null */
     protected $type;
 
+    /** @var string|null */
     protected $revision_hash;
 
+    /** @var string|null */
     protected $address;
 
+    /** @var stdClass */
     protected $file_content;
 
+    /** @var bool */
     protected $case_sensitive;
 
     public function __construct()
     {
         $config = config()['settings'];
 
-        $this->file_content = new \stdClass;
+        $this->file_content = new stdClass;
         $this->case_sensitive = $config['case_sensitive'];
     }
 
@@ -39,11 +46,19 @@ class Record implements \JsonSerializable
 
     // ############################## getters and setters ##############################
 
-    public function setId($id)
+    /**
+     * @param string $id
+     *
+     * @return void
+     */
+    public function setId(string $id): void
     {
         $this->id = $id;
     }
 
+    /**
+     * @return string|null
+     */
     public function getID()
     {
         return $this->id;
@@ -51,11 +66,19 @@ class Record implements \JsonSerializable
 
     // --
 
-    public function setPermissions($permissions)
+    /**
+     * @param int $permissions
+     *
+     * @return void
+     */
+    public function setPermissions(int $permissions): void
     {
         $this->permissions = $permissions;
     }
 
+    /**
+     * @return int|null
+     */
     public function getPermissions()
     {
         return $this->permissions;
@@ -63,11 +86,19 @@ class Record implements \JsonSerializable
 
     // --
 
-    public function setType($type)
+    /**
+     * @param string $type
+     *
+     * @return void
+     */
+    public function setType(string $type): void
     {
         $this->type = $type;
     }
 
+    /**
+     * @return string|null
+     */
     public function getType()
     {
         return $this->type;
@@ -75,11 +106,19 @@ class Record implements \JsonSerializable
 
     // --
 
-    public function setRevisionHash($revision_hash)
+    /**
+     * @param string $revision_hash
+     *
+     * @return void
+     */
+    public function setRevisionHash(string $revision_hash): void
     {
         $this->revision_hash = $revision_hash;
     }
 
+    /**
+     * @return string|null
+     */
     public function getRevisionHash()
     {
         return $this->revision_hash;
@@ -87,11 +126,19 @@ class Record implements \JsonSerializable
 
     // --
 
-    public function setAddress($address)
+    /**
+     * @param string $address
+     *
+     * @return void
+     */
+    public function setAddress(string $address): void
     {
         $this->address = trim($address);
     }
 
+    /**
+     * @return string|null
+     */
     public function getAddress()
     {
         return $this->address;
@@ -99,33 +146,55 @@ class Record implements \JsonSerializable
 
     // -- file_content --
 
-    public function setFileContent($file_content)
+    /**
+     * @param array $file_content
+     *
+     * @return void
+     */
+    public function setFileContent(array $file_content): void
     {
         foreach ($file_content as $key => $value) {
             $this->file_content->{$key} = $value;
         }
     }
 
-    public function getFileContent()
+    /**
+     * @return stdClass
+     */
+    public function getFileContent(): stdClass
     {
         return $this->file_content;
     }
 
-    public function setFileTimestamp($timestamp)
+    /**
+     * @param string $timestamp
+     */
+    public function setFileTimestamp(string $timestamp): void
     {
         $this->file_content->timestamp = $timestamp;
     }
 
+    /**
+     * @return string|null
+     */
     public function getFileTimestamp()
     {
         return $this->file_content->timestamp;
     }
 
-    public function setFileUpdatedAt($timestamp)
+    /**
+     * @param string $timestamp
+     *
+     * @return void
+     */
+    public function setFileUpdatedAt(string $timestamp): void
     {
         $this->file_content->updated_at = $timestamp;
     }
 
+    /**
+     * @return string|null
+     */
     public function getFileUpdatedAt()
     {
         return $this->file_content->updated_at;
@@ -133,14 +202,10 @@ class Record implements \JsonSerializable
 
     // ############################## getters and setters ##############################
 
-    // TODO: this can be a specific trait for custom toString
-    // public function __toString()
-    // {
-    //  $attribute = $this->string_attribute;
-    //  return $this->{$attribute};
-    // }
-
-    public function jsonSerialize()
+    /**
+     * @return array
+     */
+    public function jsonSerialize(): array
     {
         return [
             'id' => $this->id,
@@ -155,13 +220,13 @@ class Record implements \JsonSerializable
     /**
      * This match is for JSON assets
      *
+     * @todo the OR is not complete
+     * @todo implement the logic (OR, AND, ...)
+     *
      * @param array $params
      * @param array $logic
      *
      * @return bool
-     * @todo the OR is not complete
-     *
-     * @todo implement the logic (OR, AND, ...)
      */
     public function multipleParamsMatch($params, $logic = [])
     {
@@ -217,9 +282,13 @@ class Record implements \JsonSerializable
     }
 
     /**
+     * This is meant for raw data.
+     *
      * @param array $params
      *
      * @return bool
+     *
+     * @throws Exception
      */
     public function titleContentMatch(array $params): bool
     {
@@ -235,7 +304,7 @@ class Record implements \JsonSerializable
             unset($params['address']);
         }
 
-        if (isset($params['content'])) {
+        if (isset($params['content']) && property_exists($this->getFileContent(), 'content')) {
             $match = $match && $this->stringMatch($params['content'], $this->getFileContent()->content);
             unset($params['content']);
         }
@@ -265,11 +334,18 @@ class Record implements \JsonSerializable
     }
 
     /**
+     * @param string $param
+     * @param string $value
      *
+     * @return bool
      */
-    public function valueEqual($param, $value)
+    public function valueEqual(string $param, string $value): bool
     {
-        return $this->file_content->{$param} != $value;
+        if (!property_exists($this->file_content, $param)) {
+            return false;
+        }
+
+        return $this->file_content->{$param} == $value;
     }
 
     /**
@@ -277,10 +353,11 @@ class Record implements \JsonSerializable
      * command).
      *
      * @param string $records_row
-     * @param Bool $is_db
+     * @param bool $is_db
+     *
      * @return $this
      */
-    public function loadRowStructure1($records_row, $is_db)
+    public function loadRowStructure1(string $records_row, bool $is_db)
     {
         $records_row = preg_split('/\s+/', $records_row);
 
@@ -307,7 +384,7 @@ class Record implements \JsonSerializable
      * command).
      *
      * @param string $records_row
-     * @param Bool $is_db
+     * @param bool $is_db
      *
      * @return $this
      */
@@ -333,11 +410,12 @@ class Record implements \JsonSerializable
     /**
      * Load structure for the filesystem search
      *
-     * @param String $full_database_address (directory tree)
-     * @param String $records_row
+     * @param string $full_database_address (directory tree)
+     * @param string $records_row
+     *
      * @return $this
      */
-    public function loadRowStructureSimpleDir($full_database_address, $records_row)
+    public function loadRowStructureSimpleDir(string $full_database_address, string $records_row)
     {
         if (empty($records_row))
             return $this;
@@ -365,30 +443,14 @@ class Record implements \JsonSerializable
     }
 
     /**
-     * Load structure from cache, which is basic Array.
-     *
-     * @param Array $record_row
-     * @return void
-     * @todo to be deleted soon (maybe)
-     */
-    public function loadRecordCacheStructure($record_row)
-    {
-        $this->setId($record_row['id']);
-        $this->setPermissions($record_row['permissions']);
-        $this->setType($record_row['type']);
-        $this->setRevisionHash($record_row['revision_hash']);
-        $this->setAddress($record_row['address']);
-        $this->setFileContent((object)$record_row['file_content']);
-    }
-
-    /**
      * Return the Id of the physical address
      *
-     * @return Int
+     * @param string $address
+     *
+     * @return int|string
      */
-    public function getIdOfAsset($address)
+    public function getIdOfAsset(string $address)
     {
-
         $address_exploded = explode('/', $address);
 
         $asset_name = end($address_exploded);
@@ -396,7 +458,6 @@ class Record implements \JsonSerializable
         $id = preg_replace("/[^\d]/", "", $asset_name);
 
         return $id;
-
     }
 
 }

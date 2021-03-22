@@ -2,24 +2,18 @@
 
 namespace Repositories;
 
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Entities\UserEntityInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
 
-use \Models\OAuth2\User;
+use Models\OAuth2\User;
+use Repositories\Abstraction\AbstractRepository;
 
-class UserRepository implements UserRepositoryInterface
+class UserRepository extends AbstractRepository implements UserRepositoryInterface
 {
-
-    /**
-     *
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Get a user entity.
      *
@@ -29,7 +23,6 @@ class UserRepository implements UserRepositoryInterface
      * @param ClientEntityInterface $clientEntity
      *
      * @return UserEntityInterface
-     * @todo finish this
      *
      */
     public function getUserEntityByUserCredentials(
@@ -39,11 +32,10 @@ class UserRepository implements UserRepositoryInterface
         ClientEntityInterface $clientEntity
     )
     {
-
-        $user_model = new User;
+        /** @var User $access_token_model */
+        $user_model = $this->container->get(User::class);
 
         return $user_model;
-
     }
 
 }

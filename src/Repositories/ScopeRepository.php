@@ -2,28 +2,13 @@
 
 namespace Repositories;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-
+use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
-
 use League\OAuth2\Server\Entities\ClientEntityInterface;
+use Repositories\Abstraction\AbstractRepository;
 
-// scopes
-use \Models\OAuth2\Scopes\Administrator;
-use \Models\OAuth2\Scopes\Basic;
-
-class ScopeRepository implements ScopeRepositoryInterface
+class ScopeRepository extends AbstractRepository implements ScopeRepositoryInterface
 {
-
-    /**
-     *
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Return information about a scope.
      *
@@ -33,13 +18,11 @@ class ScopeRepository implements ScopeRepositoryInterface
      */
     public function getScopeEntityByIdentifier($identifier)
     {
-
         $class = '\\Models\\OAuth2\\Scopes\\' . ucfirst($identifier);
 
         $scope_model = new $class;
 
         return $scope_model;
-
     }
 
     /**
@@ -58,13 +41,9 @@ class ScopeRepository implements ScopeRepositoryInterface
         $grantType,
         ClientEntityInterface $clientEntity,
         $userIdentifier = null
-    )
-    {
-
+    ) {
         // $scope_model = new Scope;
-
         return $scopes;
-
     }
 
 }

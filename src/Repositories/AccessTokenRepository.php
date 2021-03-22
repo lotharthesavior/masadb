@@ -16,8 +16,9 @@ use Models\FileSystem\FileSystemBasic;
 use Models\Git\GitBasic;
 use Models\Interfaces\BagInterface;
 use Models\Bag\BagBasic;
+use Repositories\Abstraction\AbstractRepository;
 
-class AccessTokenRepository implements AccessTokenRepositoryInterface
+class AccessTokenRepository extends AbstractRepository implements AccessTokenRepositoryInterface
 {
     /**
      * Create a new access token
@@ -34,11 +35,8 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
         $userIdentifier = null
     ): AccessTokenEntityInterface
     {
-        $access_token_model = new AccessToken(
-            new FileSystemBasic, // FileSystemInterface
-            new GitBasic,        // GitInterface
-            new BagBasic         // BagInterface
-        );
+        /** @var AccessToken $access_token_model */
+        $access_token_model = $this->container->get(AccessToken::class);
 
         return $access_token_model;
     }
@@ -54,11 +52,8 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity): void
     {
-        $access_token_model = new AccessToken(
-            new FileSystemBasic, // FileSystemInterface
-            new GitBasic,        // GitInterface
-            new BagBasic         // BagInterface
-        );
+        /** @var AccessToken $access_token_model */
+        $access_token_model = $this->container->get(AccessToken::class);
 
         $access_token_model->save([
             'id' => null,
@@ -93,8 +88,10 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function revokeAccessToken($tokenId)
     {
-        $accessToken = new AccessToken;
-        $result = $accessToken->search('identifier', $tokenId);
+        /** @var AccessToken $access_token_model */
+        $access_token = $this->container->get(AccessToken::class);
+
+        $result = $access_token->search('identifier', $tokenId);
     }
 
     /**

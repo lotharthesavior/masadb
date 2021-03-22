@@ -14,8 +14,6 @@ use Models\Traits\BagUtilities;
  * Class for Generic Model.
  *
  * The CRUD can be found at Abstraction/GitDAO.php
- *
- * @author Savio Resende <savio@savioresende.com.br>
  */
 class Generic extends GitDAO implements GenericInterface
 {
@@ -31,13 +29,14 @@ class Generic extends GitDAO implements GenericInterface
      * Set the database
      *
      * @param string $database
+     *
      * @return void
      */
     public function setDatabase(string $database): void
     {
         $this->database = $database;
 
-        $database_physical_location = $this->config['database-address'] . "/" . $this->_getDatabaseLocation();
+        $database_physical_location = $this->config['database-address'] . DIRECTORY_SEPARATOR . $this->_getDatabaseLocation();
 
         if (!file_exists($database_physical_location)) {
             throw new NotExistentDatabaseException("Database Doesn't Exist.");
@@ -66,6 +65,7 @@ class Generic extends GitDAO implements GenericInterface
      * Set the Client ID
      *
      * @param string $client_id
+     *
      * @return void
      */
     public function setClientId(string $client_id): void
@@ -98,7 +98,7 @@ class Generic extends GitDAO implements GenericInterface
             throw new Exception("Database couldn't be created!");
         }
 
-        $this->git->initRepository($this->config['database-address'] . '/' . $this->_getDatabaseLocation());
+        $this->git->initRepository($this->config['database-address'] . DIRECTORY_SEPARATOR . $this->_getDatabaseLocation());
     }
 
 }

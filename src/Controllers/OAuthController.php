@@ -50,6 +50,7 @@ class OAuthController
      *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
+     *
      * @return ResponseInterface
      */
     public function accessToken(ServerRequestInterface $request, ResponseInterface $response)
@@ -61,14 +62,13 @@ class OAuthController
         ); // if private key has a pass phrase
         $publicKey = $this->container->get('settings')['public_key'];
 
-        $client_repository = new ClientRepository;
+        $client_repository = $this->container->get(ClientRepository::class);
 
-        $access_token_repository = new AccessTokenRepository;
+        $access_token_repository = $this->container->get(AccessTokenRepository::class);
 
-        $scope_repository = new ScopeRepository;
+        $scope_repository = $this->container->get(ScopeRepository::class);
 
         /* @var \League\OAuth2\Server\AuthorizationServer $server */
-        // $server = AuthorizationServer::class;
         $server = new AuthorizationServer(
             $client_repository,
             $access_token_repository,
@@ -114,7 +114,8 @@ class OAuthController
      *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
-     * @return Boolean
+     *
+     * @return bool
      */
     public function generateClientKey(ServerRequestInterface $request, ResponseInterface $response)
     {
@@ -125,11 +126,11 @@ class OAuthController
         $password = $request->getParam('password');
 
         // find client
-        $clients_model = new Clients;
+        $clients_model = $this->container->get(Clients::class);
         $client_result = $clients_model->find($client);
 
         // find user
-        $users_model = new Users;
+        $users_model = $this->container->get(User::class);
         $users_result = $users_model->find($client_result->file_content->user_id);
 
         // validate user credential
@@ -145,7 +146,7 @@ class OAuthController
 
         $client_result->file_content->secret_key = sha1($secret_key);
 
-        $new_client_data = (array)$client_result->file_content;
+        $new_client_data = (array) $client_result->file_content;
 
         return $clients_model->save([
             'id' => $client,

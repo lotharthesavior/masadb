@@ -13,5 +13,7 @@
     "ssl_allow_self_signed": true,
     "timezone": "America/Edmonton",
     "swoole": true,
-    "raw_files": true
+    "raw_files": true,
+    "git_user_email": "",
+    "git_user_name": ""
 }

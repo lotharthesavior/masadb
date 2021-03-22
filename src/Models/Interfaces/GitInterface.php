@@ -80,4 +80,13 @@ interface GitInterface
      * @return bool
      */
     public function commitChanges(): bool;
+
+    /**
+     * Sets the record type in the returning collection.
+     *
+     * @param string $class
+     *
+     * @return void
+     */
+    public function setDataObject(string $class): void;
 }

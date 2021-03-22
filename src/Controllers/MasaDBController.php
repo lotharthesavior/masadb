@@ -136,7 +136,7 @@ class MasaDBController extends Abstraction\MasaController
     {
         $logic = [];
 
-        $generic_model = $this->container->get('Generic');
+        $generic_model = $this->container->get(Generic::class);
 
         // This part is to be improved, right now the simple
         // presence will change all comparisons to OR.
@@ -206,7 +206,7 @@ class MasaDBController extends Abstraction\MasaController
     {
         $logic = [];
 
-        $generic_model = $this->container->get('Generic');
+        $generic_model = $this->container->get(Generic::class);
 
         // This part is to be improved, right now the simple
         // presence will change all comparisons to OR.
@@ -280,7 +280,7 @@ class MasaDBController extends Abstraction\MasaController
         array $args
     ): ResponseInterface
     {
-        $generic_model = $this->container->get('Generic');
+        $generic_model = $this->container->get(Generic::class);
 
         $current_client_id = $request->getHeader("ClientId");
         if (!empty($request->getHeader("CurrentClientId"))) {
@@ -342,7 +342,7 @@ class MasaDBController extends Abstraction\MasaController
      */
     public function deleteGeneric(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $generic_model = $this->container->get('Generic');
+        $generic_model = $this->container->get(Generic::class);
 
         $current_client_id = $request->getHeader("ClientId");
         if (!empty($request->getHeader("CurrentClientId"))) {
@@ -422,7 +422,7 @@ class MasaDBController extends Abstraction\MasaController
         /** @var array $queryParams */
         $queryParams = $request->getQueryParams();
 
-        $generic_model = $this->container->get('Generic');
+        $generic_model = $this->container->get(Generic::class);
 
         $current_client_id = $request->getHeader("ClientId");
         if (!empty($request->getHeader("CurrentClientId"))) {

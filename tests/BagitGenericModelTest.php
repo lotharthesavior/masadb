@@ -123,8 +123,10 @@ final class BagitGenericModelTest extends TestCase
     /**
      *
      */
-    private function createDummyRecord()
+    private function createDummyRecord($jsonStructure = true)
     {
+        $this->generic->setJsonStructure($jsonStructure);
+
         return $this->generic->save([
             "content" => [
                 "title" => "Lorem Ipsum",
