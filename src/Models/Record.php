@@ -4,6 +4,7 @@ namespace Models;
 
 use Exception;
 use Models\Abstraction\GitDAO;
+use Models\Interfaces\FileSystemInterface;
 use stdClass;
 use JsonSerializable;
 
@@ -59,7 +60,7 @@ class Record implements JsonSerializable
     /**
      * @return string|null
      */
-    public function getID()
+    public function getId()
     {
         return $this->id;
     }
@@ -324,6 +325,10 @@ class Record implements JsonSerializable
      */
     public function stringMatch(string $param, string $value)
     {
+        if (empty($param) || empty($value)) {
+            return false;
+        }
+
         if ($this->case_sensitive) {
             $match_string = strstr($param, $value) !== false;
         } else {
@@ -458,6 +463,30 @@ class Record implements JsonSerializable
         $id = preg_replace("/[^\d]/", "", $asset_name);
 
         return $id;
+    }
+
+    /**
+     * @param string $file_name
+     * @param string $database_address
+     * @param bool $is_db
+     * @param bool $is_bag
+     * @param FileSystemInterface $filesystem
+     *
+     * @return Record
+     */
+    public static function load(
+        string $file_name,
+        string $database_address,
+        bool $is_db,
+        bool $is_bag,
+        FileSystemInterface $filesystem,
+        $recordType
+    ): Record {
+        $new_record = new Record;
+        $new_record->loadRowStructure2($file_name, $is_db);
+        $new_record = $filesystem->getFileContent($new_record, $is_bag, $database_address);
+        $new_record->setType($recordType);
+        return $new_record;
     }
 
 }

@@ -192,18 +192,16 @@ final class BagitGenericModelTest extends TestCase
         $id = $this->createDummyRecord();
 
         $result = $this->generic->find($id);
+        $fileContent = $result->getCurrentRecord()->getFileContent();
 
-        $this->assertEquals(
-            json_decode($result, true),
-            [
-                "title" => "Lorem Ipsum",
-                "content" => "Content Content ..."
-            ]
+        $this->assertTrue(
+            $fileContent->title ==="Lorem Ipsum"
+            && $fileContent->content === "Content Content ..."
         );
 
         try {
             $results = $this->generic->find(242343232);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $results = $e->getMessage();
         }
 

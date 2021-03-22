@@ -2,7 +2,6 @@
 
 namespace Models;
 
-use Git\Git;
 use Git\GitRepo;
 use Models\Exceptions\NotExistentDatabaseException;
 use Models\Abstraction\GitDAO;

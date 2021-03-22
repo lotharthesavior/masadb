@@ -2,6 +2,7 @@
 
 namespace Models\Abstraction;
 
+use Ds\Sequence;
 use Exception;
 
 use Ds\Deque;
@@ -10,6 +11,7 @@ use Git\Git;
 use Helpers\CacheHelper;
 use League\Flysystem\Filesystem;
 
+use Models\Record;
 use Models\Traits\Pagination;
 use Models\Interfaces\GitDAOInterface;
 use Models\Interfaces\FileSystemInterface;
@@ -28,6 +30,9 @@ abstract class GitDAO implements GitDAOInterface
 
     /** @var bool */
     protected $jsonStructure = false;
+
+    /** @var Record */
+    protected $current_record;
 
     /**
      * @param FileSystemInterface $filesystem
@@ -68,18 +73,19 @@ abstract class GitDAO implements GitDAOInterface
      *
      * @param int|string $id
      *
-     * @return string
+     * @return self
      */
     public function find($id)
     {
         if ($this->isBag()) {
+            $id = $this->bag->locationOfBag($id, $this->isBag()) . ".json";
             $address = $this->config['database-address']
                 . DIRECTORY_SEPARATOR
                 . $this->_getDatabaseLocation()
                 . DIRECTORY_SEPARATOR
-                . $this->bag->locationOfBag($id, $this->isBag())
-                . ".json";
+                . $id;
         } else {
+            $id = $this->isJsonStructure() ? $id . '.json' : $id;
             $address = $this->config['database-address']
                 . DIRECTORY_SEPARATOR
                 . $this->_getDatabaseLocation()
@@ -91,7 +97,16 @@ abstract class GitDAO implements GitDAOInterface
             throw new Exception("Inexistent Record.");
         }
 
-        return file_get_contents($address);
+        $this->current_record = Record::load(
+            $id,
+            $this->getDatabaseAddress(),
+            true,
+            $this->isBag(),
+            $this->filesystem,
+            get_called_class()
+        );
+
+        return $this;
     }
 
     /**
@@ -134,7 +149,7 @@ abstract class GitDAO implements GitDAOInterface
             '.',
             $this->filesystem,
             $this->isBag(),
-            $this->config['database-address'] . DIRECTORY_SEPARATOR . $this->_getDatabaseLocation()
+            $this->getDatabaseAddress()
         );
 
         $results->sort(function ($a, $b) {
@@ -142,6 +157,16 @@ abstract class GitDAO implements GitDAOInterface
         });
 
         return $results;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabaseAddress(): string
+    {
+        return $this->config['database-address']
+            . DIRECTORY_SEPARATOR
+            . $this->_getDatabaseLocation();
     }
 
     /**
@@ -153,9 +178,9 @@ abstract class GitDAO implements GitDAOInterface
      * @param string $param
      * @param string $value
      *
-     * @return Deque
+     * @return Sequence
      */
-    public function search(string $param, string $value): Deque
+    public function search(string $param, string $value): Sequence
     {
         /** @var Deque $result_complete */
         $result_complete = $this->getAllRecords();
@@ -182,7 +207,12 @@ abstract class GitDAO implements GitDAOInterface
             }
         });
 
-        return $result_complete;
+        return $result_complete->map(function ($record) {
+            $class = get_called_class();
+            $item = new $class($this->filesystem, $this->git, $this->bag);
+            $item->setCurrentRecord($record);
+            return $item;
+        });
     }
 
     /**
@@ -214,7 +244,14 @@ abstract class GitDAO implements GitDAOInterface
         });
 
         $result_complete->sort(function ($a, $b) {
-            return (int)$a->getId() > (int)$b->getId();
+            return (int) $a->getId() > (int) $b->getId();
+        });
+
+        $result_complete = $result_complete->map(function ($record) {
+            $class = get_called_class();
+            $item = new $class($this->filesystem, $this->git, $this->bag);
+            $item->setCurrentRecord($record);
+            return $item;
         });
 
         if (!$this->_isPaginated($params)) {
@@ -345,7 +382,7 @@ abstract class GitDAO implements GitDAOInterface
     }
 
     /**
-     * @param int|string $id
+     * @param int|string|null $id
      *
      * @return bool
      *
@@ -354,8 +391,18 @@ abstract class GitDAO implements GitDAOInterface
      *           any other type of file, have to be a BagIt.
      *
      */
-    public function delete($id): bool
+    public function delete($id = null): bool
     {
+        if (
+            null === $id
+            && method_exists($this, 'getCurrentRecord')
+            && null !== $this->getCurrentRecord()
+        ) {
+            $id = $this->getCurrentRecord()->getId();
+        } else if (null === $id) {
+            throw new Exception('Must inform the record id to be deleted!');
+        }
+
         $database_url = $this->_getDatabaseFullPathLocation();
 
         // League\Flysystem\Filesystem
@@ -597,5 +644,21 @@ abstract class GitDAO implements GitDAOInterface
     public function isJsonStructure(): bool
     {
         return $this->jsonStructure;
+    }
+
+    /**
+     * @return Record
+     */
+    public function getCurrentRecord(): Record
+    {
+        return $this->current_record;
+    }
+
+    /**
+     * @return void
+     */
+    public function setCurrentRecord(Record $record): void
+    {
+        $this->current_record = $record;
     }
 }

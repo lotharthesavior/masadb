@@ -166,8 +166,9 @@ final class RawGenericModelTest extends TestCase
         $id = $this->createDummyRecord();
 
         $result = $this->generic->find($id);
+        $content = $result->getCurrentRecord()->getFileContent()->content;
 
-        $this->assertEquals($result, "Content Content ...");
+        $this->assertEquals($content, "Content Content ...");
 
         try {
             $results = $this->generic->find(242343232);

@@ -17,8 +17,8 @@ trait GitWorkflow
     {
         global $config;
 
-        $this->git->setGitConfig('user.email', $config['git_user_email']);
-        $this->git->setGitConfig('user.name', $config['git_user_name']);
+        $this->git->setGitConfig('user.email', $config['settings']['git_user_email'] ?? '');
+        $this->git->setGitConfig('user.name', $config['settings']['git_user_name'] ?? '');
         $user_email = $this->git->getGitConfig('user.email');
 
         if (empty($user_email)) {

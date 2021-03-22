@@ -140,11 +140,14 @@ class GitBasic implements GitInterface
         }
 
         $result_deque = $result_deque->map(function ($records_row) use ($is_db, $filesystem, $is_bag, $database_address) {
-            $new_record = new Record;
-            $new_record->loadRowStructure2($records_row, $is_db);
-            $new_record = $filesystem->getFileContent($new_record, $is_bag, $database_address);
-            $new_record->setType($this->recordType);
-            return $new_record;
+            return Record::load(
+                $records_row,
+                $database_address,
+                $is_db,
+                $is_bag,
+                $filesystem,
+                $this->recordType
+            );
         });
 
         return $result_deque;

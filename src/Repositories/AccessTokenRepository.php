@@ -2,6 +2,7 @@
 
 namespace Repositories;
 
+use Models\Generic;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -85,6 +86,8 @@ class AccessTokenRepository extends AbstractRepository implements AccessTokenRep
      * Revoke an access token.
      *
      * @param string $tokenId
+     *
+     * @return void
      */
     public function revokeAccessToken($tokenId)
     {
@@ -92,6 +95,12 @@ class AccessTokenRepository extends AbstractRepository implements AccessTokenRep
         $access_token = $this->container->get(AccessToken::class);
 
         $result = $access_token->search('identifier', $tokenId);
+
+        if ($result->count() === 0) {
+            return;
+        }
+
+        $result->first()->delete();
     }
 
     /**
@@ -103,7 +112,12 @@ class AccessTokenRepository extends AbstractRepository implements AccessTokenRep
      */
     public function isAccessTokenRevoked($tokenId)
     {
+        /** @var AccessToken $access_token_model */
+        $access_token = $this->container->get(AccessToken::class);
 
+        $result = $access_token->search('identifier', $tokenId);
+
+        return $result->count() === 0;
     }
 
 }

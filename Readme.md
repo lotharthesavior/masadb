@@ -281,5 +281,9 @@ $generic->save([
 ```php
 $generic->delete('test.md'); // Raw data type
 $generic->delete('1'); // Json data type, it can also be 1.json
+
+// Find and delete
+$generic->find(1)->delete();
+$generic->search('content', 'data')->first()->delete();
 ```
 
