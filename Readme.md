@@ -41,9 +41,21 @@ Reference: https://oauth2.thephpleague.com/
 
 Reference: https://flysystem.thephpleague.com/
 
-### Installation
+### Installation / Setup
 
-Start by creating a `/certs` file in the directory
+1. Start by creating a `/certs` directory
+2. Make sure you have mkcert installed ( if you have homebrew, it's easy, just do `brew install mkcert` && `mkcert -install`)
+3. browse to `certs` directory, and run `mkcert local.masadb.com`
+4. Add a record for this in your hosts file eg `127.0.0.1 local.masadb.com` (you can change this URL to what ever you'd like)
+5. While still in the `certs` folder, run this command `openssl rsa -in local.masadb.com-key.pem -pubout > masadb.pub` 
+6. Make sure the .pem files and the .pub files are all stored in 600 format `chmod 600 certs/*`
+6. copy the `.env.sample` to `.env` - change the domain if you didn't use `local.masadb.com`
+7. copy the `config.json.sample` to `config.json` - `cp config.json.sample config.json`
+8. Create a `data` directory in the root folder `mkdir data`
+9. copy the contents of data.sample into the data directory `cp -r data.sample/* data/`
+10. We have a static IP setup for this service.  The prefix is stored in the .env file (10.2 by default), and the suffix is stored in the docker-compose file (0.7 by default) - making the full local IP address (10.2.0.7) - change these up if you would like
+11. run `docker-compose up -d`
+
 
 ### Clients Credential Workflow
 
